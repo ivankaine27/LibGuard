@@ -1,0 +1,56 @@
+/* Skin Maroon and Gold */
+.skin-maroon-gold .main-header {
+  background-color: #800000; /* Dark Maroon */
+  border-bottom: 3px solid #B8860B; /* Semi-Dark Gold */
+}
+
+.skin-maroon-gold .navbar {
+  background-color: #333333; /* Dark */
+  border-color: #800000; /* Dark Maroon */
+}
+
+.skin-maroon-gold .navbar-toggle {
+  border: 2px solid #800000; /* Dark Maroon */
+  background-color: #B8860B; /* Semi-Dark Gold */
+}
+
+.skin-maroon-gold .navbar-brand {
+  color: #ffffff; /* White */
+}
+
+.skin-maroon-gold .navbar-nav > li > a {
+  color: #ffffff; /* White */
+}
+
+.skin-maroon-gold .navbar-nav > li > a:hover,
+.skin-maroon-gold .navbar-nav > li > a:focus {
+  background-color: #DAA520; /* Gold */
+}
+
+.skin-maroon-gold .navbar-nav > .active > a,
+.skin-maroon-gold .navbar-nav > .active > a:hover,
+.skin-maroon-gold .navbar-nav > .active > a:focus {
+  background-color: #800000; /* Dark Maroon */
+}
+
+.skin-maroon-gold .navbar-nav .open .dropdown-menu > li > a {
+  color: #ffffff; /* White */
+}
+
+.skin-maroon-gold .sidebar {
+  background-color: #800000; /* Dark Maroon */
+}
+
+.skin-maroon-gold .sidebar-menu > li.header {
+  background-color: #800000; /* Dark Maroon */
+  color: #ffffff; /* White */
+}
+
+.skin-maroon-gold .sidebar-menu > li > a {
+  color: #ffffff; /* White */
+}
+
+.skin-maroon-gold .sidebar-menu > li > a:hover,
+.skin-maroon-gold .sidebar-menu > li.active > a {
+  background-color: #B8860B; /* Semi-Dark Gold */
+}

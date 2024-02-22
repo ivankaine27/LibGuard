@@ -1,0 +1,54 @@
+/*
+ * Skin: Red
+ * ---------
+ */
+@import "../../../bower_components/bootstrap/less/mixins.less";
+@import "../../../bower_components/bootstrap/less/variables.less";
+@import "../variables.less";
+@import "../mixins.less";
+
+.skin-red {
+  //Navbar
+  .main-header {
+    .navbar {
+      .navbar-variant(@red; #660707);
+      .sidebar-toggle {
+        color: #fff;
+        &:hover {
+          background-color: darken(@red, 40%);
+        }
+      }
+      @media (max-width: @screen-header-collapse) {
+        .dropdown-menu {
+          li {
+            &.divider {
+              background-color: rgba(73, 2, 2, 0.1);
+            }
+            a {
+              color: #fff;
+              &:hover {
+                background: darken(@red, 40%);
+              }
+            }
+          }
+        }
+      }
+    }
+    //Logo
+    .logo {
+      .logo-variant(darken(@red, 40%));
+    }
+
+    li.user-header {
+      background-color: @red;
+    }
+  }
+
+  //Content Header
+  .content-header {
+    background: transparent;
+  }
+
+  //Create the sidebar skin
+  .skin-dark-sidebar(@red);
+}

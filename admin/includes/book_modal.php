@@ -56,6 +56,20 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="shelf_number" class="col-sm-3 control-label">Shelf Number</label>
+
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" id="shelf_number" name="shelf_number">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="shelf_row" class="col-sm-3 control-label">Shelf Row</label>
+
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" id="shelf_row" name="shelf_row">
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="datepicker_add" class="col-sm-3 control-label">Publish Date</label>
 
                     <div class="col-sm-9">
@@ -133,6 +147,20 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="shelf_number" class="col-sm-3 control-label">Shelf Number</label>
+
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" id="shelf_number" name="shelf_number">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="shelf_row" class="col-sm-3 control-label">Shelf Row</label>
+
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" id="shelf_row" name="shelf_row">
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="datepicker_edit" class="col-sm-3 control-label">Publish Date</label>
 
                     <div class="col-sm-9">
@@ -176,6 +204,3 @@
         </div>
     </div>
 </div>
-
-
-     

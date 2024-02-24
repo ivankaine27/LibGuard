@@ -57,6 +57,8 @@
                                         <th>ISBN</th>
                                         <th>Title</th>
                                         <th>Author</th>
+                                        <th>Shelf Number</th>
+                                        <th>Shelf Row</th>
                                         <th>Status</th>
                                         <th>Expected Return Date</th> <!-- Added column -->
                                     </thead>
@@ -75,6 +77,8 @@
                                                     <td>".$row['isbn']."</td>
                                                     <td>".$row['title']."</td>
                                                     <td>".$row['author']."</td>
+                                                    <td>".$row['shelf_number']."</td>
+                                                    <td>".$row['shelf_row']."</td>
                                                     <td>".$status."</td>
                                                     <td>".$return_date."</td> <!-- Display due date or N/A -->
                                                 </tr>
@@ -107,5 +111,3 @@ $(function(){
 </script>
 </body>
 </html>
-
-

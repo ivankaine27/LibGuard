@@ -7,10 +7,10 @@
     }
 ?>
 <?php include 'includes/header.php'; ?>
-<body class="hold-transition skin-maroon-gold layout-top-nav">
+<body class="hold-transition skin-maroon-gold layout-top-nav" >
 <div class="wrapper">
     <?php include 'includes/navbar.php'; ?>
-    <div class="content-wrapper">
+    <div class="content-wrapper" style="background-image: url('libbooks.png'); background-size: cover; background-color: rgba(255, 255, 255, 0.2);">
         <div class="container">
             <!-- Main content -->
             <section class="content">

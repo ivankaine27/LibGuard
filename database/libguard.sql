@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 23, 2024 at 06:49 AM
+-- Generation Time: Feb 25, 2024 at 02:59 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,23 +59,27 @@ CREATE TABLE `books` (
   `author` varchar(150) NOT NULL,
   `publisher` varchar(150) NOT NULL,
   `publish_date` date NOT NULL,
-  `status` int(1) NOT NULL
+  `status` int(1) NOT NULL,
+  `shelf_number` int(11) NOT NULL,
+  `shelf_row` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `books`
 --
 
-INSERT INTO `books` (`id`, `isbn`, `category_id`, `title`, `author`, `publisher`, `publish_date`, `status`) VALUES
-(4, '0021', 5, 'Effective C++', 'Scott Meyers', 'Hoobstank Publishers', '2018-06-03', 1),
-(6, '002', 5, 'Python Cookbook', 'ABCDEFF', 'Jacobs Publisher', '2018-06-01', 1),
-(9, '123', 5, 'Java 2', 'Herbert ', 'Demo Publisher', '2018-05-15', 1),
-(11, '978-0471787020', 1, 'Introduction to Engineering Mechanics', 'Jenn Stroud Rossmann	', 'Wiley', '2007-03-26', 1),
-(12, '978-0190698616', 1, 'Fundamentals of Electrical Engineering', 'Giorgio Rizzoni', 'Oxford University Press', '2011-01-10', 1),
-(13, '978-0470239779', 1, 'Civil Engineering Materials', 'Shan Somayaji', 'Prentice Hall', '2007-01-30', 1),
-(16, '978-0471218536', 1, 'Principles of Environmental Engineering', 'Mackenzie Davis', 'Wiley', '2005-02-23', 1),
-(17, '978-0470418235', 1, 'Introduction to Aerospace Engineering', 'Travis S. Taylor', 'CRC Press', '2004-10-02', 1),
-(18, '689', 4, 'Diary ng Panget', 'Marcelo Santos', 'Cornhwa Inc.', '2024-02-05', 1);
+INSERT INTO `books` (`id`, `isbn`, `category_id`, `title`, `author`, `publisher`, `publish_date`, `status`, `shelf_number`, `shelf_row`) VALUES
+(4, '0021', 5, 'Effective C++', 'Scott Meyers', 'Hoobstank Publishers', '2018-06-03', 1, 1, '8'),
+(6, '002', 5, 'Python Cookbook', 'ABCDEFF', 'Jacobs Publisher', '2018-06-01', 1, 1, '9'),
+(9, '123', 5, 'Java 2', 'Herbert ', 'Demo Publisher', '2018-05-15', 1, 1, '10'),
+(11, '978-0471787020', 1, 'Introduction to Engineering Mechanics', 'Jenn Stroud Rossmann	', 'Wiley', '2007-03-26', 1, 1, '2'),
+(12, '978-0190698616', 1, 'Fundamentals of Electrical Engineering', 'Giorgio Rizzoni', 'Oxford University Press', '2011-01-10', 1, 1, '3'),
+(13, '978-0470239779', 1, 'Civil Engineering Materials', 'Shan Somayaji', 'Prentice Hall', '2007-01-30', 1, 1, '4'),
+(16, '978-0471218536', 1, 'Principles of Environmental Engineering', 'Mackenzie Davis', 'Wiley', '2005-02-23', 1, 1, '1'),
+(17, '978-0470418235', 1, 'Introduction to Aerospace Engineering', 'Travis S. Taylor', 'CRC Press', '2004-10-02', 1, 1, '5'),
+(18, '689', 4, 'Diary ng Panget', 'Marcelo Santos', 'Cornhwa Inc.', '2024-02-05', 1, 1, '7'),
+(19, '111', 1, 'Yes', 'Yes', 'Yes', '2024-02-20', 0, 1, '6'),
+(20, '222', 2, 'No', 'No', 'No', '2024-02-01', 0, 3, '1');
 
 -- --------------------------------------------------------
 
@@ -119,7 +123,9 @@ INSERT INTO `borrow` (`id`, `student_id`, `book_id`, `date_borrow`, `status`, `e
 (71, 25, 9, '2024-02-20', 1, NULL, '2024-02-26'),
 (72, 25, 9, '2024-02-20', 1, NULL, '2024-02-26'),
 (73, 25, 9, '2024-02-20', 1, NULL, '2024-02-27'),
-(74, 25, 9, '2024-02-20', 0, NULL, '2024-02-27');
+(74, 25, 9, '2024-02-20', 0, NULL, '2024-02-27'),
+(75, 25, 19, '2024-02-25', 1, NULL, '2024-03-02'),
+(76, 25, 19, '2024-02-25', 1, NULL, '2024-03-02');
 
 -- --------------------------------------------------------
 
@@ -197,7 +203,9 @@ INSERT INTO `returns` (`id`, `student_id`, `book_id`, `date_return`, `due_date`)
 (31, 25, 9, '2024-02-20', NULL),
 (32, 25, 9, '2024-02-20', NULL),
 (33, 25, 9, '2024-02-20', NULL),
-(34, 25, 9, '2024-02-20', NULL);
+(34, 25, 9, '2024-02-20', NULL),
+(35, 25, 19, '2024-02-25', NULL),
+(36, 25, 19, '2024-02-25', NULL);
 
 -- --------------------------------------------------------
 
@@ -311,13 +319,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `borrow`
 --
 ALTER TABLE `borrow`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -335,7 +343,7 @@ ALTER TABLE `course`
 -- AUTO_INCREMENT for table `returns`
 --
 ALTER TABLE `returns`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `students`

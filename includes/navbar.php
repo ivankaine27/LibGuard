@@ -40,7 +40,7 @@
             }
             else{
               echo "
-                <li><a href='login' data-toggle='modal'><i class='fa fa-sign-in'></i> LOGIN</a></li>
+                <li><a href='#login' data-toggle='modal'><i class='fa fa-sign-in'></i> LOGIN</a></li>
                 <li><a href='admin/index.php' data-toggle='modal'><i class='fa fa-key'></i> ADMIN LOGIN</a></li>
               ";
             } 

@@ -65,7 +65,7 @@
 
             // AJAX request to fetch book details
             $.ajax({
-                url: 'book_detail_confirmation.php',
+                url: 'book_borrow_confirmation.php',
                 method: 'POST',
                 data: { isbn: isbnArray }, // Send array of ISBNs
                 dataType: 'json',

@@ -31,7 +31,7 @@ if(isset($_POST['add'])){
 				$sql = "SELECT b.*, br.due_date 
 						FROM books b 
 						INNER JOIN borrow br ON b.id = br.book_id 
-						WHERE b.isbn = '$isbn' AND b.status != 0";
+						WHERE b.isbn = '$isbn' AND br.status = 0";
 				$query = $conn->query($sql);
 				if ($query->num_rows > 0) {
 					$row = $query->fetch_assoc();
@@ -43,10 +43,17 @@ if(isset($_POST['add'])){
 					$bookDetails .= "Borrowing Date: " . date('Y-m-d') . "<br><br>";
 				
 					// Calculate the penalty here
-					$returned_date = date('Y-m-d');
-					$days_late = (strtotime($returned_date) - strtotime($dueDate)) / (60 * 60 * 24); // Calculate days late
-					$penalty = 10 * $days_late; // Penalty: 10 PHP per day late
-					$penaltyTotal += $penalty; // Accumulate penalty total
+$returned_date = date('Y-m-d');
+$days_late = (strtotime($returned_date) - strtotime($dueDate)) / (60 * 60 * 24); // Calculate days late
+if ($days_late <= 0) {
+    // If returned_date is earlier than or equal to dueDate, penalty is 0
+    $penalty = 0;
+} else {
+    // Penalty: 10 PHP per day late
+    $penalty = 5 * $days_late;
+}
+$penaltyTotal += $penalty; // Accumulate penalty total
+
 				}
 			}
 		}

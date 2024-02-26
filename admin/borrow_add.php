@@ -28,7 +28,7 @@ if (isset($_POST['add'])) {
         foreach ($_POST['isbn'] as $isbn) {
             $isbn = mysqli_real_escape_string($conn, $isbn);
             if (!empty($isbn)) {
-                $sql = "SELECT * FROM books WHERE isbn = '$isbn' AND status != 1";
+                $sql = "SELECT * FROM books WHERE isbn = '$isbn' AND status = 0";
                 $query = $conn->query($sql);
                 if ($query->num_rows > 0) {
                     $brow = $query->fetch_assoc();

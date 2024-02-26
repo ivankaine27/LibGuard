@@ -10,12 +10,12 @@
 <body class="hold-transition skin-maroon-gold layout-top-nav" >
 <div class="wrapper">
     <?php include 'includes/navbar.php'; ?>
-    <div class="content-wrapper" style="background-image: url('libbooks.png'); background-size: cover; background-color: rgba(255, 255, 255, 0.2);">
+    <div class="content-wrapper">
         <div class="container">
             <!-- Main content -->
             <section class="content">
                 <div class="row">
-                    <div class="col-sm-8 col-sm-offset-2">
+                    <div class="col-sm-9 col-sm-offset-2">
                         <?php
                             if(isset($_SESSION['error'])){
                                 echo "
@@ -36,7 +36,7 @@
                                 </div>
                             </div>
                             <div class="box-body">
-                                <div class="input-group col-sm-5">
+                                <div class="input-group col-sm-5 pull-right">
                                     <span class="input-group-addon">Category:</span>
                                     <select class="form-control" id="catlist">
                                         <option value=0>ALL</option>
@@ -52,11 +52,13 @@
                                         ?>
                                     </select>
                                 </div>
-                                <table class="table table-bordered table-striped" id="booklist">
+                                <table class="table table-bordered table-striped" id="example1">
                                     <thead>
                                         <th>ISBN</th>
                                         <th>Title</th>
                                         <th>Author</th>
+                                        <th>Publisher</th> <!-- Added Publisher column -->
+                                        <th>Publish Date</th> <!-- Added Publish Date column -->
                                         <th>Shelf Number</th>
                                         <th>Shelf Row</th>
                                         <th>Status</th>
@@ -77,6 +79,8 @@
                                                     <td>".$row['isbn']."</td>
                                                     <td>".$row['title']."</td>
                                                     <td>".$row['author']."</td>
+                                                    <td>".$row['publisher']."</td> <!-- Display Publisher -->
+                                                    <td>".$row['publish_date']."</td> <!-- Display Publish Date -->
                                                     <td>".$row['shelf_number']."</td>
                                                     <td>".$row['shelf_row']."</td>
                                                     <td>".$status."</td>

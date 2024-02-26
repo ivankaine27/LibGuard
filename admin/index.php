@@ -5,10 +5,10 @@
   	}
 ?>
 <?php include 'includes/header.php'; ?>
-<body class="hold-transition skin-maroon-gold login-page" style="background-image: url('libbooks.png'); background-size: cover; background-color: rgba(255, 255, 255, 0.2);">
+<body class="hold-transition skin-maroon-gold login-page">
 
 <div class="login-box">
-  	<div class="login-logo" style="color: white;">
+  	<div class="login-logo">
   		<b>LibGuard System</b>
   	</div>
   

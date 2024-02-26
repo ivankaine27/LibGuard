@@ -77,6 +77,9 @@
                                         <a href="#" id="downloadAllButton" class="btn btn-primary btn-sm">
                                             <i class="fa fa-download"></i> Download All
                                         </a>
+                                        <a href="#" id="downloadCSVButton" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-download"></i> Download CSV
+                                        </a>
                                     </div>
                                     <!-- End Download Button -->
                                 </div>
@@ -146,9 +149,63 @@ document.getElementById('downloadAllButton').addEventListener('click', function(
     printAllPages(); // Print all pages content
 });
 
+document.getElementById('downloadCSVButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    generateCSV(); // Generate and download CSV
+});
+
 // Function to print the content of the current page
 function printCurrentPage() {
+    var originalContent = document.body.innerHTML; // Save the original content
+    document.body.innerHTML = '<div id="printableContent">' + getPrintableContent() + '</div>'; // Replace with the printable content
+
     window.print(); // Print the current page
+
+    document.body.innerHTML = originalContent; // Restore the original content
+}
+
+// Function to generate CSV version of the table
+function generateCSV() {
+    var csvContent = 'Date Borrowed,Date Returned,ISBN,Title,Author\n';
+
+    // Iterate over table rows
+    var tableRows = document.querySelectorAll('#example1 tbody tr');
+    tableRows.forEach(function(row) {
+        var columns = row.querySelectorAll('td');
+        csvContent += columns[1].textContent + ','; // Date Borrowed
+        csvContent += columns[2].textContent + ','; // Date Returned
+        csvContent += columns[3].textContent + ','; // ISBN
+        csvContent += columns[4].textContent + ','; // Title
+        csvContent += columns[5].textContent + '\n'; // Author
+    });
+
+    // Create a Blob and trigger a download
+    var blob = new Blob([csvContent], { type: 'text/csv' });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'transaction_data.csv';
+    link.click();
+}
+
+function getPrintableContent() {
+    var printableContent = '<div><h3>Book Borrowing and Returning Transactions</h3>';
+    printableContent += '<p>Student Name: <?php echo ($studentName); ?><br> Student ID: <?php echo $realStudentID; ?></p></div>';
+    printableContent += getTableHtml();
+    return printableContent;
+}
+function getTableHtml() {
+    // Create a div element and append the table content to it
+    var container = document.createElement('div');
+    container.innerHTML = document.getElementById('example1').outerHTML;
+
+    // Remove pagination links if they exist
+    var paginationLinks = container.querySelectorAll('.pagination');
+    for (var i = 0; i < paginationLinks.length; i++) {
+        paginationLinks[i].parentNode.removeChild(paginationLinks[i]);
+    }
+
+    // Return the innerHTML of the container
+    return container.innerHTML;
 }
 function printAllPages() {
     if (<?php echo $totalPages; ?> === 1 && <?php echo count($selectedStudents); ?> === 1) {
@@ -164,7 +221,7 @@ function printAllPages() {
             xmlhttp.open("GET", cleanURL + '&page=' + i, false); // Synchronous request
             xmlhttp.send();
 
-            allPagesContent += "<div class='page'>" + xmlhttp.responseText + "</div>";
+            allPagesContent += "<div class='page'>" + getPrintableContent(xmlhttp.responseText) + "</div>";
         }
 
         // Instead of opening a new window and printing, we can use the same window to print all pages

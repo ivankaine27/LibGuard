@@ -7,10 +7,10 @@
     }
 ?>
 <?php include 'includes/header.php'; ?>
-<body class="hold-transition skin-maroon-gold layout-top-nav">
+<body class="hold-transition skin-maroon-gold layout-top-nav" >
 <div class="wrapper">
     <?php include 'includes/navbar.php'; ?>
-    <div class="content-wrapper">
+    <div class="content-wrapper" style="background-image: url('libbooks.png'); background-size: cover; background-color: rgba(255, 255, 255, 0.2);">
         <div class="container">
             <!-- Main content -->
             <section class="content">
@@ -57,6 +57,8 @@
                                         <th>ISBN</th>
                                         <th>Title</th>
                                         <th>Author</th>
+                                        <th>Shelf Number</th>
+                                        <th>Shelf Row</th>
                                         <th>Status</th>
                                         <th>Expected Return Date</th> <!-- Added column -->
                                     </thead>
@@ -75,6 +77,8 @@
                                                     <td>".$row['isbn']."</td>
                                                     <td>".$row['title']."</td>
                                                     <td>".$row['author']."</td>
+                                                    <td>".$row['shelf_number']."</td>
+                                                    <td>".$row['shelf_row']."</td>
                                                     <td>".$status."</td>
                                                     <td>".$return_date."</td> <!-- Display due date or N/A -->
                                                 </tr>
@@ -107,5 +111,3 @@ $(function(){
 </script>
 </body>
 </html>
-
-

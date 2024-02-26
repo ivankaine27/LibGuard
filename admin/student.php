@@ -114,8 +114,8 @@ $(function(){
     e.preventDefault();
     $('#delete').modal('show');
     var id = $(this).data('id');
-    getRow(id);
-  });
+    getRowAndPendingReturns(id);
+});
 
   $(document).on('click', '.photo', function(e){
     e.preventDefault();
@@ -124,6 +124,46 @@ $(function(){
   });
 
 });
+
+
+function getRowAndPendingReturns(id){
+    $.ajax({
+        type: 'POST',
+        url: 'student_row.php',
+        data: {id:id},
+        dataType: 'json',
+        success: function(response){
+            $('.studid').val(response.studid);
+            $('#edit_firstname').val(response.firstname);
+            $('#edit_lastname').val(response.lastname);
+            $('#edit_student_id').val(response.student_id);
+            $('#selcourse').val(response.course_id);
+            $('#selcourse').html(response.code);
+            $('.del_stu').html(response.firstname+' '+response.lastname);
+            getPendingReturns(id);
+        }
+    });
+}
+
+function getPendingReturns(id) {
+    $.ajax({
+        type: 'POST',
+        url: 'get_pending_returns.php',
+        data: {id: id},
+        dataType: 'json',
+        success: function(response) {
+            var pendingList = $('.pending-returns');
+            pendingList.empty();
+            if (response.length > 0) {
+                response.forEach(function(book) {
+                    pendingList.append('<li>' + book.title + '</li>');
+                });
+            } else {
+                pendingList.append('<li>No pending returns</li>');
+            }
+        }
+    });
+}
 
 function getRow(id){
   $.ajax({

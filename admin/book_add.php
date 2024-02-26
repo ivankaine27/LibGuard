@@ -8,8 +8,10 @@
 		$author = $_POST['author'];
 		$publisher = $_POST['publisher'];
 		$pub_date = $_POST['pub_date'];
+		$shelf_number = $_POST['shelf_number'];
+		$shelf_row = $_POST['shelf_row'];
 
-		$sql = "INSERT INTO books (isbn, category_id, title, author, publisher, publish_date) VALUES ('$isbn', '$category', '$title', '$author', '$publisher', '$pub_date')";
+		$sql = "INSERT INTO books (isbn, category_id, title, author, publisher, publish_date, shelf_number, shelf_row) VALUES ('$isbn', '$category', '$title', '$author', '$publisher', '$pub_date', '$shelf_number', '$shelf_row')";
 		if($conn->query($sql)){
 			$_SESSION['success'] = 'Book added successfully';
 		}

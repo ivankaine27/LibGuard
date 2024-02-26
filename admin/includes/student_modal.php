@@ -132,24 +132,27 @@
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><b>Deleting...</b></h4>
+              <h4 class="modal-title"><b>Are you sure to remove this student?</b></h4>
             </div>
             <div class="modal-body">
-              <form class="form-horizontal" method="POST" action="student_delete.php">
-                <input type="hidden" class="studid" name="id">
-                <div class="text-center">
-                    <p>DELETE STUDENT</p>
-                    <h2 class="del_stu bold"></h2>
-                </div>
+                <form class="form-horizontal" method="POST" action="student_delete.php">
+                    <input type="hidden" class="studid" name="id">
+                    <div class="text-center">
+                        <p>REMOVE STUDENT</p>
+                        <h1 class="del_stu bold"></h1>
+                    </div>
+                    <h4><b>Pending book returns:</b></h4>
+                    <ul class="pending-returns"></ul>
+                </form>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
-              <button type="submit" class="btn btn-danger btn-flat" name="delete"><i class="fa fa-trash"></i> Delete</button>
-              </form>
+              <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i> No</button>
+              <button type="submit" class="btn btn-danger btn-flat" name="delete"><i class="fa fa-trash"></i> Yes</button>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Update Photo -->
 <div class="modal fade" id="edit_photo">

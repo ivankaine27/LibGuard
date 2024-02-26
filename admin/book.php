@@ -86,6 +86,8 @@
                   <th>Title</th>
                   <th>Author</th>
                   <th>Publisher</th>
+                  <th>Shelf Number</th>
+                  <th>Shelf Row</th>
                   <th>Status</th>
                   <th>Shelf Number</th>
                   <th>Shelf Row</th>
@@ -110,6 +112,8 @@
                           <td>".$row['title']."</td>
                           <td>".$row['author']."</td>
                           <td>".$row['publisher']."</td>
+                          <td>".$row['shelf_number']."</td>
+                          <td>".$row['shelf_row']."</td>
                           <td>".$status."</td>
                           <td>".$row['shelf_number']."</td>
                           <td>".$row['shelf_row']."</td>
@@ -153,7 +157,7 @@ $(function(){
     getRow(id);
   });
 
-  $(document).on('click', '.delete', function(e){ // Changed from .edit to .delete
+  $(document).on('click', '.delete', function(e){
     e.preventDefault();
     $('#delete').modal('show');
     var id = $(this).data('id');

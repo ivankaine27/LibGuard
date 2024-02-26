@@ -109,7 +109,7 @@
             <div class="icon">
               <i class="fa fa-mail-forward"></i>
             </div>
-            <a href="borrow.php" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="#" id="openBorrowModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -303,6 +303,7 @@
 
   <!-- Import your calendar modal -->
   <?php include 'includes/calendar_modal.php'; ?>
+  <?php include 'includes/modals/borrow_modal.php'; ?>
 
   <!-- Add the following script to handle the click event -->
   <script>
@@ -313,6 +314,12 @@
 
               // Show the modal
               $('#dateRangePickerModal').modal('show');
+          });
+          $('#openBorrowModal').click(function(e) {
+              e.preventDefault(); // Prevent default link behavior
+
+              // Show the modal
+              $('#borrowModal').modal('show');
           });
       });
   </script>

@@ -87,11 +87,14 @@
                   <th>Author</th>
                   <th>Publisher</th>
                   <th>Status</th>
+                  <th>Shelf Number</th>
+                  <th>Shelf Row</th>
                   <th>Tools</th>
                 </thead>
                 <tbody>
                   <?php
-                    $sql = "SELECT *, books.id AS bookid FROM books LEFT JOIN category ON category.id=books.category_id $where";
+                    $sql = "SELECT *, books.id AS bookid FROM books 
+                            LEFT JOIN category ON category.id=books.category_id $where";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
                       if($row['status']){
@@ -108,6 +111,8 @@
                           <td>".$row['author']."</td>
                           <td>".$row['publisher']."</td>
                           <td>".$status."</td>
+                          <td>".$row['shelf_number']."</td>
+                          <td>".$row['shelf_row']."</td>
                           <td>
                             <button class='btn btn-success btn-sm edit btn-flat' data-id='".$row['bookid']."'><i class='fa fa-edit'></i> Edit</button>
                             <button class='btn btn-danger btn-sm delete btn-flat' data-id='".$row['bookid']."'><i class='fa fa-trash'></i> Delete</button>
@@ -148,7 +153,7 @@ $(function(){
     getRow(id);
   });
 
-  $(document).on('click', '.edit', function(e){
+  $(document).on('click', '.delete', function(e){ // Changed from .edit to .delete
     e.preventDefault();
     $('#delete').modal('show');
     var id = $(this).data('id');
@@ -170,6 +175,8 @@ function getRow(id){
       $('#edit_author').val(response.author);
       $('#edit_publisher').val(response.publisher);
       $('#datepicker_edit').val(response.publish_date);
+      $('#edit_shelf_number').val(response.shelf_number); // Update shelf number value
+      $('#edit_shelf_row').val(response.shelf_row); // Update shelf row value
       $('#del_book').html(response.title);
     }
   });

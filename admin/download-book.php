@@ -19,10 +19,10 @@
                         }
                     </style>
                     <div class="box-header with-border">
-                        <button onclick="downloadPDF()" class="btn btn-primary">Download Report</button>
+                        <button id="downloadPdf" class="btn btn-primary">Download Report</button>
                     </div>
                     <div class="returned-books-container">
-                        <div class="box">
+                        <div class="box printable-table">
                             <div class="box-body">
                                 <h4>Returned Books</h4>
                                 <table class="table table-bordered">
@@ -44,7 +44,7 @@
                         </div>
                     </div>
                     <div class="not-returned-books-container">
-                        <div class="box">
+                        <div class="box printable-table">
                             <div class="box-body">
                                 <h4>Not Returned Books</h4>
                                 <table class="table table-bordered">
@@ -67,7 +67,7 @@
                     </div>
                     <!-- Container for Dates -->
       
-                    <div class="dates-container">
+                    <div class="dates-container printable-table">
                         <?php includeBookReports(); ?>
 
                 </div>
@@ -75,58 +75,150 @@
         </div>
     </div>
     <script>
-    function downloadPDF() {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "generate_pdf.php", true);
-        xhr.responseType = "arraybuffer"; // Set response type to arraybuffer
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                var blob = new Blob([xhr.response], { type: "application/pdf" });
-                var link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = 'yearly_library_book_report.pdf';
-                link.click();
-            }
-        };
-        xhr.send();
-    }
-</script>
+        document.getElementById('downloadPdf').addEventListener('click', function(event) {
+            event.preventDefault();
+            printCurrentPage(); // Print the current page content
+        });
+        function printCurrentPage() {
+            var originalContent = document.body.innerHTML; // Save the original content
+
+            // Define the HTML structure for the returned books container
+            var returnedBooksContainerHTML = `
+            <h3>Yearly Library Book Report</h3>
+            <div class="returned-books-container">
+                        <div class="box printable-table">
+                            <div class="box-body">
+                                <h4>Returned Books</h4>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Student ID</th>
+                                            <th>Name</th>
+                                            <th>ISBN</th>
+                                            <th>Title</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php includeReturnedBooks(); ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="not-returned-books-container">
+                        <div class="box printable-table">
+                            <div class="box-body">
+                                <h4>Not Returned Books</h4>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Student ID</th>
+                                            <th>Name</th>
+                                            <th>ISBN</th>
+                                            <th>Title</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php includeNotReturnedBooks(); ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Container for Dates -->
+      
+                    <div class="dates-container printable-table">
+                        <?php includeBookReports(); ?>
+            `;
+
+            document.body.innerHTML = returnedBooksContainerHTML; // Replace with the printable content
+
+            window.print(); // Print the current page
+
+            document.body.innerHTML = originalContent; // Restore the original content
+        }
+    </script>
 
   
 </body>
 </html>
 
 <?php
-    function includeReturnedBooks() {
+     function includeReturnedBooks() {
         include 'includes/conn.php';
-        $sql_returned = "SELECT *, students.student_id AS stud, borrow.status AS barstat FROM borrow LEFT JOIN students ON students.id=borrow.student_id LEFT JOIN books ON books.id=borrow.book_id WHERE borrow.status = 1 ORDER BY date_borrow DESC";
+    
+        // Validate and sanitize input parameters
+        $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
+        $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
+    
+        // Prepare the SQL query with the date filter
+        $sql_returned = "SELECT *, students.student_id AS stud, borrow.status AS barstat
+                         FROM borrow
+                         LEFT JOIN students ON students.id = borrow.student_id
+                         LEFT JOIN books ON books.id = borrow.book_id
+                         WHERE borrow.status = 1";
+    
+        if ($startDate && $endDate) {
+            $sql_returned .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
+        }
+    
+        $sql_returned .= " ORDER BY date_borrow DESC";
+    
+        // Execute the SQL query
         $query_returned = $conn->query($sql_returned);
-        while($row = $query_returned->fetch_assoc()){
+    
+        // Fetch and display the results
+        while ($row = $query_returned->fetch_assoc()) {
             echo "
                 <tr>
-                    <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
-                    <td>".$row['stud']."</td>
-                    <td>".$row['firstname'].' '.$row['lastname']."</td>
-                    <td>".$row['isbn']."</td>
-                    <td>".$row['title']."</td>
+                    <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
+                    <td>" . $row['stud'] . "</td>
+                    <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
+                    <td>" . $row['isbn'] . "</td>
+                    <td>" . $row['title'] . "</td>
                     <td><span class='label label-success'>Returned</span></td>
                 </tr>
             ";
         }
     }
+    
 
     function includeNotReturnedBooks() {
         include 'includes/conn.php';
-        $sql_not_returned = "SELECT *, students.student_id AS stud, borrow.status AS barstat FROM borrow LEFT JOIN students ON students.id=borrow.student_id LEFT JOIN books ON books.id=borrow.book_id WHERE borrow.status = 0 ORDER BY date_borrow DESC";
+    
+        // Validate and sanitize input parameters
+        $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
+        $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
+    
+        // Prepare the SQL query with the date filter
+        $sql_not_returned = "SELECT *, students.student_id AS stud, borrow.status AS barstat
+                             FROM borrow
+                             LEFT JOIN students ON students.id = borrow.student_id
+                             LEFT JOIN books ON books.id = borrow.book_id
+                             WHERE borrow.status = 0";
+    
+        if ($startDate && $endDate) {
+            $sql_not_returned .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
+        }
+    
+        $sql_not_returned .= " ORDER BY date_borrow DESC";
+    
+        // Execute the SQL query
         $query_not_returned = $conn->query($sql_not_returned);
-        while($row = $query_not_returned->fetch_assoc()){
+    
+        // Fetch and display the results
+        while ($row = $query_not_returned->fetch_assoc()) {
             echo "
                 <tr>
-                    <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
-                    <td>".$row['stud']."</td>
-                    <td>".$row['firstname'].' '.$row['lastname']."</td>
-                    <td>".$row['isbn']."</td>
-                    <td>".$row['title']."</td>
+                    <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
+                    <td>" . $row['stud'] . "</td>
+                    <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
+                    <td>" . $row['isbn'] . "</td>
+                    <td>" . $row['title'] . "</td>
                     <td><span class='label label-danger'>Not Returned</span></td>
                 </tr>
             ";

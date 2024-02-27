@@ -68,12 +68,20 @@
                 </thead>
                 <tbody>
                   <?php
+                    $department = isset($_GET['department']) ? $_GET['department'] : null;
+
                     $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
                             FROM borrow b
                             LEFT JOIN returns r ON b.book_id = r.book_id
                             LEFT JOIN students ON students.id = b.student_id
-                            LEFT JOIN books ON books.id = b.book_id
-                            ORDER BY b.date_borrow DESC";
+                            LEFT JOIN books ON books.id = b.book_id";
+                    
+                    if ($department !== null) {
+                        // Include the department filter when it's provided
+                        $sql .= " WHERE b.department = '$department'";
+                    }
+                    
+                    $sql .= " ORDER BY b.date_borrow DESC";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
                       $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';

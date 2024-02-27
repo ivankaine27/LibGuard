@@ -71,13 +71,21 @@
                 </thead>
                 <tbody>
                   <?php
+                    $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : null;
+
                     $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
-                            FROM borrow b
-                            LEFT JOIN returns r ON b.book_id = r.book_id
-                            LEFT JOIN students ON students.id = b.student_id
-                            LEFT JOIN books ON books.id = b.book_id
-                            WHERE b.status = 1
-                            ORDER BY b.date_borrow DESC";
+                    FROM borrow b
+                    LEFT JOIN returns r ON b.book_id = r.book_id
+                    LEFT JOIN students ON students.id = b.student_id
+                    LEFT JOIN books ON books.id = b.book_id
+                    WHERE b.status = 1";
+                    
+                    if ($category_id !== null) {
+                        // Include the department filter when it's provided
+                        $sql .= " AND r.category_id = '$category_id'";
+                    }
+                    
+                    $sql .= " ORDER BY b.date_borrow DESC;";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
                       echo "

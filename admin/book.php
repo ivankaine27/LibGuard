@@ -175,6 +175,9 @@ function getRow(id){
       $('#catselect').val(response.category_id).html(response.name);
       $('#edit_author').val(response.author);
       $('#edit_publisher').val(response.publisher);
+      $('#edit_shelf_number').val(response.shelf_number);
+      $('#edit_shelf_row').val(response.shelf_row);
+      $('#edit_quantity').val(response.quantity);
       $('#datepicker_edit').val(response.publish_date);
       $('#del_book').html(response.title);
     }

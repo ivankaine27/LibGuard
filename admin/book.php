@@ -86,6 +86,7 @@
                   <th>Title</th>
                   <th>Author</th>
                   <th>Publisher</th>
+                  <th>Publish Date</th>
                   <th>Shelf Number</th>
                   <th>Shelf Row</th>
                   <th>Quantity</th>
@@ -110,6 +111,7 @@
                           <td>".$row['title']."</td>
                           <td>".$row['author']."</td>
                           <td>".$row['publisher']."</td>
+                          <td>".date('M d, Y', strtotime($row['publish_date']))."</td>
                           <td>".$row['shelf_number']."</td>
                           <td>".$row['shelf_row']."</td>
                           <td>".$row['quantity']."</td>

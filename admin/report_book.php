@@ -25,6 +25,13 @@
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Generate Report</li>
       </ol>
+          <!-- Button for specifying filters -->
+
+          <div class="box">
+            <div class="box-header with-border">
+              <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Specify filters to generate report</a>
+            </div>
+</div>
     </section>
 
     <!-- Main content -->
@@ -64,12 +71,12 @@
                 echo "<h3>".$query->num_rows."</h3>";
               ?>
 
-              <p>Total Books</p>
+              <p>Published Year</p>
             </div>
             <div class="icon">
               <i class="fa fa-book"></i>
             </div>
-            <a href="book.php" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="book.php" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -84,12 +91,12 @@
                 echo "<h3>".$query->num_rows."</h3>";
               ?>
              
-              <p>Returned Today</p>
+              <p>Book Category</p>
             </div>
             <div class="icon">
               <i class="fa fa-mail-reply"></i>
             </div>
-            <a href="return.php" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="return.php" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -104,12 +111,12 @@
                 echo "<h3>".$query->num_rows."</h3>";
               ?>
 
-              <p>Borrowed Today</p>
+              <p>Course</p>
             </div>
             <div class="icon">
               <i class="fa fa-mail-forward"></i>
             </div>
-            <a href="#" id="openBorrowModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="#" id="openBorrowModal" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -126,15 +133,16 @@
                   echo "<h3>".$query->num_rows."</h3>";
                 ?>
 
-                <p>Download Report</p>
+                <p>Book Transactions</p>
               </div>
               <div class="icon">
                 <i class="fa fa-download"></i>
               </div>
-              <a href="#" id="openCalendarModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
+              <a href="#" id="openCalendarModal" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
             </div>
           </div>
         </div>
+        
         <!-- /.row -->
         <div class="row">
           <div class="col-xs-12">

@@ -15,7 +15,7 @@
             <!-- Main content -->
             <section class="content">
                 <div class="row">
-                    <div class="col-sm-9 col-sm-offset-2">
+                    <div class="col-sm-10 col-sm-offset-1">
                         <?php
                             if(isset($_SESSION['error'])){
                                 echo "
@@ -61,6 +61,7 @@
                                         <th>Publish Date</th> <!-- Added Publish Date column -->
                                         <th>Shelf Number</th>
                                         <th>Shelf Row</th>
+                                        <th>Quantity</th>
                                         <th>Status</th>
                                         <th>Expected Return Date</th> <!-- Added column -->
                                     </thead>
@@ -83,6 +84,7 @@
                                                     <td>".$row['publish_date']."</td> <!-- Display Publish Date -->
                                                     <td>".$row['shelf_number']."</td>
                                                     <td>".$row['shelf_row']."</td>
+                                                    <td>".$row['quantity']."</td>
                                                     <td>".$status."</td>
                                                     <td>".$return_date."</td> <!-- Display due date or N/A -->
                                                 </tr>

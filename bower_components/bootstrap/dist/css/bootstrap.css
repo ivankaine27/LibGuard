@@ -2277,8 +2277,9 @@ th {
   border-top: 1px solid #ddd;
 }
 .table > thead > tr > th {
-  vertical-align: bottom;
+  vertical-align: middle;
   border-bottom: 2px solid #ddd;
+  
 }
 .table > caption + thead > tr:first-child > th,
 .table > colgroup + thead > tr:first-child > th,

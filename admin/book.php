@@ -88,6 +88,7 @@
                   <th>Publisher</th>
                   <th>Shelf Number</th>
                   <th>Shelf Row</th>
+                  <th>Quantity</th>
                   <th>Status</th>
                   <th>Tools</th>
                 </thead>
@@ -96,12 +97,12 @@
                     $sql = "SELECT *, books.id AS bookid FROM books LEFT JOIN category ON category.id=books.category_id $where";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
-                      if($row['status']){
+                      if($row['quantity'] == 0){
                         $status = '<span class="label label-danger">borrowed</span>';
-                      }
-                      else{
+                    }
+                    else{
                         $status = '<span class="label label-success">available</span>';
-                      }
+                    }                    
                       echo "
                         <tr>
                           <td>".$row['name']."</td>
@@ -111,6 +112,7 @@
                           <td>".$row['publisher']."</td>
                           <td>".$row['shelf_number']."</td>
                           <td>".$row['shelf_row']."</td>
+                          <td>".$row['quantity']."</td>
                           <td>".$status."</td>
                           <td>
                             <button class='btn btn-success btn-sm edit btn-flat' data-id='".$row['bookid']."'><i class='fa fa-edit'></i> Edit</button>

@@ -226,7 +226,20 @@
                               ?>
                               <br>
             </div>
+            
         </div>
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Book Transactions by Publish Year</h3>
+                </div>
+                <div class="box-body">
+                    <canvas id="bookTransactionsChart" style="height:350px"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     </section>   
   </div>
@@ -282,6 +295,53 @@ $(document).ready(function() {
 </script>
 <script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script type="text/javascript">
+window.onload = function () {
+    <?php
+// Fetch data for all borrowers grouped by publish year
+$borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers
+                    FROM borrow
+                    LEFT JOIN books ON borrow.book_id = books.id
+                    WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
+if ($startDate && $endDate) {
+    $borrowersQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+}
+$borrowersQuery .= " GROUP BY publish_year";
+$borrowersResult = $conn->query($borrowersQuery);
+
+// Prepare data for CanvasJS
+$barChartData = array();
+while ($borrowersRow = $borrowersResult->fetch_assoc()) {
+    $year = $borrowersRow['publish_year'];
+    $totalBorrowers = $borrowersRow['total_borrowers'];
+    $barChartData[] = array(
+        "label" => $year,
+        "y" => $totalBorrowers
+    );
+}
+?>
+    var barChart = new CanvasJS.Chart("barChartContainer", {
+        animationEnabled: true,
+        title: {
+            text: "Total Borrowers by Publish Year"
+        },
+        axisX: {
+            title: "Publish Year"
+        },
+        axisY: {
+            title: "Total Borrowers"
+        },
+        data: [{
+            type: "column",
+            dataPoints: <?php echo json_encode($barChartData, JSON_NUMERIC_CHECK); ?>
+        }]
+    });
+    barChart.render();
+}
+</script>
+
 
 <script type="text/javascript">
 window.onload = function () {
@@ -410,6 +470,55 @@ window.onload = function () {
     });
     borrowReturnChart.render();
 }
+</script>
+
+
+
+<?php include 'includes/scripts.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Fetch data for book transactions by publish year
+    $.ajax({
+        url: 'fetch_book_transactions.php', // Path to your PHP script to fetch data
+        method: 'GET',
+        success: function(data) {
+            var years = [];
+            var transactions = [];
+
+            // Parse the JSON data received
+            data.forEach(function(item) {
+                years.push(item.publish_year);
+                transactions.push(item.total_transactions);
+            });
+
+            // Render the bar chart using Chart.js
+            var ctx = document.getElementById('bookTransactionsChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Book Transactions',
+                        data: transactions,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)', // Adjust color as needed
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    });
+});
 </script>
 
 

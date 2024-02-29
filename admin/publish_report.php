@@ -133,7 +133,14 @@
                         ?>
                         <div class="box-header with-border">Total Borrow Transactions: <?php echo $totalTransactions; ?></div>
                         <br><br>
+                                
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
                         <div id="returnedChartContainer" style="height: 300px; width: 100%;"></div>
+                    </div>
+                    </div>
+                    </div>
                         <?php
                             // Fetch data for book borrowed and returned
                             $returnedQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
@@ -216,7 +223,14 @@
                              
                 </div>
                 <br>
-                <div class="box-header with-border" id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
+                <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+            <div class="box-header with-border" id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
+                    </div>
+                    </div>
+                    </div>
+               
                 <br>
                 <?php
                                 // Report data analytics
@@ -227,19 +241,69 @@
                               <br>
             </div>
             
-        </div>
+        
         <div class="row">
         <div class="col-xs-12">
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Book Transactions by Publish Year</h3>
+                    <h3 class="box-title">All Book Transactions by Publish Year</h3>
                 </div>
                 <div class="box-body">
                     <canvas id="bookTransactionsChart" style="height:350px"></canvas>
                 </div>
             </div>
+            
         </div>
+                        </div>
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Rankings of Publish Years by Total Transactions</h3>
+                </div>
+                <div class="box-body">
+                    <ul class="list-group">
+                        <?php
+                        // Fetch data for all borrowers grouped by publish year
+$borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers
+FROM borrow
+LEFT JOIN books ON borrow.book_id = books.id
+WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
+if ($startDate && $endDate) {
+$borrowersQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+}
+$borrowersQuery .= " GROUP BY publish_year";
+$borrowersResult = $conn->query($borrowersQuery);
+
+// Prepare data for CanvasJS
+$barChartData = array();
+while ($borrowersRow = $borrowersResult->fetch_assoc()) {
+$year = $borrowersRow['publish_year'];
+$totalBorrowers = $borrowersRow['total_borrowers'];
+$barChartData[] = array(
+"label" => $year,
+"y" => $totalBorrowers
+);
+}
+                            
+                            arsort($barChartData); // Sort years based on total transactions
+
+                            $rank = 1;
+                            foreach ($barChartData as $data) {
+                                echo "<li class='list-group-item'>TOP $rank: Year " . $data['label'] . " - Total Borrowers: " . $data['y'] . "</li>";
+                                $rank++;
+                            }
+                        ?>
+                    </ul>
+                </div>
+            </div>
+                        </div>
+                        </div>
+        
+
+        
     </div>
+    
     </div>
     </section>   
   </div>
@@ -335,6 +399,7 @@ while ($borrowersRow = $borrowersResult->fetch_assoc()) {
         },
         data: [{
             type: "column",
+            color: "red",
             dataPoints: <?php echo json_encode($barChartData, JSON_NUMERIC_CHECK); ?>
         }]
     });

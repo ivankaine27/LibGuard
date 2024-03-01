@@ -5,12 +5,13 @@
     }
 
     $stuid = $student['id'];
-    $sql = "SELECT * FROM borrow LEFT JOIN books ON books.id=borrow.book_id WHERE student_id = '$stuid' ORDER BY date_borrow DESC";
-    $action = '';
-    if(isset($_GET['action']) && $_GET['action'] == 'return'){
-        $sql = "SELECT * FROM returns LEFT JOIN books ON books.id=returns.book_id WHERE student_id = '$stuid' ORDER BY date_return DESC";
-        $action = $_GET['action'];
-    }
+    // Query to fetch distinct borrow transactions along with book details
+    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
+            FROM borrow b
+            LEFT JOIN returns r ON b.book_id = r.book_id
+            LEFT JOIN books ON books.id = b.book_id
+            WHERE b.student_id = '$stuid'
+            ORDER BY b.date_borrow DESC";
 ?>
 <?php include 'includes/header.php'; ?>
 <body class="hold-transition skin-maroon-gold layout-top-nav">
@@ -25,19 +26,12 @@
                         <div class="box">
                             <div class="box-header with-border">
                                 <h3 class="box-title">TRANSACTIONS</h3>
-                                <div class="pull-right">
-                                    <select class="form-control input-sm" id="transelect">
-                                        <option value="borrow" <?php echo ($action == '') ? 'selected' : ''; ?>>Borrow</option>
-                                        <option value="return" <?php echo ($action == 'return') ? 'selected' : ''; ?>>Return</option>
-                                    </select>
-                                </div>
                             </div>
                             <div class="box-body">
                                 <table class="table table-bordered table-striped" id="example1">
                                     <thead>
-                                        <th class="hidden"></th>
                                         <th>Date Borrowed</th>
-                                        <th>Date Returned</th> <!-- Added Returned Date column -->
+                                        <th>Date Returned</th>
                                         <th>ISBN</th>
                                         <th>Title</th>
                                         <th>Author</th>
@@ -46,13 +40,10 @@
                                     <?php
                                         $query = $conn->query($sql);
                                         while($row = $query->fetch_assoc()){
-                                            $date_borrow = (isset($_GET['action'])) ? 'date_return' : 'date_borrow';
-                                            $date_return = (isset($_GET['action'])) ? 'date_return' : ''; // Fetch returned date
                                             echo "
                                                 <tr>
-                                                    <td class='hidden'></td>
-                                                    <td>".date('M d, Y', strtotime($row[$date_borrow]))."</td>
-                                                    <td>".($date_return != '' ? date('M d, Y', strtotime($row[$date_return])) : '')."</td> <!-- Display returned date if available -->
+                                                    <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
+                                                    <td>".($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet")."</td>
                                                     <td>".$row['isbn']."</td>
                                                     <td>".$row['title']."</td>
                                                     <td>".$row['author']."</td>
@@ -72,16 +63,5 @@
     <?php include 'includes/footer.php'; ?>
 </div>
 <?php include 'includes/scripts.php'; ?>
-<script>
-    $('#transelect').on('change', function(){
-        var action = $(this).val();
-        if(action == 'borrow'){
-            window.location = 'transaction.php';
-        }
-        else{
-            window.location = 'transaction.php?action='+action;
-        }
-    });
-</script>
 </body>
 </html>

@@ -86,8 +86,10 @@
                   <th>Title</th>
                   <th>Author</th>
                   <th>Publisher</th>
+                  <th>Publish Date</th>
                   <th>Shelf Number</th>
                   <th>Shelf Row</th>
+                  <th>Quantity</th>
                   <th>Status</th>
                   <th>Shelf Number</th>
                   <th>Shelf Row</th>
@@ -99,12 +101,12 @@
                             LEFT JOIN category ON category.id=books.category_id $where";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
-                      if($row['status']){
+                      if($row['quantity'] == 0){
                         $status = '<span class="label label-danger">borrowed</span>';
-                      }
-                      else{
+                    }
+                    else{
                         $status = '<span class="label label-success">available</span>';
-                      }
+                    }                    
                       echo "
                         <tr>
                           <td>".$row['name']."</td>
@@ -112,8 +114,10 @@
                           <td>".$row['title']."</td>
                           <td>".$row['author']."</td>
                           <td>".$row['publisher']."</td>
+                          <td>".date('M d, Y', strtotime($row['publish_date']))."</td>
                           <td>".$row['shelf_number']."</td>
                           <td>".$row['shelf_row']."</td>
+                          <td>".$row['quantity']."</td>
                           <td>".$status."</td>
                           <td>".$row['shelf_number']."</td>
                           <td>".$row['shelf_row']."</td>
@@ -178,6 +182,9 @@ function getRow(id){
       $('#catselect').val(response.category_id).html(response.name);
       $('#edit_author').val(response.author);
       $('#edit_publisher').val(response.publisher);
+      $('#edit_shelf_number').val(response.shelf_number);
+      $('#edit_shelf_row').val(response.shelf_row);
+      $('#edit_quantity').val(response.quantity);
       $('#datepicker_edit').val(response.publish_date);
       $('#edit_shelf_number').val(response.shelf_number); // Update shelf number value
       $('#edit_shelf_row').val(response.shelf_row); // Update shelf row value

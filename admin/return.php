@@ -62,7 +62,8 @@
               <table id="example1" class="table table-bordered">
                 <thead>
                   <th class="hidden"></th>
-                  <th>Date</th>
+                  <th>Date Borrowed</th>
+                  <th>Date Returned</th>
                   <th>Student ID</th>
                   <th>Name</th>
                   <th>ISBN</th>
@@ -70,19 +71,28 @@
                 </thead>
                 <tbody>
                   <?php
-                    $sql = "SELECT *, students.student_id AS stud FROM returns LEFT JOIN students ON students.id=returns.student_id LEFT JOIN books ON books.id=returns.book_id ORDER BY date_return DESC";
+                    $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : null;
+
+                    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                    FROM borrow b
+                    LEFT JOIN returns r ON b.book_id = r.book_id
+                    LEFT JOIN students ON students.id = b.student_id
+                    LEFT JOIN books ON books.id = b.book_id
+                    WHERE b.status = 1";
+                    
+                    if ($category_id !== null) {
+                        // Include the department filter when it's provided
+                        $sql .= " AND r.category_id = '$category_id'";
+                    }
+                    
+                    $sql .= " ORDER BY b.date_borrow DESC;";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
-                      if($row['status']){
-                        $status = '<span class="label label-danger">borrowed</span>';
-                      }
-                      else{
-                        $status = '<span class="label label-success">returned</span>';
-                      }
                       echo "
                         <tr>
                           <td class='hidden'></td>
-                          <td>".date('M d, Y', strtotime($row['date_return']))."</td>
+                          <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
+                          <td>".($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet")."</td>
                           <td>".$row['stud']."</td>
                           <td>".$row['firstname'].' '.$row['lastname']."</td>
                           <td>".$row['isbn']."</td>

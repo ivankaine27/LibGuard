@@ -2,10 +2,8 @@
 <?php include 'includes/header.php'; ?>
 <body class="hold-transition skin-maroon-gold sidebar-mini">
 <div class="wrapper">
-
   <?php include 'includes/navbar.php'; ?>
   <?php include 'includes/menubar.php'; ?>
-
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -49,10 +47,8 @@
 <?php
         unset($_SESSION['success']);
     }
-
-
-      ?>
-      <div class="row">
+    ?>
+    <div class="row">
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header with-border">
@@ -62,7 +58,8 @@
               <table id="example1" class="table table-bordered">
                 <thead>
                   <th class="hidden"></th>
-                  <th>Date</th>
+                  <th>Date Borrowed</th>
+                  <th>Date Returned</th>
                   <th>Student ID</th>
                   <th>Name</th>
                   <th>ISBN</th>
@@ -71,19 +68,28 @@
                 </thead>
                 <tbody>
                   <?php
-                    $sql = "SELECT *, students.student_id AS stud, borrow.status AS barstat FROM borrow LEFT JOIN students ON students.id=borrow.student_id LEFT JOIN books ON books.id=borrow.book_id ORDER BY date_borrow DESC";
+                    $department = isset($_GET['department']) ? $_GET['department'] : null;
+
+                    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                            FROM borrow b
+                            LEFT JOIN returns r ON b.book_id = r.book_id
+                            LEFT JOIN students ON students.id = b.student_id
+                            LEFT JOIN books ON books.id = b.book_id";
+                    
+                    if ($department !== null) {
+                        // Include the department filter when it's provided
+                        $sql .= " WHERE b.department = '$department'";
+                    }
+                    
+                    $sql .= " ORDER BY b.date_borrow DESC";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
-                      if($row['barstat']){
-                        $status = '<span class="label label-success">returned</span>';
-                      }
-                      else{
-                        $status = '<span class="label label-danger">not returned</span>';
-                      }
+                      $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
                       echo "
                         <tr>
                           <td class='hidden'></td>
                           <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
+                          <td>".($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet")."</td>
                           <td>".$row['stud']."</td>
                           <td>".$row['firstname'].' '.$row['lastname']."</td>
                           <td>".$row['isbn']."</td>

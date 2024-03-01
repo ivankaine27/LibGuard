@@ -154,7 +154,6 @@
         // Validate and sanitize input parameters
         $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
         $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
-    
         // Prepare the SQL query with the date filter
         $sql_returned = "SELECT *, students.student_id AS stud, borrow.status AS barstat
                          FROM borrow
@@ -226,7 +225,13 @@
     }
     function includeBookReports() {
         include 'includes/conn.php';
-        $sql_dates = "SELECT DISTINCT DATE(date_borrow) AS borrow_date FROM borrow ORDER BY borrow_date DESC";
+        $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
+        $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
+        $sql_dates = "SELECT DISTINCT DATE(date_borrow) AS borrow_date FROM borrow WHERE";
+        if ($startDate && $endDate) {
+            $sql_dates .= " date_borrow BETWEEN '$startDate' AND '$endDate'";
+        }
+        $sql_dates .= " ORDER BY borrow_date DESC";
         $query_dates = $conn->query($sql_dates);
         while($date_row = $query_dates->fetch_assoc()) {
             $date = $date_row['borrow_date'];

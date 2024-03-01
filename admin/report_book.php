@@ -25,6 +25,13 @@
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Generate Report</li>
       </ol>
+          <!-- Button for specifying filters -->
+
+          <div class="box">
+            <div class="box-header with-border">
+              <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Specify filters to generate report</a>
+            </div>
+</div>
     </section>
 
     <!-- Main content -->
@@ -57,19 +64,19 @@
           <!-- small box -->
           <div class="small-box" style="background-color: rgba(0, 200, 250, 0.7)">
             <div class="inner">
-              <?php
+              <!-- <?php
                 $sql = "SELECT * FROM books";
                 $query = $conn->query($sql);
 
                 echo "<h3>".$query->num_rows."</h3>";
-              ?>
+              ?> -->
 
-              <p>Total Books</p>
+              <p>Published Year</p>
             </div>
             <div class="icon">
               <i class="fa fa-book"></i>
             </div>
-            <a href="book.php" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="#" id="openPublishModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -77,19 +84,19 @@
           <!-- small box -->
           <div class="small-box" style="background-color: rgba(255, 170, 0, 0.7)">
             <div class="inner">
-              <?php
+              <!-- <?php
                 $sql = "SELECT * FROM returns WHERE date_return = '$today'";
                 $query = $conn->query($sql);
 
                 echo "<h3>".$query->num_rows."</h3>";
-              ?>
+              ?> -->
              
-              <p>Returned Today</p>
+              <p>Book Category</p>
             </div>
             <div class="icon">
               <i class="fa fa-mail-reply"></i>
             </div>
-            <a href="return.php" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="#" id="openCategoryModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -97,19 +104,19 @@
           <!-- small box -->
           <div class="small-box" style="background-color: rgba(255, 0, 0, 0.7)">
             <div class="inner">
-              <?php
+              <!-- <?php
                 $sql = "SELECT * FROM borrow WHERE date_borrow = '$today'";
                 $query = $conn->query($sql);
 
                 echo "<h3>".$query->num_rows."</h3>";
-              ?>
+              ?> -->
 
-              <p>Borrowed Today</p>
+              <p>Course</p>
             </div>
             <div class="icon">
               <i class="fa fa-mail-forward"></i>
             </div>
-            <a href="#" id="openBorrowModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
+            <a href="#" id="openCourseModal" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -119,22 +126,23 @@
             <!-- small box -->
             <div class="small-box" style="background-color: rgba(0, 0, 0, 0.3);">
               <div class="inner">
-                <?php
+                <!-- <?php
                   $sql = "SELECT * FROM books";
                   $query = $conn->query($sql);
 
                   echo "<h3>".$query->num_rows."</h3>";
                 ?>
-
-                <p>Download Report</p>
+           -->
+                <p>Book Transactions</p>
               </div>
               <div class="icon">
                 <i class="fa fa-download"></i>
               </div>
-              <a href="#" id="openCalendarModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
+              <a href="#" id="openCalendarModal" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
             </div>
           </div>
         </div>
+        
         <!-- /.row -->
         <div class="row">
           <div class="col-xs-12">
@@ -303,8 +311,10 @@
 
   <!-- Import your calendar modal -->
   <?php include 'includes/calendar_modal.php'; ?>
-  <?php include 'includes/modals/borrow_modal.php'; ?>
-
+  <?php include 'includes/modals/course_modal.php'; ?>
+  <?php include 'includes/modals/category_modal.php'; ?>
+  <?php include 'includes/modals/publish_modal.php'; ?>
+  <?php include 'includes/modals/return_modal.php'; ?>
   <!-- Add the following script to handle the click event -->
   <script>
       $(document).ready(function() {
@@ -315,11 +325,28 @@
               // Show the modal
               $('#dateRangePickerModal').modal('show');
           });
-          $('#openBorrowModal').click(function(e) {
+          $('#openCourseModal').click(function(e) {
               e.preventDefault(); // Prevent default link behavior
 
               // Show the modal
-              $('#borrowModal').modal('show');
+              $('#courseModal').modal('show');
+          });
+          $('#openCategoryModal').click(function(e) {
+              e.preventDefault(); // Prevent default link behavior
+
+              // Show the modal
+              $('#categoryModal').modal('show');
+          });
+          $('#openPublishModal').click(function(e) {
+              e.preventDefault(); // Prevent default link behavior
+              // Show the modal
+              $('#publishModal').modal('show');
+          });
+          $('#openReturnModal').click(function(e) {
+              e.preventDefault(); // Prevent default link behavior
+
+              // Show the modal
+              $('#returnModal').modal('show');
           });
       });
   </script>

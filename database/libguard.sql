@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 26, 2024 at 02:07 PM
+-- Generation Time: Feb 27, 2024 at 03:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,7 +43,11 @@ CREATE TABLE `admin` (
 
 INSERT INTO `admin` (`id`, `username`, `password`, `firstname`, `lastname`, `photo`, `created_on`) VALUES
 (1, 'ivankaine', '$2y$10$iY6xgNbO9sJ5UejY3ktKOux.eFu13yLOf5mrM4EmEWhNk73MHhpSO', 'Ivan Kaine ', 'Bulaun', '', '2024-01-23'),
-(2, 'jm', '$2y$10$0VHUWahUX7OlHzvLCenvdeNTOc20EyPQXh1eqhh0SeZyjapb5tdbe', 'J', 'M', '', '2024-01-24');
+(2, 'justin', '$2y$10$Q9npdC4ZRux65FPOnmJJwOx7SrGdq0.df2937l9ecMNZs86USYbp2', 'Justin', 'Balboa', '', '2024-02-27'),
+(3, 'aldrei', '$2y$10$85XzICn/SG8EkI7YHCXEpuN0D5kDI8x12F2gxvhNip5UUYF.F0Af6', 'Aldrei', 'Bucud', '', '2024-02-27'),
+(4, 'chef', '$2y$10$5oA3Xf21vp0O.8eWejY1r.UJWdvhn8qKM.dBlxVfuA7VVODXG.n4O', 'Chef', 'Delizo', '', '2024-02-27'),
+(5, 'jm', '$2y$10$S5Vr2SwRv0uPWFIn1.ClX.CrQlnNGZTA4NEwHnUy6lWmOPA1fK4UG', 'Johnrick', 'Estrada', '', '2024-02-27'),
+(6, 'einnor', '$2y$10$IJPr2lBfq7/ST0xPuKSda.T0sh4JK7fwBSF5FgSVFP1YAJrKFlPGG', 'Einnor', 'Casupanan', '', '2024-02-27');
 
 -- --------------------------------------------------------
 
@@ -61,25 +65,26 @@ CREATE TABLE `books` (
   `publish_date` date NOT NULL,
   `status` int(1) NOT NULL,
   `shelf_number` int(11) NOT NULL,
-  `shelf_row` varchar(10) NOT NULL
+  `shelf_row` varchar(10) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `books`
 --
 
-INSERT INTO `books` (`id`, `isbn`, `category_id`, `title`, `author`, `publisher`, `publish_date`, `status`, `shelf_number`, `shelf_row`) VALUES
-(4, '0021', 5, 'Effective C++', 'Scott Meyers', 'Hoobstank Publishers', '2018-06-03', 0, 1, '8'),
-(6, '002', 5, 'Python Cookbook', 'ABCDEFF', 'Jacobs Publisher', '2018-06-01', 0, 1, '9'),
-(9, '123', 5, 'Java 2', 'Herbert ', 'Demo Publisher', '2018-05-15', 0, 1, '10'),
-(11, '978-0471787020', 1, 'Introduction to Engineering Mechanics', 'Jenn Stroud Rossmann	', 'Wiley', '2007-03-26', 0, 1, '2'),
-(12, '978-0190698616', 1, 'Fundamentals of Electrical Engineering', 'Giorgio Rizzoni', 'Oxford University Press', '2011-01-10', 0, 1, '3'),
-(13, '978-0470239779', 1, 'Civil Engineering Materials', 'Shan Somayaji', 'Prentice Hall', '2007-01-30', 0, 1, '4'),
-(16, '978-0471218536', 1, 'Principles of Environmental Engineering', 'Mackenzie Davis', 'Wiley', '2005-02-23', 0, 1, '1'),
-(17, '978-0470418235', 1, 'Introduction to Aerospace Engineering', 'Travis S. Taylor', 'CRC Press', '2004-10-02', 0, 1, '5'),
-(18, '689', 4, 'Diary ng Panget', 'Marcelo Santos', 'Cornhwa Inc.', '2024-02-05', 0, 1, '7'),
-(19, '111', 1, 'Yes', 'Yes', 'Yes', '2024-02-20', 0, 1, '6'),
-(20, '222', 2, 'No', 'No', 'No', '2024-02-01', 0, 3, '1');
+INSERT INTO `books` (`id`, `isbn`, `category_id`, `title`, `author`, `publisher`, `publish_date`, `status`, `shelf_number`, `shelf_row`, `quantity`) VALUES
+(4, '0021', 5, 'Effective C++', 'Scott Meyers', 'Hoobstank Publishers', '2018-06-03', 0, 1, '8', 2),
+(6, '002', 5, 'Python Cookbook', 'ABCDEFF', 'Jacobs Publisher', '2018-06-01', 0, 1, '9', 2),
+(9, '123', 5, 'Java 2', 'Herbert ', 'Demo Publisher', '2018-05-15', 0, 1, '10', 2),
+(11, '978-0471787020', 1, 'Introduction to Engineering Mechanics', 'Jenn Stroud Rossmann	', 'Wiley', '2007-03-26', 0, 1, '2', 2),
+(12, '978-0190698616', 1, 'Fundamentals of Electrical Engineering', 'Giorgio Rizzoni', 'Oxford University Press', '2011-01-10', 0, 1, '3', 2),
+(13, '978-0470239779', 1, 'Civil Engineering Materials', 'Shan Somayaji', 'Prentice Hall', '2007-01-30', 0, 1, '4', 2),
+(16, '978-0471218536', 1, 'Principles of Environmental Engineering', 'Mackenzie Davis', 'Wiley', '2005-02-23', 0, 1, '1', 2),
+(17, '978-0470418235', 1, 'Introduction to Aerospace Engineering', 'Travis S. Taylor', 'CRC Press', '2004-10-02', 0, 1, '5', 2),
+(18, '689', 4, 'Diary ng Panget', 'Marcelo Santos', 'Cornhwa Inc.', '2024-02-05', 0, 1, '7', 2),
+(19, '111', 1, 'Yes', 'Yes', 'Yes', '2024-02-20', 0, 1, '6', 2),
+(20, '222', 2, 'No', 'No', 'No', '2024-02-01', 0, 3, '1', 1);
 
 -- --------------------------------------------------------
 
@@ -102,38 +107,8 @@ CREATE TABLE `borrow` (
 --
 
 INSERT INTO `borrow` (`id`, `student_id`, `book_id`, `date_borrow`, `status`, `due_date`, `penalty`) VALUES
-(53, 25, 9, '2024-02-17', 1, '0000-00-00', 0.00),
-(54, 25, 6, '2024-02-17', 1, '2024-02-27', 0.00),
-(56, 25, 12, '2024-02-17', 1, '2024-02-23', 197779.58),
-(57, 25, 13, '2024-02-17', 1, '2024-02-24', 197779.58),
-(58, 25, 16, '2024-02-17', 1, '2024-02-22', 197779.58),
-(63, 25, 9, '2024-02-17', 1, '2024-02-23', 0.00),
-(64, 25, 6, '2024-02-17', 1, '2024-02-24', 0.00),
-(65, 25, 9, '2024-02-18', 1, '2024-02-25', 0.00),
-(66, 25, 9, '2024-02-18', 1, '2024-02-25', 0.00),
-(67, 25, 9, '2024-02-20', 1, '2024-02-26', 0.00),
-(68, 25, 9, '2024-02-20', 1, '2024-02-26', 0.00),
-(69, 25, 9, '2024-02-20', 1, '2024-02-26', 0.00),
-(70, 25, 9, '2024-02-20', 1, '2024-02-26', 0.00),
-(71, 25, 9, '2024-02-20', 1, '2024-02-26', 0.00),
-(72, 25, 9, '2024-02-20', 1, '2024-02-26', 0.00),
-(73, 25, 9, '2024-02-20', 1, '2024-02-27', 0.00),
-(74, 25, 9, '2024-02-20', 1, '2024-02-27', 0.00),
-(80, 25, 9, '2024-02-23', 1, '2024-02-24', 0.00),
-(82, 25, 20, '2024-02-23', 1, '2024-02-24', 0.00),
-(83, 25, 9, '2024-02-25', 1, '2024-02-22', 197780.00),
-(84, 25, 19, '2024-02-25', 1, '2024-02-21', 197779.58),
-(85, 25, 20, '2024-02-25', 1, '2024-02-21', 197779.58),
-(86, 25, 18, '2024-02-25', 1, '2024-02-21', 40.00),
-(87, 25, 11, '2024-02-25', 1, '2024-02-21', 197779.58),
-(88, 25, 19, '2024-02-26', 1, '2024-03-04', 50.00),
-(89, 25, 19, '2024-02-26', 1, '2024-03-04', 50.00),
-(90, 25, 20, '2024-02-26', 1, '2024-03-04', 20.00),
-(91, 25, 19, '2024-02-26', 1, '2024-03-04', 50.00),
-(92, 25, 19, '2024-02-26', 1, '2024-03-04', 0.00),
-(93, 25, 20, '2024-02-26', 1, '2024-03-04', 0.00),
-(94, 25, 9, '2024-02-26', 1, '2024-03-04', 0.00),
-(95, 25, 19, '2024-02-26', 1, '2024-02-25', 5.00);
+(117, 25, 19, '2024-02-27', 1, '2024-03-05', 0.00),
+(118, 25, 20, '2024-02-27', 0, '2024-03-05', 0.00);
 
 -- --------------------------------------------------------
 
@@ -155,8 +130,7 @@ INSERT INTO `category` (`id`, `name`) VALUES
 (2, 'Mathematics'),
 (3, 'Science and Technology'),
 (4, 'History'),
-(5, 'IT Programming'),
-(6, 'Cornhwa');
+(5, 'IT Programming');
 
 -- --------------------------------------------------------
 
@@ -199,40 +173,7 @@ CREATE TABLE `returns` (
 --
 
 INSERT INTO `returns` (`id`, `student_id`, `book_id`, `date_return`, `due_date`) VALUES
-(22, 25, 18, '2024-02-17', NULL),
-(23, 25, 9, '2024-02-17', NULL),
-(24, 25, 9, '2024-02-17', NULL),
-(25, 25, 6, '2024-02-17', NULL),
-(26, 25, 9, '2024-02-18', NULL),
-(27, 25, 9, '2024-02-18', NULL),
-(28, 25, 9, '2024-02-20', NULL),
-(29, 25, 9, '2024-02-20', NULL),
-(30, 25, 9, '2024-02-20', NULL),
-(31, 25, 9, '2024-02-20', NULL),
-(32, 25, 9, '2024-02-20', NULL),
-(33, 25, 9, '2024-02-20', NULL),
-(34, 25, 9, '2024-02-20', NULL),
-(35, 25, 19, '2024-02-25', NULL),
-(36, 25, 19, '2024-02-25', NULL),
-(37, 25, 9, '2024-02-25', NULL),
-(38, 25, 6, '2024-02-25', NULL),
-(39, 25, 19, '2024-02-25', NULL),
-(40, 25, 9, '2024-02-25', NULL),
-(41, 25, 20, '2024-02-25', NULL),
-(42, 25, 12, '2024-02-25', NULL),
-(43, 25, 16, '2024-02-25', NULL),
-(44, 25, 13, '2024-02-25', NULL),
-(45, 25, 9, '2024-02-25', NULL),
-(46, 25, 9, '2024-02-25', NULL),
-(47, 25, 19, '2024-02-25', NULL),
-(48, 25, 20, '2024-02-25', NULL),
-(49, 25, 11, '2024-02-25', NULL),
-(50, 25, 18, '2024-02-25', NULL),
-(51, 25, 19, '2024-02-26', NULL),
-(52, 25, 19, '2024-02-26', NULL),
-(53, 25, 19, '2024-02-26', NULL),
-(54, 25, 20, '2024-02-26', NULL),
-(55, 25, 19, '2024-02-26', NULL);
+(69, 25, 19, '2024-02-27', NULL);
 
 -- --------------------------------------------------------
 
@@ -340,7 +281,7 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `books`
@@ -352,7 +293,7 @@ ALTER TABLE `books`
 -- AUTO_INCREMENT for table `borrow`
 --
 ALTER TABLE `borrow`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -370,7 +311,7 @@ ALTER TABLE `course`
 -- AUTO_INCREMENT for table `returns`
 --
 ALTER TABLE `returns`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT for table `students`

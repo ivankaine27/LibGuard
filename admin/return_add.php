@@ -112,7 +112,7 @@ $penaltyTotal += $penalty; // Accumulate penalty total
                         $sql = "INSERT INTO returns (student_id, book_id, date_return) VALUES ('$student_id', '$bid', NOW())";
                         if($conn->query($sql)){
                             $return++;
-                            $sql = "UPDATE books SET status = 0 WHERE id = '$bid'";
+                            $sql = "UPDATE books SET status = 0, quantity = quantity + 1 WHERE id = '$bid'";
                             $conn->query($sql);
                             $sql = "UPDATE borrow SET status = 1, penalty = '$penaltyTotal' WHERE id = '$borrow_id'";
                             $conn->query($sql);

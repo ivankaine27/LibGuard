@@ -311,54 +311,31 @@ $barChartData[] = array(
 <?php include 'includes/footer.php'; ?>
 <?php include 'includes/borrow_modal.php'; ?>
 <?php include 'includes/scripts.php'; ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script>
-$(function(){
-  $(document).on('click', '#append', function(e){
-    e.preventDefault();
-    $('#append-div').append(
-      '<div class="form-group"><label for="" class="col-sm-3 control-label">ISBN</label><div class="col-sm-9"><input type="text" class="form-control" name="isbn[]"></div></div>'
-    );
-  });
-});
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
 <script>
 $(document).ready(function() {
     $('#downloadButton').click(function(e) {
         e.preventDefault();
+        console.log("Download button clicked"); // Debug statement
 
-        // Open a new window with only the table content
-        var printWindow = window.open('', '_blank');
-        printWindow.document.write('<html><head><title>Borrow Data</title>');
-        printWindow.document.write('<style>table { border-collapse: collapse; width: 100%; } table, th, td { border: 1px solid black; }</style>');
-        printWindow.document.write('</head><body>');
-        <?php
-            // Loop through tables and append HTML to the print window
-            $publishResult->data_seek(0); // Reset result pointer
-            while ($publishRow = $publishResult->fetch_assoc()) {
-                $year = $publishRow['publish_year'];
-                echo "printWindow.document.write('<h2>Pending Book Returns Data for $year</h2>');";
-                echo "printWindow.document.write($('#borrow_table_$year').clone().prop('outerHTML'));";
-            }
-            // Loop through returned tables and append HTML to the print window
-            $returnedResult->data_seek(0); // Reset result pointer
-            while ($returnedRow = $returnedResult->fetch_assoc()) {
-                $year = $returnedRow['publish_year'];
-                echo "printWindow.document.write('<h2>Book Borrowed and Returned Data for $year</h2>');";
-                echo "printWindow.document.write($('#returned_table_$year').clone().prop('outerHTML'));";
-            }
-        ?>
-        printWindow.document.write('<div>Total Borrow Transactions: <?php echo $totalTransactions; ?></div>');
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
+        // Capture HTML content to be converted to PDF
+        html2canvas(document.querySelector(".content-wrapper")).then(canvas => {
+            var { jsPDF } = window.jspdf;
+            var pdf = new jsPDF('p', 'mm', 'a4');
 
-        // Call the print function on the new window
-        printWindow.print();
+            // Stretching the image vertically by adjusting height
+            var imgWidth = 150; // Width of the image
+            var imgHeight = 298; // Increasing the height by 50%
+            
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save('book_transactions.pdf');
+        });
     });
 });
 </script>
-<script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 <script type="text/javascript">

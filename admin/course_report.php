@@ -1,5 +1,6 @@
 <?php include 'includes/session.php'; ?>
 <?php include 'includes/header.php'; ?>
+
 <body class="hold-transition skin-maroon-gold sidebar-mini">
 
 <div class="wrapper">
@@ -76,7 +77,7 @@
                     $selected_courses = isset($_GET['selected_courses']) ? $_GET['selected_courses'] : null;
                     $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
                     $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
-                    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, students.course_id, books.isbn, books.title, books.author
+                    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, students.course_id, books.isbn, books.title, books.author, course.title as course_title
                             FROM borrow b
                             LEFT JOIN returns r ON b.book_id = r.book_id
                             LEFT JOIN students ON students.id = b.student_id
@@ -110,7 +111,7 @@
                                 <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
                                 <td>" . $row['isbn'] . "</td>
                                 <td>" . $row['title'] . "</td>
-                                <td>" . $row['course_id'] . "</td>
+                                <td>" . $row['course_title'] . "</td>
                                 <td>" . $status . "</td>
                             </tr>
                         ";
@@ -178,25 +179,64 @@ $(function(){
 </script> -->
 <!-- Add this script after the existing scripts in your HTML -->
 <script>
-    $(document).ready(function() {
-        $('#downloadButton').click(function(e) {
-            e.preventDefault();
+  $(document).ready(function() {
+    $('#downloadButton').click(function(e) {
+        e.preventDefault();
 
-            // Open a new window with only the table content
-            var printWindow = window.open('', '_blank');
-            printWindow.document.write('<html><head><title>Borrow Data</title>');
-            printWindow.document.write('<style>table { border-collapse: collapse; width: 100%; } table, th, td { border: 1px solid black; }</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<h2>Borrow Data</h2>');
-            printWindow.document.write($('#example1').clone().prop('outerHTML'));
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
+        // Function to format the current date and time
+        function getCurrentDateTime() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+            return now.toLocaleDateString('en-US', options);
+        }
 
-            // Call the print function on the new window
-            printWindow.print();
-        });
+        // Open a new window with only the table content and pie chart
+        var printWindow = window.open('', '_blank');
+        printWindow.document.write('<html><head><title>Borrow Data</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('table { border-collapse: collapse; width: 50%; border: 1px solid #ddd; page-break-inside: avoid; }');
+        printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }');
+        printWindow.document.write('th { background-color: #f2f2f2; }');
+        // Styles for ribbon (both for screen and print)
+        printWindow.document.write('.ribbon-container { position: relative; background-color: #800000; padding: 10px; height: 50px; }');
+        printWindow.document.write('.ribbon-text { color: #fff; position: absolute; bottom: 10px; right: 10px; font-size: 18px; width: 20%; text-align: right; }');
+        printWindow.document.write('.date-time { color: #fff; position: absolute; bottom: 10px; left: 10px; font-size: 18px; width: 80%; text-align: left; }');
+        // Media print styles to show ribbon when printing
+        printWindow.document.write('<style>@media print { .ribbon-container { display: block; } }</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<div class="ribbon-container"><p class="ribbon-text"><b>TRANSACTION REPORT</b</p><p class="date-time">' + getCurrentDateTime() + '</p></div>');
+        printWindow.document.write('<h2 style="margin-top: 10px;">Book Borrow and Returning Transaction</h2>');
+        printWindow.document.write('<div id="chartContainer" style="height: 300px; width: 100%;"></div>');
+        printWindow.document.write('<div id="tableContainer">' + $('#example1').clone().prop('outerHTML') + '</div>');
+
+
+        printWindow.document.write('<script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>');
+        printWindow.document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>');
+        printWindow.document.write('<script>');
+
+        printWindow.document.write('window.onload = function () {');
+        printWindow.document.write('var pieChartData = ' + '<?php echo json_encode($pieChartData); ?>' + ';');
+        printWindow.document.write('pieChartData = JSON.parse(pieChartData.replace(/&quot;/g, \'"\'));');  // Handle HTML encoding
+        printWindow.document.write('var chart = new CanvasJS.Chart("chartContainer", {');
+        printWindow.document.write('title: {text: "Borrowed Books by Course"},');
+        printWindow.document.write('legend: {maxWidth: 350, itemWidth: 120},');
+        printWindow.document.write('data: [{type: "pie", showInLegend: true, legendText: "{indexLabel}", dataPoints: pieChartData }]});');
+        printWindow.document.write('chart.render();');
+        printWindow.document.write('}');
+        printWindow.document.write('</script>');
+
+        printWindow.document.write('</body></html>');
+
+
+
+        printWindow.document.close();
+
+        // Call the print function on the new window
+        // printWindow.print();
     });
+});
 </script>
+
 <!-- <script type="text/javascript">
   window.onload = function () {
 	var chart = new CanvasJS.Chart("chartContainer",

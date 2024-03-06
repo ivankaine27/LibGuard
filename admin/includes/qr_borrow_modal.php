@@ -12,15 +12,47 @@
 <body>
 
 <!-- Add -->
-<div class="modal fade" id="addnew">
+<div class="modal fade" id="addnew1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title"><b>Borrow Books</b></h4>
+                <h4 class="modal-title"><b>Scan QR Code to get Student ID</b></h4>
+                <div class="modal-body">
+            <div class= "iframe-container">
+            <iframe src="http://192.168.0.128" width="480" height="320" frameborder="0" scrolling="no"></iframe>
+         </div>
             </div>
-            <div class="modal-body">
+     
+<?php
+
+// Check if the payload data is sent using the POST method
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if the payload parameter is set in the POST data
+    if (isset($_POST["postData"])) {
+        // Retrieve the payload data
+        $qrData = $_POST["postData"];
+        $sql = "INSERT INTO data (qrData) VALUES ('$qrData')";
+		if($conn->query($sql)){
+			$_SESSION['success'] = 'Category added successfully';
+      echo "Payload received successfully: " . $qrData;
+		}
+		else{
+			$_SESSION['error'] = $conn->error;
+
+        // Process the payload data as needed
+        // For example, you can store it in a database or perform other actions
+
+        // Print a response to acknowledge that the payload was received
+        echo "Payload received successfully: " . $qrData;
+    }
+} else {
+    // If the request method is not POST, print an error message
+    echo "Error: Only POST requests are allowed";
+}
+}
+?>
                 <form class="form-horizontal" method="POST" action="borrow_add.php">
                     <div class="form-group">
                         <label for="student" class="col-sm-3 control-label">Student ID</label>
@@ -29,6 +61,7 @@
                         </div>
                     </div>
                     <div class="form-group">
+                    <h5 class="modal-title pull-center" style="text-align: center"><b>Type ISBN</b></h5>
                         <label for="isbn" class="col-sm-3 control-label">ISBN</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" id="isbn" name="isbn[]" required>
@@ -44,7 +77,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
                 <!-- Change type to button and add name="confirm" -->
-                <button type="button" class="btn btn-primary btn-flat" id="confirmButton"><i class="fa fa-save"></i> Save</button>
+                <button type="button" class="btn btn-primary btn-flat" id="confirmButton1"><i class="fa fa-save"></i> Save</button>
                 </form>
             </div>
         </div>
@@ -54,18 +87,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#confirmButton').on('click', function() {
+        $('#confirmButton1').on('click', function() {
             var studentNumber = $('#student').val();
             var isbnArray = []; // Array to store ISBNs
 
             // Loop through all ISBN input fields and collect their values
-            $('#addnew input[name="isbn[]"]').each(function() {
+            $('#addnew1 input[name="isbn[]"]').each(function() {
                 isbnArray.push($(this).val());
             });
 
             // AJAX request to fetch book details
             $.ajax({
-                url: 'book_borrow_confirmation.php',
+                url: 'qr_book_borrow_confirmation.php',
                 method: 'POST',
                 data: { isbn: isbnArray }, // Send array of ISBNs
                 dataType: 'json',
@@ -106,3 +139,16 @@
 
 </body>
 </html>
+<style>
+        /* Center the iframe horizontally */
+        .iframe-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Optional: Adjust the size of the iframe */
+        iframe {
+            width: 480px;
+            height: 480px;
+        }
+    </style>

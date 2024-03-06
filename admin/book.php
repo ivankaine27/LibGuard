@@ -91,11 +91,14 @@
                   <th>Shelf Row</th>
                   <th>Quantity</th>
                   <th>Status</th>
+                  <th>Shelf Number</th>
+                  <th>Shelf Row</th>
                   <th>Tools</th>
                 </thead>
                 <tbody>
                   <?php
-                    $sql = "SELECT *, books.id AS bookid FROM books LEFT JOIN category ON category.id=books.category_id $where";
+                    $sql = "SELECT *, books.id AS bookid FROM books 
+                            LEFT JOIN category ON category.id=books.category_id $where";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
                       if($row['quantity'] == 0){
@@ -116,6 +119,8 @@
                           <td>".$row['shelf_row']."</td>
                           <td>".$row['quantity']."</td>
                           <td>".$status."</td>
+                          <td>".$row['shelf_number']."</td>
+                          <td>".$row['shelf_row']."</td>
                           <td>
                             <button class='btn btn-success btn-sm edit btn-flat' data-id='".$row['bookid']."'><i class='fa fa-edit'></i> Edit</button>
                             <button class='btn btn-danger btn-sm delete btn-flat' data-id='".$row['bookid']."'><i class='fa fa-trash'></i> Delete</button>
@@ -181,6 +186,8 @@ function getRow(id){
       $('#edit_shelf_row').val(response.shelf_row);
       $('#edit_quantity').val(response.quantity);
       $('#datepicker_edit').val(response.publish_date);
+      $('#edit_shelf_number').val(response.shelf_number); // Update shelf number value
+      $('#edit_shelf_row').val(response.shelf_row); // Update shelf row value
       $('#del_book').html(response.title);
     }
   });

@@ -120,17 +120,43 @@
 <div class="row" style="margin-top: 20px;">
     <div class="col-sm-12 text-right">
         <ul class="pagination">
-            <?php for ($i = 1; $i <= $totalPages; $i++) { ?>
+            <?php 
+            // Calculate previous and next page numbers
+            $prevPage = ($currentPage > 1) ? $currentPage - 1 : 1;
+            $nextPage = ($currentPage < $totalPages) ? $currentPage + 1 : $totalPages;
+
+            // Display previous page link
+            ?>
+            <li>
+                <a href="?students=<?php echo urlencode(json_encode($selectedStudents)); ?>&page=<?php echo $prevPage; ?>" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <?php
+            // Display pagination links
+            for ($i = 1; $i <= $totalPages; $i++) {
+                ?>
                 <li <?php if ($i == $currentPage) echo 'class="active"'; ?>>
-                    <a href="#" onclick="printPage(<?php echo $i; ?>)">
+                    <a href="?students=<?php echo urlencode(json_encode($selectedStudents)); ?>&page=<?php echo $i; ?>">
                         <?php echo $i; ?>
                     </a>
                 </li>
             <?php } ?>
+
+            <?php
+            // Display next page link
+            ?>
+            <li>
+                <a href="?students=<?php echo urlencode(json_encode($selectedStudents)); ?>&page=<?php echo $nextPage; ?>" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
         </ul>
     </div>
 </div>
 <!-- End Pagination Links -->
+
 
                 </section>
             </div>

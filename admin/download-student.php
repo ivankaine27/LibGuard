@@ -115,7 +115,7 @@
                             </div>
                         </div>
                     </div>
-
+                    
 <!-- Pagination Links -->
 <div class="row" style="margin-top: 20px;">
     <div class="col-sm-12 text-right">
@@ -157,7 +157,6 @@
 </div>
 <!-- End Pagination Links -->
 
-
                 </section>
             </div>
         </div>
@@ -176,7 +175,7 @@ document.getElementById('downloadAllButton').addEventListener('click', function(
 });
 
 document.getElementById('downloadCSVButton').addEventListener('click', function(event) {
-    // event.preventDefault();
+    event.preventDefault();
     generateCSV(); // Generate and download CSV
 });
 
@@ -192,13 +191,7 @@ function printCurrentPage() {
 
 // Function to generate CSV version of the table
 function generateCSV() {
-    // Add title and other information
-    var additionalInfo = 'Book Borrowing and Returning Transactions\n';
-    additionalInfo += 'Student Name: <?php echo $studentName; ?>\n';
-    additionalInfo += 'Student ID: <?php echo $realStudentID; ?>\n';
-
-    // Initialize CSV content with the additional information
-    var csvContent = additionalInfo + 'Date Borrowed,Date Returned,ISBN,Title,Author\n';
+    var csvContent = 'Date Borrowed,Date Returned,ISBN,Title,Author\n';
 
     // Iterate over table rows
     var tableRows = document.querySelectorAll('#example1 tbody tr');
@@ -239,12 +232,14 @@ function getTableHtml() {
     // Return the innerHTML of the container
     return container.innerHTML;
 }
+
 function printAllPages() {
+    var originalContent = document.body.innerHTML; // Save original content
+
     if (<?php echo $totalPages; ?> === 1 && <?php echo count($selectedStudents); ?> === 1) {
         // If there's only one page and one student, print the current page instead of all pages
         printCurrentPage();
     } else {
-        var allPagesContent = '';
         for (var i = 1; i <= <?php echo $totalPages; ?>; i++) {
             var currentURL = window.location.href;
             var cleanURL = currentURL.replace(/&?page=[^&]*/g, '');
@@ -253,19 +248,31 @@ function printAllPages() {
             xmlhttp.open("GET", cleanURL + '&page=' + i, false); // Synchronous request
             xmlhttp.send();
 
-            allPagesContent += "<div class='page'>" + getPrintableContent(xmlhttp.responseText) + "</div>";
+            // Create a temporary div element to hold the fetched content
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = xmlhttp.responseText;
+
+            // Find the table element within the fetched content
+            var tableElement = tempDiv.querySelector('.box-body table');
+
+            // Create a temporary page content with header and table content
+            var pageContent = '<div><h3>Book Borrowing and Returning Transactions</h3>';
+            pageContent += '<p>Student Name: <?php echo ($studentName); ?><br> Student ID: <?php echo $realStudentID; ?></p></div>';
+            pageContent += '<div class="box-body">' + (tableElement ? tableElement.outerHTML : '') + '</div>';
+
+            // Replace current page content with the temporary page content
+            document.body.innerHTML = pageContent;
+
+            // Print the content
+            window.print();
         }
 
-        // Instead of opening a new window and printing, we can use the same window to print all pages
-        document.body.innerHTML = allPagesContent;
-
-        // Print each page's content on a separate sheet
-        window.print();
-
-        // After printing, reload the page to restore its original content
-        window.location.reload();
+        // Restore original content after printing
+        document.body.innerHTML = originalContent;
     }
 }
+
+
 
 
 

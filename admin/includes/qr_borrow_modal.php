@@ -21,38 +21,11 @@
                 <h4 class="modal-title"><b>Scan QR Code to get Student ID</b></h4>
                 <div class="modal-body">
             <div class= "iframe-container">
-            <iframe src="http://192.168.0.128" width="480" height="320" frameborder="0" scrolling="no"></iframe>
+            <iframe src="http://192.168.0.106" width="480" height="320" frameborder="0" scrolling="no"></iframe>
          </div>
             </div>
      
-<?php
 
-// Check if the payload data is sent using the POST method
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Check if the payload parameter is set in the POST data
-    if (isset($_POST["postData"])) {
-        // Retrieve the payload data
-        $qrData = $_POST["postData"];
-        $sql = "INSERT INTO data (qrData) VALUES ('$qrData')";
-		if($conn->query($sql)){
-			$_SESSION['success'] = 'Category added successfully';
-      echo "Payload received successfully: " . $qrData;
-		}
-		else{
-			$_SESSION['error'] = $conn->error;
-
-        // Process the payload data as needed
-        // For example, you can store it in a database or perform other actions
-
-        // Print a response to acknowledge that the payload was received
-        echo "Payload received successfully: " . $qrData;
-    }
-} else {
-    // If the request method is not POST, print an error message
-    echo "Error: Only POST requests are allowed";
-}
-}
-?>
                 <form class="form-horizontal" method="POST" action="borrow_add.php">
                     <div class="form-group">
                         <label for="student" class="col-sm-3 control-label">Student ID</label>

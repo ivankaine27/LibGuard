@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jsPDF Download Button</title>
+  <!-- Include jsPDF library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <h1>Generate PDF and Download</h1>
+
+  <input type="button" value="Create PDF" onclick="generatePDF()">Download PDF</input>
+
+  <script>
+    // Function to generate and download PDF
+    function generatePDF() {
+        const {jsPDF} = window.jspdf;
+      // Create new jsPDF instance
+      const doc = new jsPDF();
+
+      // Add content to PDF
+      doc.text("Hello, this is a sample PDF generated using jsPDF!", 10, 10);
+
+      // Save the PDF
+      doc.save("sample.pdf");
+    };
+  </script>
+
+</body>
+</html>

@@ -8,9 +8,6 @@
                 <h4 class="modal-title"><b>Select Date Range</b></h4>
             </div>
             <form class="form-horizontal" id="dateRangeForm" action="process_form.php" method="post">
-            <div class= "iframe-container">
-            <iframe src="http://192.168.0.128" width="480" height="320" frameborder="0" scrolling="no"></iframe>
-            </div>
                 <div class="modal-body">
                     <?php
                         $sql = "SELECT DISTINCT YEAR(publish_date) AS publish_year FROM books ORDER BY publish_year ASC;";
@@ -73,17 +70,3 @@
         });
     });
 </script>
-
-<style>
-        /* Center the iframe horizontally */
-        .iframe-container {
-            display: flex;
-            justify-content: center;
-        }
-
-        /* Optional: Adjust the size of the iframe */
-        iframe {
-            width: 480px;
-            height: 320px;
-        }
-    </style>

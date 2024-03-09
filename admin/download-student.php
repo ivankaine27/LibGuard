@@ -176,7 +176,7 @@ document.getElementById('downloadAllButton').addEventListener('click', function(
 });
 
 document.getElementById('downloadCSVButton').addEventListener('click', function(event) {
-    event.preventDefault();
+    // event.preventDefault();
     generateCSV(); // Generate and download CSV
 });
 
@@ -192,7 +192,13 @@ function printCurrentPage() {
 
 // Function to generate CSV version of the table
 function generateCSV() {
-    var csvContent = 'Date Borrowed,Date Returned,ISBN,Title,Author\n';
+    // Add title and other information
+    var additionalInfo = 'Book Borrowing and Returning Transactions\n';
+    additionalInfo += 'Student Name: <?php echo $studentName; ?>\n';
+    additionalInfo += 'Student ID: <?php echo $realStudentID; ?>\n';
+
+    // Initialize CSV content with the additional information
+    var csvContent = additionalInfo + 'Date Borrowed,Date Returned,ISBN,Title,Author\n';
 
     // Iterate over table rows
     var tableRows = document.querySelectorAll('#example1 tbody tr');

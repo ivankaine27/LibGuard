@@ -67,8 +67,13 @@
                             <div class="box">
                                 <div class="box-header with-border">
                                     <!-- Display student name and ID -->
+                                    <div class="image-container row" hidden>
+                                        <div class="col-md-12">
+                                            <img src="../images/libguard-logo.png" style="width: 30%; margin-left: 25rem ; margin-bottom: -12%; margin-top: -10%;">
+                                        </div>
+                                    </div>
                                     <h3 class="box-title"><strong>Book Borrowing and Returning Transactions</strong></h3>
-                                    <h5>Student Name: <?php echo ($studentName); ?> <br> Student ID:  <?php echo $realStudentID; ?> </h5>
+                                    <h5 class="student-info">Student Name: <?php echo ($studentName); ?> <br> Student ID:  <?php echo $realStudentID; ?> </h5>
                                     <!-- Add Download Button -->
                                     <div class="box-tools pull-right">
                                         <a href="#" id="downloadButton" class="btn btn-primary btn-sm">
@@ -192,7 +197,7 @@ function printCurrentPage() {
 // Function to generate CSV version of the table
 function generateCSV() {
     var csvContent = 'Date Borrowed,Date Returned,ISBN,Title,Author\n';
-
+    
     // Iterate over table rows
     var tableRows = document.querySelectorAll('#example1 tbody tr');
     tableRows.forEach(function(row) {
@@ -213,9 +218,13 @@ function generateCSV() {
 }
 
 function getPrintableContent() {
-    var printableContent = '<div><h3>Book Borrowing and Returning Transactions</h3>';
+
+    var image = $('.image-container').html();
+
+    var printableContent = '<div>'+ image +'<hr style="border: 1rem solid #800000;"><h3>Book Borrowing and Returning Transactions</h3>';
     printableContent += '<p>Student Name: <?php echo ($studentName); ?><br> Student ID: <?php echo $realStudentID; ?></p></div>';
     printableContent += getTableHtml();
+    printableContent += '<hr style="border: 1rem solid #800000; margin-top: 90%; !important">';
     return printableContent;
 }
 function getTableHtml() {
@@ -254,14 +263,16 @@ function printAllPages() {
 
             // Find the table element within the fetched content
             var tableElement = tempDiv.querySelector('.box-body table');
+            var studentInfo = tempDiv.querySelector('.student-info');
+            var image = tempDiv.querySelector('.image-container');
 
             // Create a temporary page content with header and table content
-            var pageContent = '<div><h3>Book Borrowing and Returning Transactions</h3>';
-            pageContent += '<p>Student Name: <?php echo ($studentName); ?><br> Student ID: <?php echo $realStudentID; ?></p></div>';
-            pageContent += '<div class="box-body">' + (tableElement ? tableElement.outerHTML : '') + '</div>';
+            var pageContent = '<div>'+ image.innerHTML +'<hr style="border: 1rem solid #800000;"><h3>Book Borrowing and Returning Transactions</h3>';
+            pageContent += studentInfo.innerHTML;
+            pageContent += '<div class="box-body">' + (tableElement ? tableElement.outerHTML : '<tbody><tr><td colspan="5" class="text-center fw-bold">No Data Available</td></tr></tbody>') + '</div>';
 
             // Replace current page content with the temporary page content
-            document.body.innerHTML = pageContent;
+            document.body.innerHTML = pageContent + '<hr style="border: 1rem solid #800000; margin-top: 90%; !important">';
 
             // Print the content
             window.print();
@@ -271,9 +282,6 @@ function printAllPages() {
         document.body.innerHTML = originalContent;
     }
 }
-
-
-
 
 
 </script>

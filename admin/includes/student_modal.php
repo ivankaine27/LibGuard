@@ -3,8 +3,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
+            <a href="#scanqr" data-toggle="modal" class="btn btn-primary pull-right btn-sm btn-flat"><i class="fa fa-camera"></i>  Scan QR Code</a>
+              
               <h4 class="modal-title"><b>Add New Student</b></h4>
             </div>
             <div class="modal-body">
@@ -13,14 +13,14 @@
                     <label for="firstname" class="col-sm-3 control-label">Firstname</label>
 
                     <div class="col-sm-9">
-                      <input type="text" class="form-control" id="firstname" name="firstname" required>
+                      <input type="text" class="form-control" id="add_firstname" name="firstname" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="lastname" class="col-sm-3 control-label">Lastname</label>
 
                     <div class="col-sm-9">
-                      <input type="text" class="form-control" id="lastname" name="lastname" required>
+                      <input type="text" class="form-control" id="add_lastname" name="lastname" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -33,18 +33,8 @@
                     <label for="course" class="col-sm-3 control-label">Course</label>
 
                     <div class="col-sm-9">
-                      <select class="form-control" id="course" name="course" required>
-                        <option value="" selected>- Select -</option>
-                        <?php
-                          $sql = "SELECT * FROM course";
-                          $query = $conn->query($sql);
-                          while($row = $query->fetch_array()){
-                            echo "
-                              <option value='".$row['id']."'>".$row['code']."</option>
-                            ";
-                          }
-                        ?>
-                      </select>
+                    <input type="text" class="form-control" id="course" name="course" required>
+
                     </div>
                 </div>
                 <div class="form-group">
@@ -62,7 +52,56 @@
             </div>
         </div>
     </div>
+    <?php include 'includes/qr_modal.php'; ?>
 </div>
+<script>
+$(document).ready(function() {
+    function fetchStudentData() {
+        $.ajax({
+            url: 'includes/fetch_latest_qr_all.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log(response); // Check response
+                if (response) {
+                    var idNumber = response.idNumber;
+                    var firstName = capitalizeEachWord(response.FirstName);
+                    var lastName = capitalizeEachWord(response.LastName);
+                    var course = response.Course;
+
+                    console.log(response.FirstName); // Check first name
+                    console.log(response.LastName);
+                    console.log(response.idNumber);
+                    console.log(response.Course); // Check last name
+                    // Update form fields with fetched data
+
+                    $('#student_id').val(response.idNumber);
+                    $('#course').val(response.Course);
+                    $('#add_firstname').val(firstName);
+                    $('#add_lastname').val(lastName);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching student data:', error);
+            }
+        });
+    }
+
+    // Function to capitalize the first letter of each word in a string
+    function capitalizeEachWord(string) {
+        return string.toLowerCase().replace(/\b\w/g, function(firstLetter) {
+            return firstLetter.toUpperCase();
+        });
+    }
+
+    // When the "scanqr" modal is hidden
+    $('#scanqr').on('hidden.bs.modal', function() {
+        // Fetch first name, last name, student ID, and course
+        fetchStudentData();
+    });
+});
+</script>
+
 
 <!-- Edit -->
 <div class="modal fade" id="edit">
@@ -139,15 +178,15 @@
                     <input type="hidden" class="studid" name="id">
                     <div class="text-center">
                         <p>REMOVE STUDENT</p>
-                        <h1 class="del_stu bold"></h1>
+                        <h1 id="del_stu" class="bold"></h1>
                     </div>
                     <h4><b>Pending book returns:</b></h4>
                     <ul class="pending-returns"></ul>
-                </form>
-            </div>
+               </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i> No</button>
               <button type="submit" class="btn btn-danger btn-flat" name="delete"><i class="fa fa-trash"></i> Yes</button>
+              </form>
             </div>
         </div>
     </div>

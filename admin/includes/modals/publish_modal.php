@@ -5,10 +5,11 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title"><b>Select Date Range</b></h4>
+                <h4 class="modal-title"><b>Select Filters</b></h4>
             </div>
             <form class="form-horizontal" id="dateRangeForm" action="process_form.php" method="post">
                 <div class="modal-body">
+                <h5 class="modal-title"><b>Select Book Publish Years</b></h5>
                     <?php
                         $sql = "SELECT DISTINCT YEAR(publish_date) AS publish_year FROM books ORDER BY publish_year ASC;";
                         $query = $conn->query($sql);
@@ -21,6 +22,8 @@
                             ";
                         }
                     ?>  
+                    <br>
+                    <h5 class="modal-title"><b>Select Date Range</b></h5> <br>
                     <div class="form-group">
                         <label for="startDate" class="col-sm-3 control-label">Start Date</label>
                         <div class="col-sm-9">

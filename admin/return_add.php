@@ -39,8 +39,8 @@ if(isset($_POST['add'])){
 					$bookDetails .= "ISBN: " . $row['isbn'] . "<br>";
 					// Fetch due date from the borrow table
 					$dueDate = $row['due_date']; // Assuming due_date is the correct column name
-					$bookDetails .= "Due Date: " . $dueDate . "<br><br>"; // Include due date in the email body
-					$bookDetails .= "Borrowing Date: " . date('Y-m-d') . "<br><br>";
+					$bookDetails .= "Due Date: " . $dueDate ."<br>"; // Include due date in the email body
+					$bookDetails .= "Borrowing Date: " . date('Y-m-d') . "<br>";
 				
 					// Calculate the penalty here
 $returned_date = date('Y-m-d');
@@ -81,8 +81,7 @@ $penaltyTotal += $penalty; // Accumulate penalty total
             $mail->Body    = 'Dear ' . $student_name . ',<br><br>' .
             'We are pleased to inform you that you have successfully returned the book you have borrowed using LibGuard, our advanced library management system.<br><br>' .
             'Book Details:<br>' .
-            $bookDetails . '<br>' . 
-            'Due Date: ' . $dueDate . '<br><br>' . 
+            $bookDetails . 
             'Returned Date: ' . $returned_date . '<br><br>' . 
             'Penalties: PHP ' . number_format($penaltyTotal, 2) . '<br><br>' .  // Include the total penalty in the email body
             'Thank you for using LibGuard for your library needs.<br><br>' . 

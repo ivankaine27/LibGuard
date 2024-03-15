@@ -1,45 +1,79 @@
-<div class= "iframe-container">
-            <iframe src="http://192.168.0.131" width="480" height="320" frameborder="0" scrolling="no"></iframe>
-         </div>
-
-
 <?php
-   include 'includes/session.php';
-// Check if the payload data is sent using the POST method
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Check if the payload parameter is set in the POST data
-    if (isset($_POST["postData"])) {
-        // Retrieve the payload data
-        $qrData = $_POST["postData"];
-        $sql = "INSERT INTO data (qrData) VALUES ('$qrData')";
-		if($conn->query($sql)){
-			$_SESSION['success'] = 'Category added successfully';
-		}
-		else{
-			$_SESSION['error'] = $conn->error;
+// Include the database connection file
+include 'includes/conn.php';
 
-        // Process the payload data as needed
-        // For example, you can store it in a database or perform other actions
+// Check if any data was received
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $postData = file_get_contents('php://input');
+    echo "Raw POST data: " . $postData . "<br>";
 
-        // Print a response to acknowledge that the payload was received
-        echo "Payload received successfully: " . $qrData;
+    // Parse the URL-encoded data
+    parse_str($postData, $parsedData);
+
+    // Check if the 'resultQR' parameter exists in the parsed data
+    if (isset($parsedData['resultQR'])) {
+        // Retrieve the value of 'resultQR' parameter
+        $resultQR = $parsedData['resultQR'];
+        echo "Received QR data: " . $resultQR . "<br>";
+
+        // Extract ID number from the received data
+        preg_match('/IDNo: (\d+)/', $resultQR, $matches);
+        $idNumber = isset($matches[1]) ? $matches[1] : '';
+
+        if (!empty($idNumber)) {
+            // Escape the data to prevent SQL injection
+            $escapedIdNumber = mysqli_real_escape_string($conn, $idNumber);
+
+            // Insert the ID number into the database table 'data' and column 'qrData'
+            $query = "INSERT INTO data (qrData) VALUES ('$escapedIdNumber')";
+            $insertResult = mysqli_query($conn, $query);
+
+            // Check if the insertion was successful
+            if ($insertResult) {
+                // Echo success message
+                echo "ID number inserted successfully: " . $idNumber . "<br>";
+
+                // Send the QR data to the student form and close the modal
+                echo "<script>
+                        var qrData = '" . $idNumber . "';
+                        // Send QR data to the student form
+                        $('#student').val(qrData);
+                        // Close the scanqr modal
+                        $('#scanqr').modal('hide');
+                      </script>";
+            } else {
+                echo "Error: Unable to insert ID number into the database.<br>";
+            }
+        } else {
+            echo "Error: Unable to extract ID number from the received data.<br>";
+        }
+    } else {
+        // If 'resultQR' parameter is not found
+        echo "Error: 'resultQR' parameter is missing in the POST request.<br>";
     }
-} else {
-    // If the request method is not POST, print an error message
-    echo "Error: Only POST requests are allowed";
 }
-}
-?>
-<style>
-        /* Center the iframe horizontally */
-        .iframe-container {
-            display: flex;
-            justify-content: center;
-        }
 
-        /* Optional: Adjust the size of the iframe */
-        iframe {
-            width: 480px;
-            height: 320px;
+// Function to fetch data from the database
+function fetchData() {
+    global $conn;
+    $selectQuery = "SELECT qrData FROM data";
+    $selectResult = mysqli_query($conn, $selectQuery);
+
+    // Check if data was fetched successfully
+    if ($selectResult && mysqli_num_rows($selectResult) > 0) {
+        // Display the retrieved data in an HTML table
+        echo "<table id='qrDataTable' border='1'>";
+        echo "<tr><th>#</th><th>Inserted ID number</th></tr>";
+        $counter = 1; // Initialize counter
+        while ($row = mysqli_fetch_assoc($selectResult)) {
+            echo "<tr><td>" . $counter++ . "</td><td>" . $row['qrData'] . "</td></tr>";
         }
-</style>
+        echo "</table>";
+    } else {
+        echo "Error: No data found in the database.<br>";
+    }
+}
+
+// Call the fetch function
+fetchData();
+?>

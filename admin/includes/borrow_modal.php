@@ -16,8 +16,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span></button>
+            <a href="#scanqr" data-toggle="modal" class="btn btn-primary pull-right btn-sm btn-flat"><i class="fa fa-camera"></i>  Scan QR Code</a>
                 <h4 class="modal-title"><b>Borrow Books</b></h4>
             </div>
             <div class="modal-body">
@@ -25,6 +24,7 @@
                     <div class="form-group">
                         <label for="student" class="col-sm-3 control-label">Student ID</label>
                         <div class="col-sm-9">
+                            <!-- Input field for student ID -->
                             <input type="text" class="form-control" id="student" name="student" required>
                         </div>
                     </div>
@@ -49,17 +49,43 @@
             </div>
         </div>
     </div>
+    <?php include 'includes/qr_modal.php'; ?>
 </div>
+
 <!-- Add SweetAlert JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 <script>
     $(document).ready(function() {
+           // Function to fetch the latest QR data
+    function fetchLatestidNumber() {
+        $.ajax({
+            url: 'includes/fetch_latest_qr.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.idNumber !== null) {
+                    // Update the student ID input field with the latest QR data
+                    $('#student').val(response.idNumber);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching latest ID Number:', error);
+            }
+        });
+    }
+
+// When the "scanqr" modal is hidden
+$('#scanqr').on('hidden.bs.modal', function() {
+    // Fetch the latest QR data
+    fetchLatestidNumber();
+});
+
         $('#confirmButton').on('click', function() {
             var studentNumber = $('#student').val();
             var isbnArray = []; // Array to store ISBNs
 
             // Loop through all ISBN input fields and collect their values
-            $('#addnew input[name="isbn[]"]').each(function() {
+            $('input[name="isbn[]"]').each(function() {
                 isbnArray.push($(this).val());
             });
 
@@ -100,9 +126,72 @@
                 }
             });
         });
+
     });
 </script>
-
-
 </body>
 </html>
+
+<?php
+// Include the database connection file
+include 'conn.php';
+// Check if any data was received
+// Check if any data was received
+// Check if any data was received
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the raw POST data
+    $postData = $_POST['resultQR'];
+    echo "Raw POST data: " . $postData . "<br>";
+
+    // Decode the query string
+    $decodedData = urldecode($postData);
+
+    // Extract data from the decoded string
+    preg_match('/IDNo:\s*(\d+)/', $decodedData, $idMatches);
+    preg_match('/Full Name:\s*([^\n]+)/', $decodedData, $fullNameMatches);
+    preg_match('/Program:\s*([^\n]+)/', $decodedData, $courseMatches);
+
+    // Check if all necessary information is available
+    if (count($idMatches) > 1 && count($fullNameMatches) > 1 && count($courseMatches) > 1) {
+        $idNumber = trim($idMatches[1]);
+        $fullName = trim($fullNameMatches[1]);
+        $course = trim($courseMatches[1]);
+
+        // Remove middle initial
+        $fullName = preg_replace('/\b[A-Z]\.?(\s|$)/', '', $fullName);
+        // Split full name into first name and last name
+        $names = explode(" ", $fullName);
+        $firstName = '';
+        $lastName = '';
+
+        // Extract last name
+        $lastName = array_pop($names);
+
+        // Whatever remains is considered as first name
+        $firstName = implode(" ", $names);
+
+        // Escape the data to prevent SQL injection
+        $escapedIdNumber = mysqli_real_escape_string($conn, $idNumber);
+        $escapedFirstName = mysqli_real_escape_string($conn, $firstName);
+        $escapedLastName = mysqli_real_escape_string($conn, $lastName);
+        $escapedCourse = mysqli_real_escape_string($conn, $course);
+
+        // Insert the extracted information into the database table 'data'
+        $query = "INSERT INTO data (idNumber, FirstName, LastName, Course) VALUES ('$escapedIdNumber', '$escapedFirstName', '$escapedLastName', '$escapedCourse')";
+        $insertResult = mysqli_query($conn, $query);
+
+        if ($insertResult) {
+            echo "Data inserted successfully into the database.";
+        } else {
+            echo "Error inserting data into the database: " . mysqli_error($conn);
+        }
+    } else {
+        echo "Error: Couldn't extract necessary information from the POST data.";
+    }
+} else {
+    // If 'resultQR' parameter is not found
+    echo "Error: 'resultQR' parameter is missing in the POST request.<br>";
+}
+
+
+?>

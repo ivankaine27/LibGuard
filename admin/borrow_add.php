@@ -35,7 +35,7 @@ if (isset($_POST['add'])) {
                     $brow = $query->fetch_assoc();
                     $bookDetails .= "Title: " . $brow['title'] . "<br>";
                     $bookDetails .= "ISBN: " . $brow['isbn'] . "<br>";
-                    $bookDetails .= "Borrowing Date: " . date('Y-m-d') . "<br><br>";
+                    $bookDetails .= "Borrowing Date: " . date('Y-m-d') . "<br>";
                 } else {
                     // Provide more specific error message if book is not available
                     $_SESSION['error'][] = 'Book with ISBN - ' . $isbn . ' is already borrowed or not available';
@@ -50,12 +50,28 @@ if (isset($_POST['add'])) {
         // Send email to the student
         $mail = new PHPMailer(true);
         try {
-            // Configure PHPMailer
-            // (SMTP configuration and other settings)
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'ivanbulaun2727@gmail.com';
+            $mail->Password   = 'dmye wbxl behj vkuw';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port       = 587;
 
-            // Send email
-
-            // Set success message
+            $mail->setFrom('ivanbulaun2727@gmail.com', 'LibGuard System');
+            $mail->addAddress($student_email);
+            $mail->isHTML(true);
+            $mail->Subject = 'Book Borrowed Successfully';
+            $mail->Body    = 'Dear ' . $student_name . ',<br><br>' .
+                             'We are pleased to inform you that you have successfully borrowed a book using LibGuard, our advanced library management system.<br><br>' .
+                             'Book Details:<br>' .
+                             $bookDetails . 
+                             'Due Date: ' . $formattedDueDate . '<br><br>' . 
+                             'Please ensure to return the book on or before the due date to avoid any late fees or penalties.<br><br>' . 
+                             'Thank you for using LibGuard for your library needs.<br><br>' . 
+                             'Best regards,<br>' . 
+                             'LibGuard System Team';
+            $mail->send();
             $_SESSION['success'] = 'Message has been sent';
         } catch (Exception $e) {
             // Provide detailed error message if email sending fails

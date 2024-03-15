@@ -11,8 +11,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
           	<div class="modal-header">
-            	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              		<span aria-hidden="true">&times;</span></button>
+              <a href="#scanqr" data-toggle="modal" class="btn btn-primary pull-right btn-sm btn-flat"><i class="fa fa-camera"></i>  Scan QR Code</a>
             	<h4 class="modal-title"><b>Return Books</b></h4>
           	</div>
           	<div class="modal-body">
@@ -46,9 +45,34 @@
           	</div>
         </div>
     </div>
+    <?php include 'includes/qr_modal.php'; ?>
 </div>
 <script>
     $(document).ready(function() {
+
+                // Function to fetch the latest QR data
+    function fetchLatestidNumber() {
+        $.ajax({
+            url: 'includes/fetch_latest_qr.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.idNumber !== null) {
+                    // Update the student ID input field with the latest QR data
+                    $('#student').val(response.idNumber);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching latest ID Number:', error);
+            }
+        });
+    }
+
+// When the "scanqr" modal is hidden
+$('#scanqr').on('hidden.bs.modal', function() {
+    // Fetch the latest QR data
+    fetchLatestidNumber();
+});
         $('#confirmButton').on('click', function() {
             var studentNumber = $('#student').val();
             var isbnArray = []; // Array to store ISBNs

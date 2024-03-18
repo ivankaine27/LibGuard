@@ -40,10 +40,14 @@
                 <?php
                     if ($_GET['pending_book_returns'] != 0) {
                 ?>
-                    <div class="row">
+                    <div class="row pending-book-returns">
                         <div class="col-xs-12">
                             <div class="box">
-                                <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="chartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></div>
+                                    </div>
+                                </div>
                                 <?php
                                     // Fetch data for pie chart
                                     $publishQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
@@ -151,11 +155,15 @@
                 <?php
                     if ($_GET['books_borrowed_and_returned'] != 0) {
                 ?>
-                    <div class="row">
+                    <div class="row books-borrowed-and-returned">
                         <div class="col-xs-12">
                             <div class="box">
                                 <div class="box-body">
-                                    <div id="returnedChartContainer" style="height: 300px; width: 100%;"></div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="returnedChartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></div>
+                                        </div>
+                                    </div>
                                     <?php
                                         $selected_publish = isset($_GET['selected_publish']) ? $_GET['selected_publish'] : null;
                                         $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
@@ -269,14 +277,18 @@
                 <?php
                     if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
                 ?>
-                    <div class="row">
+                    <div class="row contrast-books-returned-and-pending-returns">
                         <div class="col-xs-12">
                             <div class="box">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">Contrast Returned and Pending Returns Data</h3>
                                 </div>
                                 <div class="box-body">
-                                    <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="borrowReturnChartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -288,14 +300,18 @@
                 <?php
                     if ($_GET['all_transaction_history'] != 0) {
                 ?>
-                    <div class="row">
+                    <div class="row all-transaction-history">
                         <div class="col-xs-12">
                             <div class="box">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">All Book Transactions by Publish Year</h3>
                                 </div>
                                 <div class="box-body">
-                                    <canvas id="bookTransactionsChart" style="height:350px"></canvas>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <canvas id="bookTransactionsChart" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -307,7 +323,7 @@
                 <?php
                     if ($_GET['rankings_per_total_transaction'] != 0) {
                 ?>
-                    <div class="row">
+                    <div class="row ranking-per-total-transaction">
                         <div class="col-xs-12">
                             <div class="box">
                                 <div class="box-header with-border">
@@ -402,22 +418,92 @@
                 $('#downloadButton').click(function (e) {
                     e.preventDefault();
                     console.log("Download button clicked"); // Debug statement
+                    var contentWrapper = document.querySelector(".content-wrapper");
 
-                    // Capture HTML content to be converted to PDF
-                    html2canvas(document.querySelector(".content-wrapper")).then(canvas => {
-                        var {
-                            jsPDF
-                        } = window.jspdf;
-                        var pdf = new jsPDF('p', 'mm', 'a4', 'landscape');
+                    var classesToCheck = [".pending-book-returns", ".books-borrowed-and-returned", ".contrast-books-returned-and-pending-returns", ".all-transaction-history", ".ranking-per-total-transaction"];
 
-                        // Stretching the image vertically by adjusting height
-                        var imgWidth = 150; // Width of the image
-                        var imgHeight = 298; // Increasing the height by 50%
+                    var { jsPDF } = window.jspdf;
+                    var pdf = new jsPDF('p', 'mm', 'a4', 'portrait');
 
-                        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-                        pdf.save('book_transactions.pdf');
+                    var headerHtml = `
+                        <div class="image-container row">
+                            <div class="col-md-12">
+                                <img src="../images/libguard-logo.png" style="width: 100%; margin-left: auto; margin-right: auto;">
+                            </div>
+                        </div>
+                        <hr style="border: 1px solid #800000; margin-top: 10px;">
+                    `;
+
+                    var footerHtml = `
+                        <hr style="border: 1px solid #800000; margin-top: 10px;">
+                    `;
+
+                    function addHeaderFooterToPdf(pageIndex, totalPages) {
+                        var contentHeight = pdf.internal.pageSize.height - 20;
+                        var headerHeight = 50;
+                        var footerHeight = 30;
+
+                        pdf.setPage(pageIndex);
+                        pdf.html(headerHtml, {
+                            x: 10,
+                            y: 10,
+                            width: pdf.internal.pageSize.width - 20,
+                            html2canvas: {
+                                scale: 10
+                            }
+                        });
+
+                        pdf.setPage(pageIndex);
+                        pdf.html(footerHtml, {
+                            x: 10,
+                            y: pdf.internal.pageSize.height - footerHeight,
+                            width: pdf.internal.pageSize.width - 20,
+                            html2canvas: {
+                                scale: 10
+                            }
+                        });
+                    }
+
+                    function addElementToPdf(element, isFirstElement) {
+                        return new Promise((resolve, reject) => {
+                            html2canvas(element).then(canvas => {
+                                if (!isFirstElement) {
+                                    pdf.addPage();
+                                }
+
+                                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.width, pdf.internal.pageSize.height);
+
+                                resolve();
+                            }).catch(error => reject(error));
+                        });
+                    }
+
+                    var promises = [];
+                    var isFirstElement = true;
+
+                    classesToCheck.forEach(function(currClass) {
+                        var elements = contentWrapper.querySelectorAll(currClass);
+                        elements.forEach(function(element) {
+                            if (element.offsetWidth > 0 || element.offsetHeight > 0) {
+                                promises.push(addElementToPdf(element, isFirstElement));
+                                isFirstElement = false;
+                            }
+                        });
                     });
+
+                    Promise.all(promises)
+                        .then(() => {
+                            for (var i = 1; i <= pdf.internal.getNumberOfPages(); i++) {
+                                addHeaderFooterToPdf(i, pdf.internal.getNumberOfPages());
+                            }
+
+                            pdf.save('book_transactions.pdf');
+                        })
+                        .catch(error => {
+                            console.error("Error generating PDF:", error);
+                        });
                 });
+
             });
         </script>
 
@@ -448,6 +534,7 @@
                 }
                 ?>
                 var barChart = new CanvasJS.Chart("barChartContainer", {
+                    responsive: true,
                     animationEnabled: true,
                     title: {
                         text: "Total Borrowers by Publish Year"
@@ -509,12 +596,12 @@
 
 
                     var chart = new CanvasJS.Chart("chartContainer", {
+                        responsive: true,
                         animationEnabled: true,
                         title: {
                             text: "Pending Book Returns by Year Published of Books"
                         },
                         legend: {
-                            maxWidth: 350,
                             itemWidth: 120
                         },
                         data: [{
@@ -558,13 +645,13 @@
                     ?>
 
                     var returnedChart = new CanvasJS.Chart("returnedChartContainer", {
+                        responsive: true,
                         animationEnabled: true,
                         title: {
                             text: "Book Borrowed and Returned by Year Published of Books"
                         },
                         legend: {
-                            maxWidth: 350,
-                            itemWidth: 120
+                            itemWidth: 200
                         },
                         data: [{
                             type: "pie",
@@ -598,12 +685,12 @@
                     ];
 
                     var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
+                        responsive: true,
                         animationEnabled: true,
                         title: {
                             text: "Pending Book Returns vs Book Borrowed and Returned"
                         },
                         legend: {
-                            maxWidth: 350,
                             itemWidth: 120
                         },
                         data: [{

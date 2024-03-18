@@ -1,3 +1,4 @@
+
 <?php include 'includes/session.php'; ?>
 <?php include 'includes/header.php'; ?>
 <?php
@@ -7,7 +8,7 @@
     // Adjust the offset for the second page
 
     // Define the number of records per page
-    $recordsPerPage = 10;
+    $recordsPerPage = 100;
 
     // Calculate the total number of pages needed (equal to the number of selected students)
     $totalPages = count($selectedStudents);
@@ -37,20 +38,14 @@
     $studentName = $studentData['firstname'] . ' ' . $studentData['lastname'];
     $realStudentID = $studentData['real_student_id'];
 
-    // Prepare the SQL query to fetch transaction history for the student on the current page
-    $transactionSql = "SELECT borrow.*, books.isbn, books.title, books.author, returns.date_return
-                       FROM borrow 
-                       LEFT JOIN books ON books.id = borrow.book_id 
-                       LEFT JOIN returns ON borrow.student_id = returns.student_id
-                       WHERE borrow.student_id = ?
-                       ORDER BY borrow.date_borrow DESC
-                       LIMIT $recordsPerPage OFFSET $offset";
+    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
+            FROM borrow b
+            LEFT JOIN returns r ON b.book_id = r.book_id
+            LEFT JOIN books ON books.id = b.book_id
+            WHERE b.student_id = '$studentIdForPage'
+            ORDER BY b.date_borrow DESC
+            LIMIT $recordsPerPage OFFSET $offset";
 
-    // Prepare and execute the statement to fetch transaction data
-    $stmt = $conn->prepare($transactionSql);
-    $stmt->bind_param("i", $studentIdForPage);
-    $stmt->execute();
-    $result = $stmt->get_result();
 ?>
 
 <?php include 'includes/header.php'; ?>
@@ -89,7 +84,8 @@
                                     <!-- End Download Button -->
                                 </div>
                                 <div class="box-body">
-                                    <table class="table table-bordered table-striped" id="example1">
+                                 <div class="table-responsive">
+                                    <table class="table table-bordered table-striped" id="customer_data">
                                         <thead>
                                             <th class="hidden"></th>
                                             <th><strong>Date Borrowed</strong></th>
@@ -99,21 +95,41 @@
                                             <th><strong>Author</strong></th>
                                         </thead>
                                         <tbody>
-                                            <?php
-                                                // Fetch and display transaction data
-                                                while($row = $result->fetch_assoc()){
-                                                    echo "
-                                                        <tr>
-                                                            <td class='hidden'></td>
-                                                            <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
-                                                            <td>".($row['date_return'] ? date('M d, Y', strtotime($row['date_return'])) : "")."</td>
-                                                            <td>".$row['isbn']."</td>
-                                                            <td>".$row['title']."</td>
-                                                            <td>".$row['author']."</td>
-                                                        </tr>
-                                                    ";
-                                                }
-                                            ?>
+                                        <?php
+// Assuming you have already established a database connection and $result holds the query result.
+
+$data = array();
+$query = $conn->query($sql);
+while($row = $query->fetch_assoc()) {
+    // Add transaction data to the $data array for JSON encoding
+    $transaction = array(
+        'date_borrow' => date('M d, Y', strtotime($row['date_borrow'])),
+        'date_return' => $row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet",
+        'isbn' => $row['isbn'],
+        'title' => $row['title'],
+        'author' => $row['author']
+    );
+    $data[] = $transaction;
+    
+    // Echo HTML table row for each transaction
+    echo "
+        <tr>
+            <td class='hidden'></td>
+            <td>".$transaction['date_borrow']."</td>
+            <td>".$transaction['date_return']."</td>
+            <td>".$transaction['isbn']."</td>
+            <td>".$transaction['title']."</td>
+            <td>".$transaction['author']."</td>
+        </tr>
+    ";
+}
+
+// Encode $data array as JSON
+$json_data = json_encode($data);
+
+// Now you can use $json_data for any other purpose, such as sending it via AJAX
+
+?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -160,6 +176,17 @@
         </ul>
     </div>
 </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
 <!-- End Pagination Links -->
 
                 </section>
@@ -168,7 +195,8 @@
         <?php include 'includes/footer.php'; ?>
     </div>
     <?php include 'includes/scripts.php'; ?>
-    <script>
+
+<script>
 document.getElementById('downloadButton').addEventListener('click', function(event) {
     event.preventDefault();
     printCurrentPage(); // Print the current page content
@@ -199,7 +227,7 @@ function generateCSV() {
     var csvContent = 'Date Borrowed,Date Returned,ISBN,Title,Author\n';
     
     // Iterate over table rows
-    var tableRows = document.querySelectorAll('#example1 tbody tr');
+    var tableRows = document.querySelectorAll('#customer_data tbody tr');
     tableRows.forEach(function(row) {
         var columns = row.querySelectorAll('td');
         csvContent += columns[1].textContent + ','; // Date Borrowed
@@ -230,7 +258,7 @@ function getPrintableContent() {
 function getTableHtml() {
     // Create a div element and append the table content to it
     var container = document.createElement('div');
-    container.innerHTML = document.getElementById('example1').outerHTML;
+    container.innerHTML = document.getElementById('customer_data').outerHTML;
 
     // Remove pagination links if they exist
     var paginationLinks = container.querySelectorAll('.pagination');
@@ -285,6 +313,118 @@ function printAllPages() {
 
 
 </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<script type="text/javascript" language="javascript">
+$(document).ready(function () {
+    // Base64 encoded image data
+    <?php
+    // Path to your image file
+    $imagePath = '../images/libguard-logo-header2.png';
+
+    // Read image data
+    $imageData = file_get_contents($imagePath);
+
+    // Encode image data to base64
+    $imgData = base64_encode($imageData);
+    $type = pathinfo($imagePath, PATHINFO_EXTENSION);
+    $src = 'data:image/' . $type . ';base64,' . $imgData;
+    ?>
+
+    var image = '<?php echo $src; ?>';
+
+    $('#customer_data').dataTable({
+        dom: 'lBfrtip',
+        buttons: [
+            {
+    extend: 'excelHtml5',
+    customize: function (xlsx) {
+        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+
+        // Add the title, student name, and student ID to the Excel document
+        var title = 'Book Borrowing and Returning Transactions';
+        var studentName = 'Student Name: <?php echo $studentName; ?>';
+        var studentID = 'Student ID: <?php echo $realStudentID; ?>';
+        
+        // Add title, student name, and student ID to separate rows
+        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr><tr><td colspan="5">' + studentName + '</td></tr><tr><td colspan="5">' + studentID + '</td></tr></table>';
+        
+        // Add an empty row for better formatting
+        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
+    },
+    filename: 'Student Transaction History' // Set the filename for download
+},
+
+            {
+                extend: 'csvHtml5',
+                customize: function (csv) {
+                    // Add the title and student information to the CSV content
+                    var csvContent = 'Book Borrowing and Returning Transactions\n';
+                    csvContent += 'Student Name: <?php echo $studentName; ?>\n';
+                    csvContent += 'Student ID: <?php echo $realStudentID; ?>\n\n';
+
+                    // Append the existing CSV content
+                    csvContent += csv;
+
+                    return csvContent;
+                },
+                filename: 'Student Transaction History' // Set the filename for download
+            },
+            {
+                extend: 'pdfHtml5',
+                customize: function (doc) {
+                    // Remove the title
+                    doc.content.splice(0, 1);
+
+                    // Add the image to the PDF document
+                    doc.content.unshift({
+                        margin: [0, 0, 0, 12],
+                        alignment: 'center',
+                        image: image
+                    });
+
+                    // Add the title and student information
+                    doc.content.splice(1, 0, {
+                        text: [
+                            { text: 'Book Borrowing and Returning Transactions\n', fontSize: 14, bold: true },
+                            { text: 'Student Name: <?php echo $studentName; ?>\n', fontSize: 10 },
+                            { text: 'Student ID: <?php echo $realStudentID; ?>\n\n', fontSize: 10 }
+                        ],
+                        alignment: 'left',
+                        margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                    });
+                },
+                filename: 'Student Transaction History' // Set the filename for download
+            },
+            {
+                extend: 'copy',
+                exportOptions: {
+                    format: {
+                        body: function (data, row, column, node) {
+                            return data;
+                        }
+                    }
+                }
+            },
+            'print'
+        ],
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+    });
+});
+</script>
+
 <style>
     .page {
         page-break-after: always;

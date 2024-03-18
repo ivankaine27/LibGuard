@@ -9,7 +9,7 @@
 
 <div class="login-box">
   	<div class="login-logo">
-  		<b>LibGuard System</b>
+  		<b>LibGuard</b>
   	</div>
   
   	<div class="login-box-body">

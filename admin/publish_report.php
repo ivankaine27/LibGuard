@@ -98,7 +98,7 @@
                                     // Fetch data for the specific year for pending book returns
                                     $yearQuery = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
                                                 FROM borrow b
-                                                LEFT JOIN returns r ON borrow.book_id = r.book_id
+                                                LEFT JOIN returns r ON b.book_id = r.book_id
                                                 LEFT JOIN students ON students.id = b.student_id
                                                 LEFT JOIN books ON books.id = b.book_id
                                                 WHERE YEAR(books.publish_date) = $year AND (b.status = 0 OR r.date_return IS NULL)";

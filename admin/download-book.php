@@ -155,11 +155,12 @@
         $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
         $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
         // Prepare the SQL query with the date filter
-        $sql_returned = "SELECT *, students.student_id AS stud, borrow.status AS barstat
-                         FROM borrow
-                         LEFT JOIN students ON students.id = borrow.student_id
-                         LEFT JOIN books ON books.id = borrow.book_id
-                         WHERE borrow.status = 1";
+        $sql_returned = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
+        FROM borrow b
+        LEFT JOIN returns r ON b.book_id = r.book_id
+        LEFT JOIN books ON books.id = b.book_id
+                         WHERE borrow.status = 1
+                         ORDER BY b.date_borrow DESC";
     
         if ($startDate && $endDate) {
             $sql_returned .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
@@ -194,10 +195,10 @@
         $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
     
         // Prepare the SQL query with the date filter
-        $sql_not_returned = "SELECT *, students.student_id AS stud, borrow.status AS barstat
-                             FROM borrow
-                             LEFT JOIN students ON students.id = borrow.student_id
-                             LEFT JOIN books ON books.id = borrow.book_id
+        $sql_not_returned = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
+        FROM borrow b
+        LEFT JOIN returns r ON b.book_id = r.book_id
+        LEFT JOIN books ON books.id = b.book_id
                              WHERE borrow.status = 0";
     
         if ($startDate && $endDate) {
@@ -242,7 +243,14 @@
             echo "<table class='table table-bordered'>";
             echo "<thead><tr><th>Date</th><th>Student ID</th><th>Name</th><th>ISBN</th><th>Title</th><th>Status</th></tr></thead>";
             echo "<tbody>";
-            $sql_books = "SELECT *, students.student_id AS stud, borrow.status AS barstat FROM borrow LEFT JOIN students ON students.id=borrow.student_id LEFT JOIN books ON books.id=borrow.book_id WHERE DATE(date_borrow) = '$date' ORDER BY date_borrow DESC";
+
+            $sql_books = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
+            FROM borrow b
+            LEFT JOIN returns r ON b.book_id = r.book_id
+            LEFT JOIN books ON books.id = b.book_id
+            WHERE DATE(date_borrow) = '$date' 
+            ORDER BY date_borrow DESC";
+
             $query_books = $conn->query($sql_books);
             while($book_row = $query_books->fetch_assoc()) {
                 $status_label = $book_row['barstat'] ? "<span class='label label-success'>Returned</span>" : "<span class='label label-danger'>Not Returned</span>";

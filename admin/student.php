@@ -134,9 +134,9 @@ function getRowAndPendingReturns(id){
     dataType: 'json',
     success: function(response){
       $('.studid').val(response.studid);
-      $('#edit_firstname').val(response.firstname);
-      $('#edit_lastname').val(response.lastname);
-      $('#edit_student_id').val(response.student_id);
+      $('#firstname').val(response.firstname);
+      $('#lastname').val(response.lastname);
+      $('#student_id').val(response.student_id);
       $('#selcourse').val(response.course_id);
       $('#selcourse').html(response.code);
       $('#del_stu').html(response.firstname+' '+response.lastname);

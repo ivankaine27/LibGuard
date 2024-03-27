@@ -48,6 +48,12 @@
 
 ?>
 
+
+
+
+
+
+
 <?php include 'includes/header.php'; ?>
 <body class="hold-transition skin-maroon-gold sidebar-mini">
     <div class="wrapper">

@@ -62,13 +62,13 @@
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><b>Deleting...</b></h4>
+              <h4 class="modal-title"><b>Are you sure to delete this Category?</b></h4>
             </div>
             <div class="modal-body">
               <form class="form-horizontal" method="POST" action="category_delete.php">
                 <input type="hidden" class="catid" name="id">
                 <div class="text-center">
-                    <p>DELETE BOOK</p>
+                    <p>DELETE CATEGORY</p>
                     <h2 id="del_cat" class="bold"></h2>
                 </div>
             </div>

@@ -15,7 +15,7 @@
             <!-- Main content -->
             <section class="content">
                 <div class="row">
-                    <div class="col-sm-10 col-sm-offset-1">
+                    <div class="col-sm-12 col-sm-offset-0">
                         <?php
                             if(isset($_SESSION['error'])){
                                 echo "
@@ -52,7 +52,7 @@
                                         ?>
                                     </select>
                                 </div>
-                                <table class="table table-bordered table-striped" id="example1">
+                                <table class="table table-bordered table-striped" id="booklist">
                                     <thead>
                                         <th>ISBN</th>
                                         <th>Title</th>

@@ -32,16 +32,31 @@
                 <?php
                     unset($_SESSION['success']);
                 } ?>
-  <div class="box-header with-border">
-                                <button id="downloadButton" class="btn btn-primary btn-sm btn-flat"> Download</button>
-                            </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <div class="box">
-                          
+
+
                             <div class="box-body">
-                                <div id="chartContainer" style="height: 300px; width: 100%;"></div>
-                                <?php
+                                 <div class="table-responsive">
+                                    <table class="table table-bordered table-striped" id="customer_data">
+                                        <thead>
+
+                                        </thead>
+                                        <tbody>
+    <tr>
+        <td colspan="2">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+        <?php
                                 // Fetch data for pie chart
                                 $publishQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
                                                 FROM borrow
@@ -143,15 +158,24 @@
                                     </div>
                             </div>
                                 </div>
-
-                                
-                                <div class="row">
-                                    <div class="col-xs-12">
-                                        <div class="box">
-                                            <div class="box-body">
-                                            <div id="returnedChartContainer" style="height: 300px; width: 100%;"></div>
-                              
-                                <?php
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div id="returnedChartContainer" style="height: 300px; width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+        <?php
                                 // Fetch data for book borrowed and returned
                                 $returnedQuery = "SELECT DISTINCT b.id, b.*, books.isbn, books.title, books.author, YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
                                                              FROM borrow b
@@ -271,47 +295,42 @@
                         </div>
                     </div>
                 </div>
-
-         <div class="row">
-        <div class="col-xs-12">
-            <div class="box">
-            <div class="box-header with-border">
-                 <h3 class="box-title">Contrast Returned and Pending Returns Data</h3>
-            </div>
-                <div class="box-body">
-
-                    <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
-                 </div>
-                </div>
-            </div>
-        </div>
-               
-    
-
-                <div class="row">
-                    <div class="col-xs-12">
-                        <div class="box">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">All Book Transactions by Publish Year</h3>
-                            </div>
-                            <div class="box-body">
-                                <canvas id="bookTransactionsChart" style="height:350px"></canvas>
-                             
-                            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
                         </div>
                     </div>
                 </div>
-
-               
-                <div class="row">
-                    <div class="col-xs-12">
-                        <div class="box">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Rankings of Book Publish Years by Total Transactions</h3>
-                            </div>
-                            <div class="box-body">
-                                <ul class="list-group">
-                                <?php
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <canvas id="bookTransactionsChart" style="height:350px"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <ul class="list-group">
+                            <?php
                                     // Fetch data for all borrowers grouped by publish year
                                     $borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers
                                                         FROM borrow
@@ -372,13 +391,48 @@
                                     }
                                     ?>
 
-                                </ul>
-                            </div>
+                            </ul>
                         </div>
                     </div>
                 </div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>
+</div>
+
+                          
             </section>
         </div>
+        
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#customer_data').DataTable({
+            dom: 'lBfrtip',
+            buttons: [
+                'pdf', 'excel', 'csv', 'print', 'copy'
+            ],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        });
+    });
+</script>
+
         <?php include 'includes/footer.php'; ?>
         <?php include 'includes/borrow_modal.php'; ?>
         <?php include 'includes/scripts.php'; ?>
@@ -643,6 +697,7 @@ var returnedChartData = [];
                 });
             });
         </script>
+        
 </body>
 
 </html>

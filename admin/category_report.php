@@ -273,6 +273,7 @@
             <div class="box-body">
               <div class="row">
                 <div class="col-md-12">
+                  //! FIX ME
                   <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
                 </div>
               </div>
@@ -759,6 +760,7 @@ $(function(){
 </script>
 
 <script>
+  //! FIX ME
   window.onload = function () {
     // Pie chart for borrow and return transactions
     var borrowReturnData = [

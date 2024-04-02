@@ -159,7 +159,7 @@
         FROM borrow b
         LEFT JOIN returns r ON b.book_id = r.book_id
         LEFT JOIN books ON books.id = b.book_id
-                         WHERE borrow.status = 1
+                         WHERE b.status = 1
                          ORDER BY b.date_borrow DESC";
     
         if ($startDate && $endDate) {
@@ -170,17 +170,25 @@
     
         // Execute the SQL query
         $query_returned = $conn->query($sql_returned);
-    
-        // Fetch and display the results
-        while ($row = $query_returned->fetch_assoc()) {
+
+        if ($query_returned != false) {
+            // Fetch and display the results
+            while ($row = $query_returned->fetch_assoc()) {
+                echo "
+                    <tr>
+                        <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
+                        <td>" . $row['stud'] . "</td>
+                        <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
+                        <td>" . $row['isbn'] . "</td>
+                        <td>" . $row['title'] . "</td>
+                        <td><span class='label label-success'>Returned</span></td>
+                    </tr>
+                ";
+            }
+        } else {
             echo "
                 <tr>
-                    <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
-                    <td>" . $row['stud'] . "</td>
-                    <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
-                    <td>" . $row['isbn'] . "</td>
-                    <td>" . $row['title'] . "</td>
-                    <td><span class='label label-success'>Returned</span></td>
+                    <td colspan='6' class='text-center'>No Data Available</td>
                 </tr>
             ";
         }
@@ -195,11 +203,21 @@
         $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
     
         // Prepare the SQL query with the date filter
-        $sql_not_returned = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
-        FROM borrow b
-        LEFT JOIN returns r ON b.book_id = r.book_id
-        LEFT JOIN books ON books.id = b.book_id
-                             WHERE borrow.status = 0";
+        $sql_not_returned = "SELECT
+            DISTINCT b.id,
+            b.*,
+            r.date_return AS return_date,
+            books.isbn,
+            books.title,
+            books.author,
+            students.*
+        FROM
+            borrow b
+            LEFT JOIN returns r ON b.book_id = r.book_id
+            LEFT JOIN books ON books.id = b.book_id
+            LEFT JOIN students ON b.student_id = students.id
+        WHERE
+            b.status = 0";
     
         if ($startDate && $endDate) {
             $sql_not_returned .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
@@ -210,20 +228,29 @@
         // Execute the SQL query
         $query_not_returned = $conn->query($sql_not_returned);
     
-        // Fetch and display the results
-        while ($row = $query_not_returned->fetch_assoc()) {
+        if ($query_not_returned != false) {
+            // Fetch and display the results
+            while ($row = $query_not_returned->fetch_assoc()) {
+                echo "
+                    <tr>
+                        <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
+                        <td>" . $row['student_id'] . "</td>
+                        <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
+                        <td>" . $row['isbn'] . "</td>
+                        <td>" . $row['title'] . "</td>
+                        <td><span class='label label-danger'>Not Returned</span></td>
+                    </tr>
+                ";
+            }
+        } else {
             echo "
                 <tr>
-                    <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
-                    <td>" . $row['stud'] . "</td>
-                    <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
-                    <td>" . $row['isbn'] . "</td>
-                    <td>" . $row['title'] . "</td>
-                    <td><span class='label label-danger'>Not Returned</span></td>
+                    <td colspan='6' class='text-center'>No Data Available</td>
                 </tr>
             ";
         }
     }
+
     function includeBookReports() {
         include 'includes/conn.php';
         $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
@@ -244,19 +271,30 @@
             echo "<thead><tr><th>Date</th><th>Student ID</th><th>Name</th><th>ISBN</th><th>Title</th><th>Status</th></tr></thead>";
             echo "<tbody>";
 
-            $sql_books = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
-            FROM borrow b
-            LEFT JOIN returns r ON b.book_id = r.book_id
-            LEFT JOIN books ON books.id = b.book_id
-            WHERE DATE(date_borrow) = '$date' 
-            ORDER BY date_borrow DESC";
+            $sql_books = "SELECT
+                DISTINCT b.id,
+                b.*,
+                r.date_return AS return_date,
+                books.isbn,
+                books.title,
+                books.author,
+                students.*
+            FROM
+                borrow b
+                LEFT JOIN returns r ON b.book_id = r.book_id
+                LEFT JOIN books ON books.id = b.book_id
+                LEFT JOIN students ON b.student_id = students.id
+            WHERE
+                DATE(date_borrow) = '$date'
+            ORDER BY
+                date_borrow DESC";
 
             $query_books = $conn->query($sql_books);
             while($book_row = $query_books->fetch_assoc()) {
-                $status_label = $book_row['barstat'] ? "<span class='label label-success'>Returned</span>" : "<span class='label label-danger'>Not Returned</span>";
+                $status_label = $book_row['status'] ? "<span class='label label-success'>Returned</span>" : "<span class='label label-danger'>Not Returned</span>";
                 echo "<tr>";
                 echo "<td>".date('M d, Y', strtotime($book_row['date_borrow']))."</td>";
-                echo "<td>".$book_row['stud']."</td>";
+                echo "<td>".$book_row['student_id']."</td>";
                 echo "<td>".$book_row['firstname'].' '.$book_row['lastname']."</td>";
                 echo "<td>".$book_row['isbn']."</td>";
                 echo "<td>".$book_row['title']."</td>";

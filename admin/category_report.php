@@ -80,60 +80,60 @@
                   <th>Status</th>
                 </thead>
                 <tbody>
-                <?php
-                    $selected_category = isset($_GET['selected_category']) ? $_GET['selected_category'] : null;
-                    $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
-                    $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
-                    $sql = "SELECT
-                              DISTINCT b.id,
-                              b.*,
-                              r.date_return AS return_date,
-                              students.student_id AS stud,
-                              students.firstname,
-                              students.lastname,
-                              books.isbn,
-                              books.title,
-                              books.author
-                          FROM
-                              borrow b
-                              LEFT JOIN returns r ON b.book_id = r.book_id
-                              LEFT JOIN students ON students.id = b.student_id
-                              LEFT JOIN books ON books.id = b.book_id
-                              LEFT JOIN course ON students.course_id = course.id
-                              LEFT JOIN category on books.category_id = category.id";
+                  <?php
+                      $selected_category = isset($_GET['selected_category']) ? $_GET['selected_category'] : null;
+                      $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
+                      $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
+                      $sql = "SELECT
+                                DISTINCT b.id,
+                                b.*,
+                                r.date_return AS return_date,
+                                students.student_id AS stud,
+                                students.firstname,
+                                students.lastname,
+                                books.isbn,
+                                books.title,
+                                books.author
+                            FROM
+                                borrow b
+                                LEFT JOIN returns r ON b.book_id = r.book_id
+                                LEFT JOIN students ON students.id = b.student_id
+                                LEFT JOIN books ON books.id = b.book_id
+                                LEFT JOIN course ON students.course_id = course.id
+                                LEFT JOIN category on books.category_id = category.id";
 
 
-                    if ($selected_category !== null) {
-                        // Include the course filter when it's provided
-                        $categoryIds = explode(',', $selected_category);
-                        $categoryIds = array_map('intval', $categoryIds);  // Convert string values to integers
-                        $categoryIdsString = implode(',', $categoryIds);
+                      if ($selected_category !== null) {
+                          // Include the course filter when it's provided
+                          $categoryIds = explode(',', $selected_category);
+                          $categoryIds = array_map('intval', $categoryIds);  // Convert string values to integers
+                          $categoryIdsString = implode(',', $categoryIds);
 
-                        $sql .= " WHERE category.id IN ($categoryIdsString)";
-                    }
-                    if ($startDate && $endDate) {
-                      $sql .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
-                    }
+                          $sql .= " WHERE category.id IN ($categoryIdsString)";
+                      }
+                      if ($startDate && $endDate) {
+                        $sql .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
+                      }
 
-                    $sql .= " ORDER BY b.date_borrow DESC";
+                      $sql .= " ORDER BY b.date_borrow DESC";
 
-                    $query = $conn->query($sql);
+                      $query = $conn->query($sql);
 
-                    while ($row = $query->fetch_assoc()) {
-                        $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
-                        echo "
-                            <tr>
-                                <td class='hidden'></td>
-                                <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
-                                <td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>
-                                <td>" . $row['stud'] . "</td>
-                                <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
-                                <td>" . $row['isbn'] . "</td>
-                                <td>" . $row['title'] . "</td>
-                                <td>" . $status . "</td>
-                            </tr>
-                        ";
-                    }
+                      while ($row = $query->fetch_assoc()) {
+                          $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
+                          echo "
+                              <tr>
+                                  <td class='hidden'></td>
+                                  <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
+                                  <td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>
+                                  <td>" . $row['stud'] . "</td>
+                                  <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
+                                  <td>" . $row['isbn'] . "</td>
+                                  <td>" . $row['title'] . "</td>
+                                  <td>" . $status . "</td>
+                              </tr>
+                          ";
+                      }
                     ?>
                 </tbody>
               </table>

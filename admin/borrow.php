@@ -80,25 +80,29 @@
                         // Include the department filter when it's provided
                         $sql .= " WHERE b.department = '$department'";
                     }
-                    
                     $sql .= " ORDER BY b.date_borrow DESC";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
-                      $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
-                      echo "
-                        <tr>
-                          <td class='hidden'></td>
-                          <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
-                          <td>".($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet")."</td>
-                          <td>".$row['stud']."</td>
-                          <td>".$row['firstname'].' '.$row['lastname']."</td>
-                          <td>".$row['isbn']."</td>
-                          <td>".$row['title']."</td>
-                          <td>".$status."</td>
-                        </tr>
-                      ";
+                        $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
+                        $returnDate = $row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet";
+                        // Check if the status is 0 (not returned) and adjust the return date accordingly
+                        if (!$row['status']) {
+                            $returnDate = "Not Returned Yet";
+                        }
+                        echo "
+                            <tr>
+                                <td class='hidden'></td>
+                                <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
+                                <td>".$returnDate."</td>
+                                <td>".$row['stud']."</td>
+                                <td>".$row['firstname'].' '.$row['lastname']."</td>
+                                <td>".$row['isbn']."</td>
+                                <td>".$row['title']."</td>
+                                <td>".$status."</td>
+                            </tr>
+                        ";
                     }
-                  ?>
+?>                    
                 </tbody>
               </table>
             </div>

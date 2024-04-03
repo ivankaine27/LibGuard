@@ -77,14 +77,21 @@
                                     <h5 class="student-info">Student Name: <?php echo ($studentName); ?> <br> Student ID:  <?php echo $realStudentID; ?> </h5>
                                     <!-- Add Download Button -->
                                     <div class="box-tools pull-right">
+                                        <button class="btn btn-primary btn-sm" id="excel-btn">
+                                            <i class="fa fa-download"></i> Excel
+                                        </button>
+                                        <button class="btn btn-primary btn-sm" id="csv-btn">
+                                            <i class="fa fa-download"></i> CSV
+                                        </button>
+                                        <button class="btn btn-primary btn-sm" id="pdf-btn">
+                                            <i class="fa fa-download"></i> PDF
+                                        </button>
                                         <a href="#" id="downloadButton" class="btn btn-primary btn-sm">
-                                            <i class="fa fa-download"></i> Download
+                                            <i class="fa fa-download"></i> Print
                                         </a>
                                         <a href="#" id="downloadAllButton" class="btn btn-primary btn-sm">
                                             <i class="fa fa-download"></i> Download All
                                         </a>
-                                        <a href="#" id="downloadCSVButton" class="btn btn-primary btn-sm">
-                                            <i class="fa fa-download"></i> Download CSV
                                         </a>
                                     </div>
                                     <!-- End Download Button -->
@@ -334,101 +341,118 @@ function printAllPages() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
 
 <script type="text/javascript" language="javascript">
-$(document).ready(function () {
-    // Base64 encoded image data
-    <?php
-    // Path to your image file
-    $imagePath = '../images/libguard-logo-header2.png';
+    $(document).ready(function () {
+        // Base64 encoded image data
+        <?php
+        // Path to your image file
+        $imagePath = '../images/libguard-logo-header2.png';
 
-    // Read image data
-    $imageData = file_get_contents($imagePath);
+        // Read image data
+        $imageData = file_get_contents($imagePath);
 
-    // Encode image data to base64
-    $imgData = base64_encode($imageData);
-    $type = pathinfo($imagePath, PATHINFO_EXTENSION);
-    $src = 'data:image/' . $type . ';base64,' . $imgData;
-    ?>
+        // Encode image data to base64
+        $imgData = base64_encode($imageData);
+        $type = pathinfo($imagePath, PATHINFO_EXTENSION);
+        $src = 'data:image/' . $type . ';base64,' . $imgData;
+        ?>
 
-    var image = '<?php echo $src; ?>';
+        var image = '<?php echo $src; ?>';
+        var table;
 
-    $('#customer_data').dataTable({
-        dom: 'lBfrtip',
-        buttons: [
-            {
-    extend: 'excelHtml5',
-    customize: function (xlsx) {
-        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+        table = $('#customer_data').DataTable({
+            dom: 'lBfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    class: 'buttons-excel',
+                    init: function (api, node, config) {
+                        $(node).hide()
+                    },
+                    customize: function (xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-        // Add the title, student name, and student ID to the Excel document
-        var title = 'Book Borrowing and Returning Transactions';
-        var studentName = 'Student Name: <?php echo $studentName; ?>';
-        var studentID = 'Student ID: <?php echo $realStudentID; ?>';
-        
-        // Add title, student name, and student ID to separate rows
-        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr><tr><td colspan="5">' + studentName + '</td></tr><tr><td colspan="5">' + studentID + '</td></tr></table>';
-        
-        // Add an empty row for better formatting
-        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
-    },
-    filename: 'Student Transaction History' // Set the filename for download
-},
-
-            {
-                extend: 'csvHtml5',
-                customize: function (csv) {
-                    // Add the title and student information to the CSV content
-                    var csvContent = 'Book Borrowing and Returning Transactions\n';
-                    csvContent += 'Student Name: <?php echo $studentName; ?>\n';
-                    csvContent += 'Student ID: <?php echo $realStudentID; ?>\n\n';
-
-                    // Append the existing CSV content
-                    csvContent += csv;
-
-                    return csvContent;
+                        // Add the title, student name, and student ID to the Excel document
+                        var title = 'Book Borrowing and Returning Transactions';
+                        var studentName = 'Student Name: <?php echo $studentName; ?>';
+                        var studentID = 'Student ID: <?php echo $realStudentID; ?>';
+                        
+                        // Add title, student name, and student ID to separate rows
+                        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr><tr><td colspan="5">' + studentName + '</td></tr><tr><td colspan="5">' + studentID + '</td></tr></table>';
+                        
+                        // Add an empty row for better formatting
+                        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
+                    },
+                    filename: 'Student Transaction History' // Set the filename for download
                 },
-                filename: 'Student Transaction History' // Set the filename for download
-            },
-            {
-                extend: 'pdfHtml5',
-                customize: function (doc) {
-                    // Remove the title
-                    doc.content.splice(0, 1);
 
-                    // Add the image to the PDF document
-                    doc.content.unshift({
-                        margin: [0, 0, 0, 12],
-                        alignment: 'center',
-                        image: image
-                    });
+                {
+                    extend: 'csvHtml5',
+                    class: 'buttons-csv',
+                    init: function (api, node, config) {
+                        $(node).hide()
+                    },
+                    customize: function (csv) {
+                        // Add the title and student information to the CSV content
+                        var csvContent = 'Book Borrowing and Returning Transactions\n';
+                        csvContent += 'Student Name: <?php echo $studentName; ?>\n';
+                        csvContent += 'Student ID: <?php echo $realStudentID; ?>\n\n';
 
-                    // Add the title and student information
-                    doc.content.splice(1, 0, {
-                        text: [
-                            { text: 'Book Borrowing and Returning Transactions\n', fontSize: 14, bold: true },
-                            { text: 'Student Name: <?php echo $studentName; ?>\n', fontSize: 10 },
-                            { text: 'Student ID: <?php echo $realStudentID; ?>\n\n', fontSize: 10 }
-                        ],
-                        alignment: 'left',
-                        margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                    });
+                        // Append the existing CSV content
+                        csvContent += csv;
+
+                        return csvContent;
+                    },
+                    filename: 'Student Transaction History' // Set the filename for download
                 },
-                filename: 'Student Transaction History' // Set the filename for download
-            },
-            {
-                extend: 'copy',
-                exportOptions: {
-                    format: {
-                        body: function (data, row, column, node) {
-                            return data;
-                        }
-                    }
-                }
-            },
-            'print'
-        ],
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                {
+                    extend: 'pdfHtml5',
+                    class: 'buttons-pdf',
+                    init: function (api, node, config) {
+                        $(node).hide()
+                    },
+                    customize: function (doc) {
+                        // Remove the title
+                        doc.content.splice(0, 1);
+
+                        // Add the image to the PDF document
+                        doc.content.unshift({
+                            margin: [0, 0, 0, 12],
+                            alignment: 'center',
+                            image: image
+                        });
+
+                        // Add the title and student information
+                        doc.content.splice(1, 0, {
+                            text: [
+                                { text: 'Book Borrowing and Returning Transactions\n', fontSize: 14, bold: true },
+                                { text: 'Student Name: <?php echo $studentName; ?>\n', fontSize: 10 },
+                                { text: 'Student ID: <?php echo $realStudentID; ?>\n\n', fontSize: 10 }
+                            ],
+                            alignment: 'left',
+                            margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                        });
+                    },
+                    filename: 'Student Transaction History' // Set the filename for download
+                },
+            ],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        });
+
+        // Trigger Excel export
+        $('#excel-btn').click(function() {
+            table.buttons('.buttons-excel').trigger();
+        });
+
+        // Trigger CSV export
+        $('#csv-btn').click(function() {
+            table.buttons('.buttons-csv').trigger();
+        });
+
+        // Trigger PDF export
+        $('#pdf-btn').click(function() {
+            table.buttons('.buttons-pdf').trigger();
+        });
     });
-});
 </script>
 
 <style>

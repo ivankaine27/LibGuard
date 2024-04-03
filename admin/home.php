@@ -278,3 +278,11 @@ $(function(){
 </script>
 </body>
 </html>
+<style>
+  .box {
+    border-radius: 10px; /* Adjust the value as needed */
+}
+  .small-box {
+    border-radius: 10px; /* Adjust the value as needed */
+}
+</style>

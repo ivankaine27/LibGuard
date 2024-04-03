@@ -136,8 +136,6 @@ $('#scanqr').on('hidden.bs.modal', function() {
 // Include the database connection file
 include 'conn.php';
 // Check if any data was received
-// Check if any data was received
-// Check if any data was received
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the raw POST data
     $postData = $_POST['resultQR'];

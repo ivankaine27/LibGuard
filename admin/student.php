@@ -52,7 +52,7 @@
                 </div>
 
             <div class="box-body">
-            <table id="example1" class="table table-bordered">
+            <table class="table table-bordered" id="example1">
                 <thead>
                   <th>Firstname</th>
                   <th>Lastname</th>

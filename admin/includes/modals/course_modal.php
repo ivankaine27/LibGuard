@@ -34,6 +34,40 @@
                             <input type="text" class="form-control datepicker" id="endDateCourse" name="endDate" required>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input books_borrowed_and_returned" type="checkbox" value="" id="books_borrowed_and_returned" name="books_borrowed_and_returned">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    Books Borrowed and Returned
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input pending_book_returns" type="checkbox" value="" id="pending_book_returns" name="pending_book_returns">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    Pending Book Returns
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input contrast_books_returned_and_pending_returns" type="checkbox" value="" id="contrast_books_returned_and_pending_returns" name="contrast_books_returned_and_pending_returns">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    Contrast Books Returned and Pending Returns
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input all_transaction_history" type="checkbox" value="" id="all_transaction_history" name="all_transaction_history">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    All Transaction History
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input rankings_per_total_transaction" type="checkbox" value="" id="rankings_per_total_transaction" name="rankings_per_total_transaction">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    Rankings per Total Transaction
+                                </label>
+                            </div>
+                        </div>
+                    </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-flat pull-left" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>
@@ -53,12 +87,26 @@
             var selectedCourses = $('.select-checkbox:checked').map(function() {
                 return this.getAttribute('data-id');
             }).get();
+
+            var booksBorrowedAndReturned = $('.books_borrowed_and_returned:checked').length > 0 ? '1' : '0';
+            var pendingBookReturns = $('.pending_book_returns:checked').length > 0 ? '1' : '0';
+            var contrastBooksReturnedAndPendingReturns = $('.contrast_books_returned_and_pending_returns:checked').length > 0 ? '1' : '0';
+            var allTransactionHistory = $('.all_transaction_history:checked').length > 0 ? '1' : '0';
+            var rankingsPerTotalTransaction = $('.rankings_per_total_transaction:checked').length > 0 ? '1' : '0';
+
             var startDate = $('#startDateCourse').val();
             var endDate = $('#endDateCourse').val();
             // Convert the selectedCourses array to a comma-separated string
             var selectedCoursesString = selectedCourses.join(',');
             // Construct the URL with the selected course IDs
-            var url = 'course_report.php?selected_courses=' + selectedCoursesString + '&startDate=' + startDate + '&endDate=' + endDate;
+            var url = 'course_report.php?selected_courses=' + selectedCoursesString + 
+                '&startDate=' + startDate + 
+                '&endDate=' + endDate +
+                '&books_borrowed_and_returned=' + booksBorrowedAndReturned +
+                '&pending_book_returns=' + pendingBookReturns +
+                '&contrast_books_returned_and_pending_returns=' + contrastBooksReturnedAndPendingReturns +
+                '&all_transaction_history=' + allTransactionHistory +
+                '&rankings_per_total_transaction=' + rankingsPerTotalTransaction;
             // Redirect the user to the course_report.php page with the selected course IDs
             window.location.href = url;
 

@@ -69,7 +69,8 @@
             <div class="box-body">
               <div class="row pending-book-returns">
                 <div class="col-md-12">
-                  <canvas id="chartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+                  <canvas id="chartContainer" style="height: 200px; margin-left: auto; margin-right: auto;"></canvas>
+                  <div id="legend-container"></div>
                   <table class="table table-bordered" id="book_data">
                     <thead>
                       <th class="hidden"></th>
@@ -570,7 +571,6 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
-<!-- <script type="text/javascript" src="js/script.js"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
 <script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
@@ -644,110 +644,152 @@ $(function(){
 
 <script type="text/javascript" language="javascript">
     $(document).ready(function () {
-        // Base64 encoded image data
-        <?php
-        // Path to your image file
-        $imagePath = '../images/libguard-logo-header2.png';
-
-        // Read image data
-        $imageData = file_get_contents($imagePath);
-
-        // Encode image data to base64
-        $imgData = base64_encode($imageData);
-        $type = pathinfo($imagePath, PATHINFO_EXTENSION);
-        $src = 'data:image/' . $type . ';base64,' . $imgData;
-        ?>
-
-        var image = '<?php echo $src; ?>';
+        // Function to convert image file to base64 data URL
+        function imageToDataURL(imagePath) {
+            return new Promise(function(resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        var reader = new FileReader();
+                        reader.onload = function() {
+                            resolve(reader.result);
+                        };
+                        reader.readAsDataURL(xhr.response);
+                    } else {
+                        reject(new Error('Failed to load image'));
+                    }
+                };
+                xhr.onerror = function() {
+                    reject(new Error('Network error occurred'));
+                };
+                xhr.open('GET', imagePath);
+                xhr.responseType = 'blob';
+                xhr.send();
+            });
+        }
+        
+        var imagePath = '../images/libguard-logo.png';
+        var bannerWidth = 400; 
+        var bannerHeight = 200;
         var table;
 
-        table = $('#book_data').DataTable({
-            dom: 'lBfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    class: 'buttons-excel',
-                    init: function (api, node, config) {
-                        $(node).hide()
-                    },
-                    customize: function (xlsx) {
-                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+        imageToDataURL(imagePath)
+            .then(function(dataURL) {
+                var image = new Image();
+                image.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+                    canvas.width = bannerWidth;
+                    canvas.height = bannerHeight;
+                    ctx.drawImage(image, 0, 0, bannerWidth, bannerHeight);
+                    var resizedImage = canvas.toDataURL('image/png');
 
-                        // Add the title, student name, and student ID to the Excel document
-                        var title = 'Borrowed Books by Category';
-                        
-                        // Add title, student name, and student ID to separate rows
-                        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
-                        
-                        // Add an empty row for better formatting
-                        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
-                    },
-                    filename: 'Borrowed Books by Category' // Set the filename for download
-                },
+                    // Initialize DataTable
+                    table = $('#book_data').DataTable({
+                        dom: 'lBfrtip',
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                className: 'buttons-excel',
+                                init: function (api, node, config) {
+                                    $(node).hide();
+                                },
+                                customize: function (xlsx) {
+                                    var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-                {
-                    extend: 'csvHtml5',
-                    class: 'buttons-csv',
-                    init: function (api, node, config) {
-                        $(node).hide()
-                    },
-                    customize: function (csv) {
-                        // Add the title and student information to the CSV content
-                        var csvContent = 'Borrowed Books by Category\n';
+                                    // Add the title, student name, and student ID to the Excel document
+                                    var title = 'Borrowed Books by Category';
+                                    
+                                    // Add title, student name, and student ID to separate rows
+                                    sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                    
+                                    // Add an empty row for better formatting
+                                    sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
+                                },
+                                filename: 'Borrowed Books by Category' // Set the filename for download
+                            },
+                            {
+                                extend: 'csvHtml5',
+                                className: 'buttons-csv',
+                                init: function (api, node, config) {
+                                    $(node).hide();
+                                },
+                                customize: function (csv) {
+                                    // Add the title and student information to the CSV content
+                                    var csvContent = 'Borrowed Books by Category\n';
 
-                        // Append the existing CSV content
-                        csvContent += csv;
+                                    // Append the existing CSV content
+                                    csvContent += csv;
 
-                        return csvContent;
-                    },
-                    filename: 'Borrowed Books by Category' // Set the filename for download
-                },
-                {
-                    extend: 'pdfHtml5',
-                    class: 'buttons-pdf',
-                    init: function (api, node, config) {
-                        $(node).hide()
-                    },
-                    customize: function (doc) {
-                        // Remove the title
-                        doc.content.splice(0, 1);
+                                    return csvContent;
+                                },
+                                filename: 'Borrowed Books by Category' // Set the filename for download
+                            },
+                            {
+                                extend: 'pdfHtml5',
+                                className: 'buttons-pdf',
+                                init: function (api, node, config) {
+                                    $(node).hide();
+                                },
+                                customize: function (doc) {
+                                    // Remove the title
+                                    doc.content.splice(0, 1);
 
-                        // Add the image to the PDF document
-                        doc.content.unshift({
-                            margin: [0, 0, 0, 12],
-                            alignment: 'center',
-                            image: image
-                        });
+                                    // Convert Chart.js chart to a base64-encoded PNG image
+                                    var canvas = document.createElement('canvas');
+                                    canvas.width = 300; // Adjust width as needed
+                                    canvas.height = 300; // Adjust height as needed
+                                    var ctx = canvas.getContext('2d');
+                                    ctx.drawImage(document.getElementById('chartContainer'), 0, 0, canvas.width, canvas.height);
+                                    var chartImage = canvas.toDataURL('image/png');
 
-                        // Add the title and student information
-                        doc.content.splice(1, 0, {
-                            text: [
-                                { text: 'Borrowed Books by Category\n', fontSize: 14, bold: true },
-                            ],
-                            alignment: 'left',
-                            margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                        });
-                    },
-                    filename: 'Borrowed Books by Category' // Set the filename for download
-                },
-            ],
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-        });
+                                    doc.content.unshift({
+                                        margin: [0, 0, 0, 12],
+                                        alignment: 'center',
+                                        image: chartImage,
+                                    });
 
-        // Trigger Excel export
-        $('#excel-btn').click(function() {
-            table.buttons('.buttons-excel').trigger();
-        });
+                                    doc.content.unshift({
+                                        margin: [100, 0, 0, -50],
+                                        alignment: 'center',
+                                        image: resizedImage,
+                                    });
 
-        // Trigger CSV export
-        $('#csv-btn').click(function() {
-            table.buttons('.buttons-csv').trigger();
-        });
+                                    // Add the title and student information
+                                    doc.content.splice(1, 0, {
+                                        text: [
+                                            { text: 'Borrowed Books by Category\n', fontSize: 14, bold: true },
+                                        ],
+                                        alignment: 'left',
+                                        margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                    });
+                                },
+                                filename: 'Borrowed Books by Category' // Set the filename for download
+                            }
+                        ],
+                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                    });
 
-        // Trigger PDF export
-        $('#pdf-btn').click(function() {
-            table.buttons('.buttons-pdf').trigger();
-        });
+                    // Trigger Excel export
+                    $('#excel-btn').click(function() {
+                        table.buttons('.buttons-excel').trigger();
+                    });
+
+                    // Trigger CSV export
+                    $('#csv-btn').click(function() {
+                        table.buttons('.buttons-csv').trigger();
+                    });
+
+                    // Trigger PDF export
+                    $('#pdf-btn').click(function() {
+                        table.buttons('.buttons-pdf').trigger();
+                    });
+                };
+                image.src = dataURL;
+            })
+            .catch(function(error) {
+                console.error(error);
+            });
     });
 </script>
 
@@ -796,7 +838,7 @@ $(function(){
             ?>
 
             const pendingBookReturns = <?php echo json_encode($pieChartData); ?>;
-            const pendingBookReturnsPublishYear = pendingBookReturns.map(element => element.name);
+            const pendingBookReturnsPublishYear = pendingBookReturns.map(element => element.name + ' : ' + element.count);
             const pendingBookReturnsCount = pendingBookReturns.map(element => element.count);
             const pendingBookReturnsBackgroundColor = <?php echo json_encode($backgroundColor); ?>;
             const pendingBookReturnsContainer = document.getElementById('chartContainer');
@@ -815,12 +857,16 @@ $(function(){
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'top',
+                            position: 'bottom',
+                            labels: {
+                                fontSize: 1 // Adjust the font size as needed
+                            },
+                            label: pendingBookReturnsPublishYear
                         },
                         title: {
                             display: true,
                             text: 'Borrowed Books by Category'
-                        }
+                        },
                     }
                 },
             });
@@ -834,47 +880,34 @@ $(function(){
     if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
 ?>
     <script type="text/javascript">
+        window.onload = function () {
+            // Pie chart for borrow and return transactions
+            var borrowReturnData = [
+                { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
+                { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
+            ];
 
-        <?php
-            $totalTransactionData = $totalTransactions;
-            $totalTransactionsReturnedData = $totalTransactionsReturned;
-        ?>
-        
-        const pendingBookReturns = <?php echo json_encode($totalTransactions); ?>;
-        const bookBorrowedAndReturn = <?php echo json_encode($totalTransactionsReturned); ?>
-        
-        const pendingBookReturnsAndBookBorrowedAndReturnedContainer = document.getElementById('borrowReturnChartContainer');
-
-        new Chart(pendingBookReturnsAndBookBorrowedAndReturnedContainer, {
-            type: 'pie',
-            data: {
-                labels: 'Pending Book Returns vs Book Borrowed and Returned',
-                datasets: [{
-                    label: [
-                        'Pending Book Returns',
-                        'Book Borrowed and Returned'
-                    ],
-                    data: [
-                        pendingBookReturns,
-                        bookBorrowedAndReturn
-                    ],
-                    backgroundColor: ['blue', 'red'],
+            var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
+                animationEnabled: true,
+                title: {
+                    text: "Pending Book Returns vs Book Borrowed and Returned"
+                },
+                legend: {
+                    maxWidth: 350,
+                    itemWidth: 120
+                },
+                data: [{
+                    type: "pie",
+                    showInLegend: true,
+                    legendText: "{label}: {y}",
+                    startAngle: 0,
+                    yValueFormatString: "##0",
+                    indexLabel: "{label} {y}",
+                    dataPoints: borrowReturnData
                 }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Pending Book Returns vs Book Borrowed and Returned'
-                    }
-                }
-            },
-        });
-
+            });
+            borrowReturnChart.render();
+        }
     </script>
 <?php
     }

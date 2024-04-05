@@ -671,7 +671,7 @@ $(function(){
         // Base64 encoded image data
         <?php
         // Path to your image file
-        $imagePath = '../images/libguard-logo-header2.png';
+        $imagePath = '../images/libguard-logo.png';
 
         // Read image data
         $imageData = file_get_contents($imagePath);

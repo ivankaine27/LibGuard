@@ -565,37 +565,43 @@
         }
     </script>
 
-    <script>
-        //! FIX ME
-        window.onload = function () {
-            // Pie chart for borrow and return transactions
-            var borrowReturnData = [
-                { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
-                { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
-            ];
+    <?php
+        if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+    ?>
+        <script>
+            //! FIX ME
+            window.onload = function () {
+                // Pie chart for borrow and return transactions
+                var borrowReturnData = [
+                    { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
+                    { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
+                ];
 
-            var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
-                animationEnabled: true,
-                title: {
-                    text: "Pending Book Returns vs Book Borrowed and Returned"
-                },
-                legend: {
-                    maxWidth: 350,
-                    itemWidth: 120
-                },
-                data: [{
-                    type: "pie",
-                    showInLegend: true,
-                    legendText: "{label}: {y}",
-                    startAngle: 0,
-                    yValueFormatString: "##0",
-                    indexLabel: "{label} {y}",
-                    dataPoints: borrowReturnData
-                }]
-            });
-            borrowReturnChart.render();
+                var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
+                    animationEnabled: true,
+                    title: {
+                        text: "Pending Book Returns vs Book Borrowed and Returned"
+                    },
+                    legend: {
+                        maxWidth: 350,
+                        itemWidth: 120
+                    },
+                    data: [{
+                        type: "pie",
+                        showInLegend: true,
+                        legendText: "{label}: {y}",
+                        startAngle: 0,
+                        yValueFormatString: "##0",
+                        indexLabel: "{label} {y}",
+                        dataPoints: borrowReturnData
+                    }]
+                });
+                borrowReturnChart.render();
+            }
+        </script>
+    <?php 
         }
-    </script>
+    ?>
 
     <?php
         if ($_GET['pending_book_returns'] != 0) {

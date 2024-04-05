@@ -707,85 +707,43 @@
             }
         ?>
 
-        <?php
-            if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
-        ?>
+    <?php
+        if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+    ?>
+        <script>
             //! FIX ME
-            <script type="text/javascript">
+            window.onload = function () {
+                // Pie chart for borrow and return transactions
+                var borrowReturnData = [
+                    { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
+                    { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
+                ];
 
-                <?php
-                    $totalTransactionData = $totalTransactions;
-                    $totalTransactionsReturnedData = $totalTransactionsReturned;
-                ?>
-                
-                const pendingBookReturns = <?php echo json_encode($totalTransactions); ?>;
-                const bookBorrowedAndReturn = <?php echo json_encode($totalTransactionsReturned); ?>
-               
-                const pendingBookReturnsAndBookBorrowedAndReturnedContainer = document.getElementById('borrowReturnChartContainer');
-
-                new Chart(pendingBookReturnsAndBookBorrowedAndReturnedContainer, {
-                    type: 'pie',
-                    data: {
-                        labels: 'Pending Book Returns vs Book Borrowed and Returned',
-                        datasets: [{
-                            label: [
-                                'Pending Book Returns',
-                                'Book Borrowed and Returned'
-                            ],
-                            data: [
-                                pendingBookReturns,
-                                bookBorrowedAndReturn
-                            ],
-                            backgroundColor: ['blue', 'red'],
-                        }]
+                var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
+                    animationEnabled: true,
+                    title: {
+                        text: "Pending Book Returns vs Book Borrowed and Returned"
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Pending Book Returns vs Book Borrowed and Returned'
-                            }
-                        }
+                    legend: {
+                        maxWidth: 350,
+                        itemWidth: 120
                     },
+                    data: [{
+                        type: "pie",
+                        showInLegend: true,
+                        legendText: "{label}: {y}",
+                        startAngle: 0,
+                        yValueFormatString: "##0",
+                        indexLabel: "{label} {y}",
+                        dataPoints: borrowReturnData
+                    }]
                 });
-
-
-                // window.onload = function () {
-                //     // Pie chart for borrow and return transactions
-                //     var borrowReturnData = [
-                //         { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
-                //         { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
-                //     ];
-
-                //     var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
-                //         responsive: true,
-                //         animationEnabled: true,
-                //         title: {
-                //             text: "Pending Book Returns vs Book Borrowed and Returned"
-                //         },
-                //         legend: {
-                //             itemWidth: 120
-                //         },
-                //         data: [{
-                //             type: "pie",
-                //             showInLegend: true,
-                //             legendText: "{label}: {y}",
-                //             startAngle: 0,
-                //             yValueFormatString: "##0",
-                //             indexLabel: "{label} {y}",
-                //             dataPoints: borrowReturnData
-                //         }]
-                //     });
-                //     borrowReturnChart.render();
-                // }
-            </script>
-        <?php
+                borrowReturnChart.render();
             }
-        ?>
+        </script>
+    <?php 
+        }
+    ?>
 
         <?php
             if ($_GET['all_transaction_history'] != 0) {

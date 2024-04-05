@@ -21,336 +21,369 @@
                     <div class="box-header with-border">
                         <button id="downloadPdf" class="btn btn-primary">Download Report</button>
                     </div>
-                    <div class="returned-books-container">
-                        <div class="box printable-table">
-                            <div class="box-body">
-                                <h4>Returned Books</h4>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Student ID</th>
-                                            <th>Name</th>
-                                            <th>ISBN</th>
-                                            <th>Title</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php includeReturnedBooks(); ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="not-returned-books-container">
-                        <div class="box printable-table">
-                            <div class="box-body">
-                                <h4>Not Returned Books</h4>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Student ID</th>
-                                            <th>Name</th>
-                                            <th>ISBN</th>
-                                            <th>Title</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php includeNotReturnedBooks(); ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Container for Dates -->
-      
-                    <div class="dates-container printable-table">
-                        <?php includeBookReports(); ?>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-12">
+                    <?php
+                        if ($_GET['pending_book_returns'] != 0) {
+                    ?>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box printable-table">
+                                    <div class="box-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <canvas id="chartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                            <?php
+                                                // Fetch data for pie chart
+                                                $publishQuery = "SELECT
+                                                                    YEAR(books.publish_date) AS publish_year,
+                                                                    COUNT(*) AS count,
+                                                                    students.course_id as course_id,
+                                                                    course.*,
+                                                                    borrow.*
+                                                                FROM
+                                                                    borrow
+                                                                    LEFT JOIN books ON borrow.book_id = books.id
+                                                                    LEFT JOIN students ON borrow.student_id = students.id
+                                                                    LEFT JOIN course ON students.course_id = course.id";
+                                                                    
+                                                $selected_category = isset($_GET['selected_category']) ? $_GET['selected_category'] : null;
+                                                $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
+                                                $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
+
+                                                // if ($selected_category !== null) {
+                                                //     $publishCategories = explode(',', $selected_category);
+                                                //     $publishCategories = array_map('intval', $publishCategories);
+                                                //     $publishCategoriesString = implode(',', $publishCategories);
+
+                                                //     $publishQuery .= " WHERE students.course_id IN ($publishCategoriesString)";
+                                                // }
+
+                                                // Add the date range condition
+                                                if ($startDate && $endDate) {
+                                                    $publishQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                                }
+
+                                                $publishQuery .= " AND borrow.status = 0";
+                                                $publishQuery .= " GROUP BY course_id";
+                                                $publishResult = $conn->query($publishQuery);
+
+                                                // Fetch data for each year and create tables for pending book returns
+                                                $totalTransactions = 0;
+                                                while ($publishRow = $publishResult->fetch_assoc()) {
+                                                    $course = $publishRow['date_borrow'];
+                                                    $count = $publishRow['count'];
+                                                    $totalTransactions += $count;
+
+                                                    // Output table for pending book returns for each course
+                                                    echo "<div class='row'>";
+                                                    echo "<div class='col-xs-12'>";
+                                                    echo "<div class='box'>";
+                                                    echo "<div class='box-header with-border'>";
+                                                    echo "<h4><b>Pending Book Returns Data for $course</b></h4>";
+                                                    echo "</div>";
+                                                    echo "<div class='box-body'>";
+                                                    echo "<table class='table table-bordered'>";
+                                                    echo "<thead>";
+                                                    echo "<tr>";
+                                                    echo "<th>Date Borrowed</th>";
+                                                    echo "<th>Date Returned</th>";
+                                                    echo "<th>Student ID</th>";
+                                                    echo "<th>Name</th>";
+                                                    echo "<th>ISBN</th>";
+                                                    echo "<th>Title</th>";
+                                                    echo "<th>Status</th>";
+                                                    echo "</tr>";
+                                                    echo "</thead>";
+                                                    echo "<tbody>";
+
+                                                    // Fetch data for the specific year for pending book returns
+                                                    $yearQuery = "SELECT
+                                                                    DISTINCT b.id,
+                                                                    b.*,
+                                                                    r.date_return AS return_date,
+                                                                    students.student_id AS stud,
+                                                                    students.firstname,
+                                                                    students.lastname,
+                                                                    books.isbn,
+                                                                    books.title,
+                                                                    books.author
+                                                                FROM
+                                                                    borrow b
+                                                                    LEFT JOIN returns r ON b.book_id = r.book_id
+                                                                    LEFT JOIN students ON students.id = b.student_id
+                                                                    LEFT JOIN books ON books.id = b.book_id
+                                                                    LEFT JOIN course ON students.course_id = course.id
+                                                                WHERE
+                                                                    students.course_id = {$publishRow['course_id']}
+                                                                    AND b.status = 0
+                                                                    OR r.date_return IS NULL";
+
+                                                    // Add the date range condition
+                                                    if ($startDate && $endDate) {
+                                                        $yearQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                                    }
+
+                                                    $yearQuery .= " ORDER BY b.date_borrow DESC";
+
+                                                    $yearResult = $conn->query($yearQuery);
+
+                                                    if ($yearResult->num_rows > 0) {
+                                                        while ($row = $yearResult->fetch_assoc()) {
+                                                            $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
+                                                            echo "<tr>";
+                                                            echo "<td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>";
+                                                            echo "<td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>";
+                                                            echo "<td>" . $row['stud'] . "</td>";
+                                                            echo "<td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>";
+                                                            echo "<td>" . $row['isbn'] . "</td>";
+                                                            echo "<td>" . $row['title'] . "</td>";
+                                                            echo "<td>" . $status . "</td>";
+                                                            echo "</tr>";
+                                                        }
+                                                    } else {
+                                                        echo "<tr><td colspan='7'>No Pending Book Returns for Books Published in $course</td></tr>";
+                                                    }
+
+                                                    echo "</tbody>";
+                                                    echo "</table>";
+                                                    echo "</div>";
+                                                    echo "</div>";
+                                                    echo "</div>";
+                                                    echo "</div>";
+                                                }
+                                                ?>
+                                                <div class="box-header with-border">Total Borrow Transactions: <?php echo $totalTransactions; ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="not-returned-books-container pending-book-returns">
                             <div class="box printable-table">
                                 <div class="box-body">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                        <?php
-                                            // Fetch data for pie chart
-                                            $publishQuery = "SELECT
-                                                                YEAR(books.publish_date) AS publish_year,
-                                                                COUNT(*) AS count,
-                                                                students.course_id as course_id,
-                                                                course.*,
-                                                                borrow.*
-                                                            FROM
-                                                                borrow
-                                                                LEFT JOIN books ON borrow.book_id = books.id
-                                                                LEFT JOIN students ON borrow.student_id = students.id
-                                                                LEFT JOIN course ON students.course_id = course.id";
-                                                                
-                                            $selected_category = isset($_GET['selected_category']) ? $_GET['selected_category'] : null;
-                                            $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
-                                            $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
+                                    <h4>Not Returned Books</h4>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Student ID</th>
+                                                <th>Name</th>
+                                                <th>ISBN</th>
+                                                <th>Title</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php includeNotReturnedBooks(); ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    <?php 
+                        }
+                    ?>
 
-                                            // if ($selected_category !== null) {
-                                            //     $publishCategories = explode(',', $selected_category);
-                                            //     $publishCategories = array_map('intval', $publishCategories);
-                                            //     $publishCategoriesString = implode(',', $publishCategories);
+                    <?php
+                        if ($_GET['books_borrowed_and_returned'] != 0) {
+                    ?>
+                        <div class="returned-books-container books-borrowed-and-returned">
+                            <div class="box printable-table">
+                                <div class="box-body">
+                                    <canvas id="returnedChartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+                                    <h4>Returned Books</h4>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Student ID</th>
+                                                <th>Name</th>
+                                                <th>ISBN</th>
+                                                <th>Title</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php includeReturnedBooks(); ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
 
-                                            //     $publishQuery .= " WHERE students.course_id IN ($publishCategoriesString)";
-                                            // }
+                        <!-- Container for Dates -->
+      
+                        <div class="dates-container printable-table">
+                            <?php includeBookReports(); ?>
+                        </div>
+                    <?php 
+                        }
+                    ?>
 
-                                            // Add the date range condition
-                                            if ($startDate && $endDate) {
-                                                $publishQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
-                                            }
+                    <?php
+                        if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+                    ?>
 
-                                            $publishQuery .= " AND borrow.status = 0";
-                                            $publishQuery .= " GROUP BY course_id";
-                                            $publishResult = $conn->query($publishQuery);
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box">
+                                    <div class="box-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                            //! FIX ME
+                                            <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                            <?php
+                                                // Fetch data for book borrowed and returned
+                                                $returnedQuery = "SELECT DISTINCT b.id, b.*, books.isbn, books.title, books.author, YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
+                                                                            FROM borrow b
+                                                                            LEFT JOIN books ON books.id = b.book_id";
 
-                                            // Fetch data for each year and create tables for pending book returns
-                                            $totalTransactions = 0;
-                                            while ($publishRow = $publishResult->fetch_assoc()) {
-                                                $course = $publishRow['date_borrow'];
-                                                $count = $publishRow['count'];
-                                                $totalTransactions += $count;
-
-                                                // Output table for pending book returns for each course
-                                                echo "<div class='row'>";
-                                                echo "<div class='col-xs-12'>";
-                                                echo "<div class='box'>";
-                                                echo "<div class='box-header with-border'>";
-                                                echo "<h4><b>Pending Book Returns Data for $course</b></h4>";
-                                                echo "</div>";
-                                                echo "<div class='box-body'>";
-                                                echo "<table class='table table-bordered'>";
-                                                echo "<thead>";
-                                                echo "<tr>";
-                                                echo "<th>Date Borrowed</th>";
-                                                echo "<th>Date Returned</th>";
-                                                echo "<th>Student ID</th>";
-                                                echo "<th>Name</th>";
-                                                echo "<th>ISBN</th>";
-                                                echo "<th>Title</th>";
-                                                echo "<th>Status</th>";
-                                                echo "</tr>";
-                                                echo "</thead>";
-                                                echo "<tbody>";
-
-                                                // Fetch data for the specific year for pending book returns
-                                                $yearQuery = "SELECT
-                                                                DISTINCT b.id,
-                                                                b.*,
-                                                                r.date_return AS return_date,
-                                                                students.student_id AS stud,
-                                                                students.firstname,
-                                                                students.lastname,
-                                                                books.isbn,
-                                                                books.title,
-                                                                books.author
-                                                            FROM
-                                                                borrow b
-                                                                LEFT JOIN returns r ON b.book_id = r.book_id
-                                                                LEFT JOIN students ON students.id = b.student_id
-                                                                LEFT JOIN books ON books.id = b.book_id
-                                                                LEFT JOIN course ON students.course_id = course.id
-                                                            WHERE
-                                                                students.course_id = {$publishRow['course_id']}
-                                                                AND b.status = 0
-                                                                OR r.date_return IS NULL";
+                                                // if ($selected_category !== null) {
+                                                //     $returnedQuery .= " WHERE YEAR(books.publish_date) IN ($publishCategoriesString)";
+                                                // }
 
                                                 // Add the date range condition
                                                 if ($startDate && $endDate) {
-                                                    $yearQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                                    $returnedQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                                 }
+                                                $returnedQuery .= " AND b.status = 1";
+                                                $returnedQuery .= " GROUP BY publish_year";
+                                                $returnedResult = $conn->query($returnedQuery);
 
-                                                $yearQuery .= " ORDER BY b.date_borrow DESC";
+                                                // Fetch data for each year and create tables for book borrowed and returned
+                                                $totalTransactionsReturned = 0;
+                                                while ($returnedRow = $returnedResult->fetch_assoc()) {
+                                                    // $year = $returnedRow['publish_year'];
+                                                    $count = $returnedRow['count'];
+                                                    $totalTransactionsReturned += $count;
 
-                                                $yearResult = $conn->query($yearQuery);
+                                                    // Output table for book borrowed and returned for each year
+                                                    echo "<div class='row'>";
+                                                    echo "<div class='col-xs-12'>";
+                                                    echo "<div class='box'>";
+                                                    echo "<div class='box-header with-border'>";
+                                                    echo "<h4><b>Book Borrowed and Returned Data</b></h4>";
+                                                    echo "</div>";
+                                                    echo "<div class='box-body'>";
+                                                    echo "<table class='table table-bordered'>";
+                                                    echo "<thead>";
+                                                    echo "<tr>";
+                                                    echo "<th>Date Borrowed</th>";
+                                                    echo "<th>Date Returned</th>";
+                                                    echo "<th>Student ID</th>";
+                                                    echo "<th>Name</th>";
+                                                    echo "<th>ISBN</th>";
+                                                    echo "<th>Title</th>";
+                                                    echo "</tr>";
+                                                    echo "</thead>";
+                                                    echo "<tbody>";
 
-                                                if ($yearResult->num_rows > 0) {
-                                                    while ($row = $yearResult->fetch_assoc()) {
-                                                        $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
-                                                        echo "<tr>";
-                                                        echo "<td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>";
-                                                        echo "<td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>";
-                                                        echo "<td>" . $row['stud'] . "</td>";
-                                                        echo "<td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>";
-                                                        echo "<td>" . $row['isbn'] . "</td>";
-                                                        echo "<td>" . $row['title'] . "</td>";
-                                                        echo "<td>" . $status . "</td>";
-                                                        echo "</tr>";
+                                                    // Fetch data for the specific year for book borrowed and returned
+                                                    $returnedYearQuery = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                                                    FROM borrow b
+                                                    LEFT JOIN returns r ON b.book_id = r.book_id
+                                                    LEFT JOIN students ON students.id = b.student_id
+                                                    LEFT JOIN books ON books.id = b.book_id";
+
+                                                    // Add the date range condition
+                                                    if ($startDate && $endDate) {
+                                                        $returnedYearQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                                     }
-                                                } else {
-                                                    echo "<tr><td colspan='7'>No Pending Book Returns for Books Published in $course</td></tr>";
-                                                }
 
-                                                echo "</tbody>";
-                                                echo "</table>";
-                                                echo "</div>";
-                                                echo "</div>";
-                                                echo "</div>";
-                                                echo "</div>";
-                                            }
+                                                    $returnedYearQuery .= " ORDER BY b.date_borrow DESC";
+
+                                                    $returnedYearResult = $conn->query($returnedYearQuery);
+
+                                                    if ($returnedYearResult->num_rows > 0) {
+                                                        while ($row = $returnedYearResult->fetch_assoc()) {
+                                                            echo "<tr>";
+                                                            echo "<td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>";
+                                                            echo "<td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>";
+                                                            echo "<td>" . $row['stud'] . "</td>";
+                                                            echo "<td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>";
+                                                            echo "<td>" . $row['isbn'] . "</td>";
+                                                            echo "<td>" . $row['title'] . "</td>";
+                                                            echo "</tr>";
+                                                        }
+                                                    } else {
+                                                        echo "<tr><td colspan='6'>No Book Borrowed and Returned Transactions for Books Published in $year</td></tr>";
+                                                    }
+
+                                                    echo "</tbody>";
+                                                    echo "</table>";
+                                                    echo "</div>";
+                                                    echo "</div>";
+                                                    echo "</div>";
+                                                    echo "</div>";
+                                                }
                                             ?>
-                                            <div class="box-header with-border">Total Borrow Transactions: <?php echo $totalTransactions; ?></div>
+
+                                                <div class="box-header with-border">Total Book Borrowed and Returned Transactions: <?php echo $totalTransactionsReturned; ?></div>
+                                                <br>
+                                            <?php
+                                                echo "<p>This table displays the book borrowing and returning transactions according to the publish years of books. It includes details such as the date borrowed, date returned (if returned), student ID, student name, ISBN, and title of the book.</p>";
+                                                // Report data analytics
+                                                $borrowPercentage = ($totalTransactionsReturned > 0) ? (($totalTransactions / $totalTransactionsReturned) * 100) : 0;
+                                                echo "<p>The total borrow transactions are: $totalTransactions, while the total book borrowed and returned transactions are: $totalTransactionsReturned.</p>";
+                                                echo "<p>In the selected date range, all the total book borrowing transactions are $totalTransactions. This constitutes a borrow percentage of $borrowPercentage%.</p>";
+                                                // Additional data analytics reports
+                                                // Example: Average number of books borrowed per student
+                                                $avgBooksBorrowedPerStudentQuery = "SELECT AVG(num_books) AS avg_books_borrowed_per_student FROM (SELECT COUNT(*) AS num_books FROM borrow GROUP BY student_id) AS subquery";
+                                                $avgBooksBorrowedPerStudentResult = $conn->query($avgBooksBorrowedPerStudentQuery);
+                                                $avgBooksBorrowedPerStudentRow = $avgBooksBorrowedPerStudentResult->fetch_assoc();
+                                                $avgBooksBorrowedPerStudent = $avgBooksBorrowedPerStudentRow['avg_books_borrowed_per_student'];
+
+                                                echo "<div class='box-header with-border'>Average Number of Books Borrowed per Student: $avgBooksBorrowedPerStudent</div>";
+                                                echo "<br>";
+
+                                                // Example: Most borrowed book
+                                                $mostBorrowedBookQuery = "SELECT books.title AS most_borrowed_book, COUNT(*) AS borrow_count FROM borrow LEFT JOIN books ON borrow.book_id = books.id GROUP BY borrow.book_id ORDER BY borrow_count DESC LIMIT 1";
+                                                $mostBorrowedBookResult = $conn->query($mostBorrowedBookQuery);
+                                                $mostBorrowedBookRow = $mostBorrowedBookResult->fetch_assoc();
+                                                $mostBorrowedBook = $mostBorrowedBookRow['most_borrowed_book'];
+                                                $mostBorrowedBookCount = $mostBorrowedBookRow['borrow_count'];
+
+                                                echo "<div class='box-header with-border'>Most Borrowed Book: $mostBorrowedBook (Borrow Count: $mostBorrowedBookCount)</div>";
+                                                echo "<br>";
+                                                ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="box">
-                                <div class="box-body">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                        //! FIX ME
-                                        <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div>
-                                        </div>
+                    <?php 
+                        }
+                    ?>
+
+                    <?php
+                        if ($_GET['all_transaction_history'] != 0) {
+                    ?>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">All Book Transactions</h3>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                        <?php
-                                            // Fetch data for book borrowed and returned
-                                            $returnedQuery = "SELECT DISTINCT b.id, b.*, books.isbn, books.title, books.author, YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
-                                                                        FROM borrow b
-                                                                        LEFT JOIN books ON books.id = b.book_id";
-
-                                            if ($selected_category !== null) {
-                                                $returnedQuery .= " WHERE YEAR(books.publish_date) IN ($publishCategoriesString)";
-                                            }
-
-                                            // Add the date range condition
-                                            if ($startDate && $endDate) {
-                                                $returnedQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
-                                            }
-                                            $returnedQuery .= " AND b.status = 1";
-                                            $returnedQuery .= " GROUP BY publish_year";
-                                            $returnedResult = $conn->query($returnedQuery);
-
-                                            // Fetch data for each year and create tables for book borrowed and returned
-                                            $totalTransactionsReturned = 0;
-                                            while ($returnedRow = $returnedResult->fetch_assoc()) {
-                                                // $year = $returnedRow['publish_year'];
-                                                $count = $returnedRow['count'];
-                                                $totalTransactionsReturned += $count;
-
-                                                // Output table for book borrowed and returned for each year
-                                                echo "<div class='row'>";
-                                                echo "<div class='col-xs-12'>";
-                                                echo "<div class='box'>";
-                                                echo "<div class='box-header with-border'>";
-                                                echo "<h4><b>Book Borrowed and Returned Data</b></h4>";
-                                                echo "</div>";
-                                                echo "<div class='box-body'>";
-                                                echo "<table class='table table-bordered'>";
-                                                echo "<thead>";
-                                                echo "<tr>";
-                                                echo "<th>Date Borrowed</th>";
-                                                echo "<th>Date Returned</th>";
-                                                echo "<th>Student ID</th>";
-                                                echo "<th>Name</th>";
-                                                echo "<th>ISBN</th>";
-                                                echo "<th>Title</th>";
-                                                echo "</tr>";
-                                                echo "</thead>";
-                                                echo "<tbody>";
-
-                                                // Fetch data for the specific year for book borrowed and returned
-                                                $returnedYearQuery = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
-                                                FROM borrow b
-                                                LEFT JOIN returns r ON b.book_id = r.book_id
-                                                LEFT JOIN students ON students.id = b.student_id
-                                                LEFT JOIN books ON books.id = b.book_id";
-
-                                                // Add the date range condition
-                                                if ($startDate && $endDate) {
-                                                    $returnedYearQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
-                                                }
-
-                                                $returnedYearQuery .= " ORDER BY b.date_borrow DESC";
-
-                                                $returnedYearResult = $conn->query($returnedYearQuery);
-
-                                                if ($returnedYearResult->num_rows > 0) {
-                                                    while ($row = $returnedYearResult->fetch_assoc()) {
-                                                        echo "<tr>";
-                                                        echo "<td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>";
-                                                        echo "<td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>";
-                                                        echo "<td>" . $row['stud'] . "</td>";
-                                                        echo "<td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>";
-                                                        echo "<td>" . $row['isbn'] . "</td>";
-                                                        echo "<td>" . $row['title'] . "</td>";
-                                                        echo "</tr>";
-                                                    }
-                                                } else {
-                                                    echo "<tr><td colspan='6'>No Book Borrowed and Returned Transactions for Books Published in $year</td></tr>";
-                                                }
-
-                                                echo "</tbody>";
-                                                echo "</table>";
-                                                echo "</div>";
-                                                echo "</div>";
-                                                echo "</div>";
-                                                echo "</div>";
-                                            }
-                                        ?>
-
-                                            <div class="box-header with-border">Total Book Borrowed and Returned Transactions: <?php echo $totalTransactionsReturned; ?></div>
-                                            <br>
-                                        <?php
-                                            echo "<p>This table displays the book borrowing and returning transactions according to the publish years of books. It includes details such as the date borrowed, date returned (if returned), student ID, student name, ISBN, and title of the book.</p>";
-                                            // Report data analytics
-                                            $borrowPercentage = ($totalTransactionsReturned > 0) ? (($totalTransactions / $totalTransactionsReturned) * 100) : 0;
-                                            echo "<p>The total borrow transactions are: $totalTransactions, while the total book borrowed and returned transactions are: $totalTransactionsReturned.</p>";
-                                            echo "<p>In the selected date range, all the total book borrowing transactions are $totalTransactions. This constitutes a borrow percentage of $borrowPercentage%.</p>";
-                                            // Additional data analytics reports
-                                            // Example: Average number of books borrowed per student
-                                            $avgBooksBorrowedPerStudentQuery = "SELECT AVG(num_books) AS avg_books_borrowed_per_student FROM (SELECT COUNT(*) AS num_books FROM borrow GROUP BY student_id) AS subquery";
-                                            $avgBooksBorrowedPerStudentResult = $conn->query($avgBooksBorrowedPerStudentQuery);
-                                            $avgBooksBorrowedPerStudentRow = $avgBooksBorrowedPerStudentResult->fetch_assoc();
-                                            $avgBooksBorrowedPerStudent = $avgBooksBorrowedPerStudentRow['avg_books_borrowed_per_student'];
-
-                                            echo "<div class='box-header with-border'>Average Number of Books Borrowed per Student: $avgBooksBorrowedPerStudent</div>";
-                                            echo "<br>";
-
-                                            // Example: Most borrowed book
-                                            $mostBorrowedBookQuery = "SELECT books.title AS most_borrowed_book, COUNT(*) AS borrow_count FROM borrow LEFT JOIN books ON borrow.book_id = books.id GROUP BY borrow.book_id ORDER BY borrow_count DESC LIMIT 1";
-                                            $mostBorrowedBookResult = $conn->query($mostBorrowedBookQuery);
-                                            $mostBorrowedBookRow = $mostBorrowedBookResult->fetch_assoc();
-                                            $mostBorrowedBook = $mostBorrowedBookRow['most_borrowed_book'];
-                                            $mostBorrowedBookCount = $mostBorrowedBookRow['borrow_count'];
-
-                                            echo "<div class='box-header with-border'>Most Borrowed Book: $mostBorrowedBook (Borrow Count: $mostBorrowedBookCount)</div>";
-                                            echo "<br>";
-                                            ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="box">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">All Book Transactions by Courses</h3>
-                                </div>
-                                <div class="box-body">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="box-body">
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                    <canvas id="bookTransactionsChart" style="height:350px"></canvas>
+                                    <div class="box-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="box-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                        <canvas id="bookTransactionsChart" style="height:350px"></canvas>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -359,87 +392,97 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    <?php 
+                        }
+                    ?>
 
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <div class="box">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Rankings of Book</h3>
-                                </div>
-                                <div class="box-body">
-                                    <ul class="list-group">
-                                    <?php
-                                        // Fetch data for all borrowers grouped by publish year
-                                        $borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers, course.*
-                                                            FROM borrow
-                                                            LEFT JOIN books ON borrow.book_id = books.id
-                                                            LEFT JOIN students ON borrow.student_id = students.id
-                                                            LEFT JOIN course ON students.course_id = course.id
-                                                            WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
-                                        if ($startDate && $endDate) {
-                                            $borrowersQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
-                                        }
-                                        $borrowersQuery .= " GROUP BY publish_year";
-                                        $borrowersResult = $conn->query($borrowersQuery);
+                    <?php
+                        if ($_GET['rankings_per_total_transaction'] != 0) {
+                    ?>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="box">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Rankings of Book</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <ul class="list-group">
+                                        <?php
+                                            // Fetch data for all borrowers grouped by publish year
+                                            $borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers, course.*
+                                                                FROM borrow
+                                                                LEFT JOIN books ON borrow.book_id = books.id
+                                                                LEFT JOIN students ON borrow.student_id = students.id
+                                                                LEFT JOIN course ON students.course_id = course.id
+                                                                WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
+                                            if ($startDate && $endDate) {
+                                                $borrowersQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                            }
+                                            $borrowersQuery .= " GROUP BY publish_year";
+                                            $borrowersResult = $conn->query($borrowersQuery);
 
-                                        // Prepare data for CanvasJS
-                                        $barChartData = array();
-                                        $allYears = array(); // Store all years to check against selected publish years
-                                        while ($borrowersRow = $borrowersResult->fetch_assoc()) {
-                                            $year = $borrowersRow['title'];
-                                            $totalBorrowers = $borrowersRow['total_borrowers'];
-                                            $barChartData[$year] = $totalBorrowers;
-                                            $allYears[] = $year;
-                                        }
+                                            // Prepare data for CanvasJS
+                                            $barChartData = array();
+                                            $allYears = array(); // Store all years to check against selected publish years
+                                            while ($borrowersRow = $borrowersResult->fetch_assoc()) {
+                                                $year = $borrowersRow['title'];
+                                                $totalBorrowers = $borrowersRow['total_borrowers'];
+                                                $barChartData[$year] = $totalBorrowers;
+                                                $allYears[] = $year;
+                                            }
 
-                                        // Add selected publish years with 0 transactions
-                                        if (!empty($selected_category)) {
-                                            $selectedYears = explode(',', $selected_category);
-                                            $selectedYears = array_map('intval', $selectedYears);
-                                            foreach ($selectedYears as $year) {
-                                                if (!in_array($year, $allYears)) {
-                                                    $barChartData[$year] = 0;
-                                                    $allYears[] = $year;
+                                            // Add selected publish years with 0 transactions
+                                            if (!empty($selected_category)) {
+                                                $selectedYears = explode(',', $selected_category);
+                                                $selectedYears = array_map('intval', $selectedYears);
+                                                foreach ($selectedYears as $year) {
+                                                    if (!in_array($year, $allYears)) {
+                                                        $barChartData[$year] = 0;
+                                                        $allYears[] = $year;
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        arsort($barChartData); // Sort years based on total transactions
+                                            arsort($barChartData); // Sort years based on total transactions
 
-                                        $rank = 1;
-                                        $yearsWithTransactions = [];
-                                        $yearsWithNoTransactions = [];
+                                            $rank = 1;
+                                            $yearsWithTransactions = [];
+                                            $yearsWithNoTransactions = [];
 
-                                        foreach ($barChartData as $year => $transactions) {
-                                            if ($transactions > 0) {
-                                                $yearsWithTransactions[] = "Course $year - Total Borrowers: $transactions";
-                                            } else {
-                                                $yearsWithNoTransactions[] = $year;
+                                            foreach ($barChartData as $year => $transactions) {
+                                                if ($transactions > 0) {
+                                                    $yearsWithTransactions[] = "Course $year - Total Borrowers: $transactions";
+                                                } else {
+                                                    $yearsWithNoTransactions[] = $year;
+                                                }
                                             }
-                                        }
 
-                                        // Output years with transactions
-                                        foreach ($yearsWithTransactions as $yearData) {
-                                            echo "<li class='list-group-item'>TOP $rank: $yearData</li>";
-                                            $rank++;
-                                        }
+                                            // Output years with transactions
+                                            foreach ($yearsWithTransactions as $yearData) {
+                                                echo "<li class='list-group-item'>TOP $rank: $yearData</li>";
+                                                $rank++;
+                                            }
 
-                                        // Output combined years with 0 transactions
-                                        if (!empty($yearsWithNoTransactions)) {
-                                            $combinedYears = implode(', ', $yearsWithNoTransactions);
-                                            echo "<li class='list-group-item'>Years with 0 transactions: $combinedYears</li>";
-                                        }
-                                    ?>
-                                    </ul>
+                                            // Output combined years with 0 transactions
+                                            if (!empty($yearsWithNoTransactions)) {
+                                                $combinedYears = implode(', ', $yearsWithNoTransactions);
+                                                echo "<li class='list-group-item'>Years with 0 transactions: $combinedYears</li>";
+                                            }
+                                        ?>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    <?php 
+                        }
+                    ?>
 
             </section>
         </div>
     </div>
+    <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/scripts.php'; ?>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
@@ -552,52 +595,243 @@
             });
             borrowReturnChart.render();
         }
+    </script>
 
-        $(document).ready(function () {
-            // Fetch data for book transactions by publish year
-            $.ajax({
-                url: 'fetch_book_transactions.php', // Path to your PHP script to fetch data
-                method: 'GET',
-                success: function (data) {
-                    var years = [];
-                    var transactions = [];
+    <?php
+        if ($_GET['pending_book_returns'] != 0) {
+    ?>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                <?php
+                    // Fetch data for pie chart
+                    $pieChartData = array();
+                    $pieChartQuery = "SELECT category.*, COUNT(*) AS count
+                                    FROM borrow
+                                    LEFT JOIN books ON borrow.book_id = books.id
+                                    LEFT JOIN category ON books.category_id = category.id";
 
-                    for (var i in data) {
-                        years.push(data[i].publish_year);
-                        transactions.push(data[i].total_transactions);
+                    // Add the date range condition
+                    if ($startDate && $endDate) {
+                        $pieChartQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
                     }
 
-                    var ctx = document.getElementById('bookTransactionsChart').getContext('2d');
-                    var chart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: years,
-                            datasets: [{
-                                label: 'Total Transactions',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                borderWidth: 1,
-                                data: transactions
-                            }]
-                        },
-                        // options: {
-                        //     scales: {
-                        //         yAxes: [{
-                        //             ticks: {
-                        //                 beginAtZero: true
-                        //             }
-                        //         }]
-                        //     }
-                        // }
-                    });
-                    
-                },
-                error: function (data) {
-                    console.log(data);
+                    // $pieChartQuery .= " AND borrow.status = 0";
+                    $pieChartQuery .= " GROUP BY name";
+                    $pieChartResult = $conn->query($pieChartQuery);
+
+                    while ($pieChartRow = $pieChartResult->fetch_assoc()) {
+                        $pieChartData[] = array(
+                            "name" => $pieChartRow['name'],
+                            "count" => $pieChartRow['count']
+                        );
+                    }
+
+                    // Generate random background colors
+                    $backgroundColor = [];
+                    for ($i = 0; $i < count($pieChartData); $i++) {
+                        $backgroundColor[] = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+                    }
+                ?>
+
+                const pendingBookReturns = <?php echo json_encode($pieChartData); ?>;
+                const pendingBookReturnsPublishYear = pendingBookReturns.map(element => element.name);
+                const pendingBookReturnsCount = pendingBookReturns.map(element => element.count);
+                const pendingBookReturnsBackgroundColor = <?php echo json_encode($backgroundColor); ?>;
+                const pendingBookReturnsContainer = document.getElementById('chartContainer');
+
+                new Chart(pendingBookReturnsContainer, {
+                    type: 'pie',
+                    data: {
+                        labels: pendingBookReturnsPublishYear,
+                        datasets: [{
+                            label: pendingBookReturns[pendingBookReturnsCount],
+                            data: pendingBookReturnsCount,
+                            backgroundColor: pendingBookReturnsBackgroundColor,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Borrowed Books by Category'
+                            }
+                        }
+                    },
+                });
+            });
+        </script>
+    <?php
+        }
+    ?>
+
+    <?php
+        if ($_GET['books_borrowed_and_returned'] != 0) {
+    ?>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php
+                // Fetch data for book borrowed and returned
+                $returnedChartData = array();
+                $booksBorrowedAndReturnedQuery = "SELECT category.*, COUNT(*) AS count
+                                FROM borrow
+                                INNER JOIN returns ON borrow.book_id = returns.book_id
+                                LEFT JOIN books ON borrow.book_id = books.id
+                                LEFT JOIN category ON books.category_id = category.id";
+
+                if ($selected_category !== null) {
+                    $publishYears = explode(',', $selected_category);
+                    $publishYearsString = implode(',', $publishYears);
+                    $booksBorrowedAndReturnedQuery .= " WHERE category.id IN ($publishYearsString)";
                 }
+
+                // Add the date range condition
+                if ($startDate && $endDate) {
+                    $booksBorrowedAndReturnedQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                }
+
+                // $booksBorrowedAndReturnedQuery .= " GROUP BY name";
+                $booksBorrowedAndReturnedResult = $conn->query($booksBorrowedAndReturnedQuery);
+
+                while ($returnedRow = $booksBorrowedAndReturnedResult->fetch_assoc()) {
+                    $year = $returnedRow['name'];
+                    $count = $returnedRow['count'];
+                    $returnedChartData[] = array('name' => $year, 'count' => $count);
+                }
+
+                // Generate random background colors
+                $backgroundColor = [];
+                for ($i = 0; $i < count($returnedChartData); $i++) {
+                    $backgroundColor[] = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+                }
+            ?>
+
+            const bookBorrowedAndReturned = <?php echo json_encode($returnedChartData); ?>;
+            const bookBorrowedAndReturnedPublishYear = bookBorrowedAndReturned.map(element => element.name);
+            const bookBorrowedAndReturnedCount = bookBorrowedAndReturned.map(element => element.count);
+            const bookBorrowedAndReturnedBackgroundColor = <?php echo json_encode($backgroundColor); ?>;
+            const bookBorrowedAndReturnedContainer = document.getElementById('returnedChartContainer');
+
+            new Chart(bookBorrowedAndReturnedContainer, {
+                type: 'pie',
+                data: {
+                    labels: bookBorrowedAndReturnedPublishYear,
+                    datasets: [{
+                        label: 'Book Borrowed and Returned by Category',
+                        data: bookBorrowedAndReturnedCount,
+                        backgroundColor: bookBorrowedAndReturnedBackgroundColor,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Book Borrowed and Returned by Category'
+                        }
+                    }
+                },
             });
         });
     </script>
+    <?php 
+        }
+    ?>
+
+    <?php
+        if ($_GET['all_transaction_history'] != 0) {
+    ?>
+        <script>
+            $(document).ready(function () {
+                // Fetch data for book transactions by publish year
+                <?php 
+                // Initialize the array to store the data
+                $data = array();
+
+                // Execute SQL query to fetch book transactions by publish year
+                $query = "SELECT category.*, COUNT(*) AS total_transactions
+                            FROM borrow
+                            LEFT JOIN books ON borrow.book_id = books.id
+                            LEFT JOIN category ON books.category_id = category.id
+                            GROUP BY name";
+
+                $result = $conn->query($query);
+
+                // Check if query executed successfully
+                if ($result) {
+                    // Fetch associative array
+                    while ($row = $result->fetch_assoc()) {
+                        // Append data to the array
+                        $data[] = $row;
+                    }
+                    // Free result set
+                    $result->free();
+                }
+                ?>
+
+                const totalTransaction = <?php echo json_encode($data); ?>;
+                const totalTransactionName = totalTransaction.map(element => element.name);
+                const totalTransactionData = totalTransaction.map(element => element.total_transactions);
+
+                const totalTransactionContainer = document.getElementById('bookTransactionsChart').getContext('2d');
+
+                new Chart(totalTransactionContainer, {
+                    type: 'bar',
+                    data: {
+                        labels: totalTransactionName,
+                        datasets: [{
+                            label: 'Total Transactions',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            data: totalTransactionData
+                        }]
+                    },
+                });
+
+
+                // $.ajax({
+                //     url: 'fetch_book_transactions.php', // Path to your PHP script to fetch data
+                //     method: 'GET',
+                //     success: function (data) {
+                //         var years = [];
+                //         var transactions = [];
+
+                //         for (var i in data) {
+                //             years.push(data[i].publish_year);
+                //             transactions.push(data[i].total_transactions);
+                //         }
+
+                //         var ctx = document.getElementById('bookTransactionsChart').getContext('2d');
+                //         var chart = new Chart(ctx, {
+                //             type: 'bar',
+                //             data: {
+                //                 labels: years,
+                //                 datasets: [{
+                //                     label: 'Total Transactions',
+                //                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                //                     borderColor: 'rgba(255, 99, 132, 1)',
+                //                     borderWidth: 1,
+                //                     data: transactions
+                //                 }]
+                //             },
+                //         });
+                //     },
+                //     error: function (data) {
+                //         console.log(data);
+                //     }
+                // });
+            });
+        </script>
+    <?php
+        }
+    ?>
 
   
 </body>

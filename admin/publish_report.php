@@ -34,7 +34,16 @@
                 } ?>
 
                 <div class="box-header with-border">
-                    <button id="downloadButton" class="btn btn-primary btn-sm btn-flat"> Download</button>
+                    <!-- <button id="downloadButton" class="btn btn-primary btn-sm btn-flat"> Download</button> -->
+                    <button class="btn btn-primary btn-sm" id="excel-btn">
+                        <i class="fa fa-download"></i> Excel
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="csv-btn">
+                        <i class="fa fa-download"></i> CSV
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="pdf-btn">
+                        <i class="fa fa-download"></i> PDF
+                    </button>
                 </div>
 
                 <?php
@@ -46,7 +55,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <!-- <div id="chartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></div> -->
-                                        <canvas id="chartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+                                        <canvas id="chartContainer" style="height: 200px; margin-left: auto; margin-right: auto;"></canvas>
                                     </div>
                                 </div>
                                 <?php
@@ -89,7 +98,7 @@
                                         echo "<h4><b>Pending Book Returns Data for $year</b></h4>";
                                         echo "</div>";
                                         echo "<div class='box-body'>";
-                                        echo "<table class='table table-bordered'>";
+                                        echo "<table class='table table-bordered pending-book-table'>";
                                         echo "<thead>";
                                         echo "<tr>";
                                         echo "<th>Date Borrowed</th>";
@@ -206,7 +215,7 @@
                                             echo "<h4><b>Book Borrowed and Returned Data for $year</b></h4>";
                                             echo "</div>";
                                             echo "<div class='box-body'>";
-                                            echo "<table class='table table-bordered'>";
+                                            echo "<table class='table table-bordered book-borrowed-and-return-table'>";
                                             echo "<thead>";
                                             echo "<tr>";
                                             echo "<th>Date Borrowed</th>";
@@ -287,7 +296,21 @@
                                 <div class="box-body">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div id="borrowReturnChartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></div>
+                                            <canvas id="borrowReturnChartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
+                                            <table class='table table-bordered contrast-returned-and-pending-returns-table' style="display: none;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Data</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Category 1</td>
+                                                        <td>10</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -311,6 +334,20 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <canvas id="bookTransactionsChart" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
+                                            <table class='table table-bordered all-transaction-history-table' style="display: none;">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Data</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Category 1</td>
+                                                        <td>10</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -330,12 +367,13 @@
                                 <div class="box-header with-border">
                                     <h3 class="box-title">Rankings of Book Publish Years by Total Transactions</h3>
                                 </div>
-                                <div class="box-body">
-                                    <ul class="list-group">
+                                <div class="row">
+                                    <div class="box-body ranking-of-book-publish-year-by-total-transaction-table">
                                         <?php
                                             $selected_publish = isset($_GET['selected_publish']) ? $_GET['selected_publish'] : null;
                                             $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
                                             $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
+
                                             // Fetch data for all borrowers grouped by publish year
                                             $borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers
                                                                 FROM borrow
@@ -377,25 +415,37 @@
 
                                             foreach ($barChartData as $year => $transactions) {
                                                 if ($transactions > 0) {
-                                                    $yearsWithTransactions[] = "Year $year - Total Borrowers: $transactions";
+                                                    $yearsWithTransactions[] = array('year' => $year, 'transactions' => $transactions);
                                                 } else {
                                                     $yearsWithNoTransactions[] = $year;
                                                 }
                                             }
 
-                                            // Output years with transactions
+                                            // Construct the table HTML dynamically
+                                            $tableHTML = '<div class="row"><div class="col-md-12"><table class="table table-bordered ranking-of-book-publish-year-by-total-transaction">';
+                                            $tableHTML .= '<thead>';
+                                            $tableHTML .= '<tr><th>Top</th><th>Year</th><th>Total Borrowers</th></tr>';
+                                            $tableHTML .= '</thead>';
+                                            $tableHTML .= '<tbody>';
+
                                             foreach ($yearsWithTransactions as $yearData) {
-                                                echo "<li class='list-group-item'>TOP $rank: $yearData</li>";
+                                                $tableHTML .= '<tr>';
+                                                $tableHTML .= '<td>' . $rank . '</td>';
+                                                $tableHTML .= '<td>' . $yearData['year'] . '</td>';
+                                                $tableHTML .= '<td>' . $yearData['transactions'] . '</td>';
+                                                $tableHTML .= '</tr>';
                                                 $rank++;
                                             }
 
-                                            // Output combined years with 0 transactions
-                                            if (!empty($yearsWithNoTransactions)) {
-                                                $combinedYears = implode(', ', $yearsWithNoTransactions);
-                                                echo "<li class='list-group-item'>Years with 0 transactions: $combinedYears</li>";
-                                            }
+                                            $tableHTML .= '</tbody>';
+                                            $tableHTML .= '</table>';
+                                            $tableHTML .= '</div>';
+                                            $tableHTML .= '</div>';
+
+                                            // Output the table HTML
+                                            echo $tableHTML;
                                         ?>
-                                    </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -408,101 +458,596 @@
         <?php include 'includes/footer.php'; ?>
         <?php include 'includes/borrow_modal.php'; ?>
         <?php include 'includes/scripts.php'; ?>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
         <script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
-        <script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script type="text/javascript" language="javascript">
             $(document).ready(function () {
-                $('#downloadButton').click(function (e) {
-                    e.preventDefault();
-                    console.log("Download button clicked"); // Debug statement
-                    var contentWrapper = document.querySelector(".content-wrapper");
-
-                    var classesToCheck = [".pending-book-returns", ".books-borrowed-and-returned", ".contrast-books-returned-and-pending-returns", ".all-transaction-history", ".ranking-per-total-transaction"];
-
-                    var { jsPDF } = window.jspdf;
-                    var pdf = new jsPDF('p', 'mm', 'a4', 'portrait');
-
-                    var headerHtml = `
-                        <div class="image-container row">
-                            <div class="col-md-12">
-                                <img src="../images/libguard-logo.png" style="width: 100%; margin-left: auto; margin-right: auto;">
-                            </div>
-                        </div>
-                        <hr style="border: 1px solid #800000; margin-top: 10px;">
-                    `;
-
-                    var footerHtml = `
-                        <hr style="border: 1px solid #800000; margin-top: 10px;">
-                    `;
-
-                    function addHeaderFooterToPdf(pageIndex, totalPages) {
-                        var contentHeight = pdf.internal.pageSize.height - 20;
-                        var headerHeight = 50;
-                        var footerHeight = 30;
-
-                        pdf.setPage(pageIndex);
-                        pdf.html(headerHtml, {
-                            x: 10,
-                            y: 10,
-                            width: pdf.internal.pageSize.width - 20,
-                            html2canvas: {
-                                scale: 10
+                // Function to convert image file to base64 data URL
+                function imageToDataURL(imagePath) {
+                    return new Promise(function(resolve, reject) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                var reader = new FileReader();
+                                reader.onload = function() {
+                                    resolve(reader.result);
+                                };
+                                reader.readAsDataURL(xhr.response);
+                            } else {
+                                reject(new Error('Failed to load image'));
                             }
-                        });
-
-                        pdf.setPage(pageIndex);
-                        pdf.html(footerHtml, {
-                            x: 10,
-                            y: pdf.internal.pageSize.height - footerHeight,
-                            width: pdf.internal.pageSize.width - 20,
-                            html2canvas: {
-                                scale: 10
-                            }
-                        });
-                    }
-
-                    function addElementToPdf(element, isFirstElement) {
-                        return new Promise((resolve, reject) => {
-                            html2canvas(element).then(canvas => {
-                                if (!isFirstElement) {
-                                    pdf.addPage();
-                                }
-
-                                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.width, pdf.internal.pageSize.height);
-
-                                resolve();
-                            }).catch(error => reject(error));
-                        });
-                    }
-
-                    var promises = [];
-                    var isFirstElement = true;
-
-                    classesToCheck.forEach(function(currClass) {
-                        var elements = contentWrapper.querySelectorAll(currClass);
-                        elements.forEach(function(element) {
-                            if (element.offsetWidth > 0 || element.offsetHeight > 0) {
-                                promises.push(addElementToPdf(element, isFirstElement));
-                                isFirstElement = false;
-                            }
-                        });
+                        };
+                        xhr.onerror = function() {
+                            reject(new Error('Network error occurred'));
+                        };
+                        xhr.open('GET', imagePath);
+                        xhr.responseType = 'blob';
+                        xhr.send();
                     });
+                }
+                
+                var imagePath = '../images/libguard-logo.png';
+                var bannerWidth = 400; 
+                var bannerHeight = 200;
+                var table;
 
-                    Promise.all(promises)
-                        .then(() => {
-                            for (var i = 1; i <= pdf.internal.getNumberOfPages(); i++) {
-                                addHeaderFooterToPdf(i, pdf.internal.getNumberOfPages());
-                            }
+                //Datatable variables
+                var pendingBooksTable;
+                var bookBorrowedAndReturnTable;
+                var contrastBooksReturnedAndPendingReturns;
+                var allTransactionHistory
+                var rankingPerTotalTransaction;
 
-                            pdf.save('book_transactions.pdf');
-                        })
-                        .catch(error => {
-                            console.error("Error generating PDF:", error);
-                        });
-                });
+                imageToDataURL(imagePath)
+                    .then(function(dataURL) {
+                        var image = new Image();
+                        image.onload = function() {
+                            var canvas = document.createElement('canvas');
+                            var ctx = canvas.getContext('2d');
+                            canvas.width = bannerWidth;
+                            canvas.height = bannerHeight;
+                            ctx.drawImage(image, 0, 0, bannerWidth, bannerHeight);
+                            var resizedImage = canvas.toDataURL('image/png');
 
+                            // Initialize Pending DataTable
+                            pendingBooksTable = $('.pending-book-table').DataTable({
+                                dom: 'lBfrtip',
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Pending Book Return';
+                                            
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                            
+                                            // Add an empty row for better formatting
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
+                                        },
+                                        filename: 'Pending Book Return' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Pending Book Return\n';
+
+                                            // Append the existing CSV content
+                                            csvContent += csv;
+
+                                            return csvContent;
+                                        },
+                                        filename: 'Pending Book Return' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
+
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('chartContainer'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
+
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
+
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
+
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Pending Book Return\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Pending Book Return' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
+
+                            // Initialize Book Borrowed and Return DataTable
+                            bookBorrowedAndReturnTable = $('.book-borrowed-and-return-table').DataTable({
+                                dom: 'lBfrtip',
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Book Borrowed and Returned Data';
+                                            
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                            
+                                            // Add an empty row for better formatting
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
+                                        },
+                                        filename: 'Book Borrowed and Returned Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Book Borrowed and Returned Data\n';
+
+                                            // Append the existing CSV content
+                                            csvContent += csv;
+
+                                            return csvContent;
+                                        },
+                                        filename: 'Book Borrowed and Returned Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
+
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('returnedChartContainer'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
+
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
+
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
+
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Book Borrowed and Returned Data\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Book Borrowed and Returned Data' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
+
+                            contrastBooksReturnedAndPendingReturns = $('.contrast-returned-and-pending-returns-table').DataTable({
+                                dom: 'lBfrtip',
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Contrast Returned and Pending Returns Data';
+                                            
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                        },
+                                        filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Contrast Returned and Pending Returns Data\n';
+
+                                            csvContent += csv;
+
+                                            return csvContent;
+                                        },
+                                        filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
+
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('borrowReturnChartContainer'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
+
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
+
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
+
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Contrast Returned and Pending Returns Data\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
+
+                            allTransactionHistory = $('.all-transaction-history-table').DataTable({
+                                dom: 'lBfrtip',
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'All Book Transactions by Publish Year';
+                                            
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                        },
+                                        filename: 'All Book Transactions by Publish Year' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'All Book Transactions by Publish Year\n';
+
+                                            csvContent += csv;
+
+                                            return csvContent;
+                                        },
+                                        filename: 'All Book Transactions by Publish Year' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
+
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('bookTransactionsChart'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
+
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
+
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
+
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'All Book Transactions by Publish Year\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'All Book Transactions by Publish Year' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
+
+                            rankingPerTotalTransaction = $('.ranking-of-book-publish-year-by-total-transaction').DataTable({
+                                dom: 'lBfrtip',
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Rankings of Book Publish Years by Total Transactions';
+                                            
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                        },
+                                        filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Rankings of Book Publish Years by Total Transactions\n';
+
+                                            csvContent += csv;
+
+                                            return csvContent;
+                                        },
+                                        filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
+
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
+
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Rankings of Book Publish Years by Total Transactions\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
+
+                            
+
+                            // Trigger Excel export
+                            $('#excel-btn').click(function() {
+                                <?php
+                                    if ($_GET['pending_book_returns'] != 0) {
+                                ?>
+                                    pendingBooksTable.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['books_borrowed_and_returned'] != 0) {
+                                ?>
+                                    bookBorrowedAndReturnTable.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+                                ?>
+                                    contrastBooksReturnedAndPendingReturns.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['all_transaction_history'] != 0) {
+                                ?>
+                                    allTransactionHistory.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['rankings_per_total_transaction'] != 0) {
+                                ?>
+                                    rankingPerTotalTransaction.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                            });
+
+                            // Trigger CSV export
+                            $('#csv-btn').click(function() {
+                                <?php
+                                    if ($_GET['pending_book_returns'] != 0) {
+                                ?>
+                                    pendingBooksTable.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
+
+                                <?php
+                                    if ($_GET['books_borrowed_and_returned'] != 0) {
+                                ?>
+                                    bookBorrowedAndReturnTable.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
+
+                                <?php
+                                    if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+                                ?>
+                                    contrastBooksReturnedAndPendingReturns.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
+
+                                <?php
+                                    if ($_GET['all_transaction_history'] != 0) {
+                                ?>
+                                    allTransactionHistory.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
+
+                                <?php
+                                    if ($_GET['rankings_per_total_transaction'] != 0) {
+                                ?>
+                                    rankingPerTotalTransaction.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
+                            });
+
+                            // Trigger PDF export
+                            $('#pdf-btn').click(function() {
+                                <?php
+                                    if ($_GET['pending_book_returns'] != 0) {
+                                ?>
+                                    pendingBooksTable.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['books_borrowed_and_returned'] != 0) {
+                                ?>
+                                    bookBorrowedAndReturnTable.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+                                ?>
+                                    contrastBooksReturnedAndPendingReturns.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['all_transaction_history'] != 0) {
+                                ?>
+                                    allTransactionHistory.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['rankings_per_total_transaction'] != 0) {
+                                ?>
+                                    rankingPerTotalTransaction.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                            });
+                        };
+                        image.src = dataURL;
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                    });
             });
         </script>
 
@@ -598,7 +1143,7 @@
                     ?>
 
                     const pendingBookReturns = <?php echo json_encode($pieChartData); ?>;
-                    const pendingBookReturnsPublishYear = pendingBookReturns.map(element => element.publish_year);
+                    const pendingBookReturnsPublishYear = pendingBookReturns.map(element => element.publish_year + ' : ' + element.count);
                     const pendingBookReturnsCount = pendingBookReturns.map(element => element.count);
                     const pendingBookReturnsBackgroundColor = <?php echo json_encode($backgroundColor); ?>;
                     const pendingBookReturnsContainer = document.getElementById('chartContainer');
@@ -617,7 +1162,11 @@
                             responsive: true,
                             plugins: {
                                 legend: {
-                                    position: 'top',
+                                    position: 'bottom',
+                                    labels: {
+                                        fontSize: 1 // Adjust the font size as needed
+                                    },
+                                    label: pendingBookReturnsPublishYear
                                 },
                                 title: {
                                     display: true,
@@ -714,31 +1263,69 @@
             //! FIX ME
             window.onload = function () {
                 // Pie chart for borrow and return transactions
+                // var borrowReturnData = [
+                //     { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
+                //     { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
+                // ];
+
+                // var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
+                //     animationEnabled: true,
+                //     title: {
+                //         text: "Pending Book Returns vs Book Borrowed and Returned"
+                //     },
+                //     legend: {
+                //         maxWidth: 350,
+                //         itemWidth: 120
+                //     },
+                //     data: [{
+                //         type: "pie",
+                //         showInLegend: true,
+                //         legendText: "{label}: {y}",
+                //         startAngle: 0,
+                //         yValueFormatString: "##0",
+                //         indexLabel: "{label} {y}",
+                //         dataPoints: borrowReturnData
+                //     }]
+                // });
+                // borrowReturnChart.render();
+
                 var borrowReturnData = [
                     { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
                     { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
                 ];
 
-                var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
-                    animationEnabled: true,
-                    title: {
-                        text: "Pending Book Returns vs Book Borrowed and Returned"
+                var borrowReturnChart = new Chart(document.getElementById('borrowReturnChartContainer'), {
+                    type: 'pie',
+                    data: {
+                        labels: borrowReturnData.map(data => data.label),
+                        datasets: [{
+                            data: borrowReturnData.map(data => data.y),
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',
+                                'rgba(54, 162, 235, 0.6)',
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
                     },
-                    legend: {
-                        maxWidth: 350,
-                        itemWidth: 120
-                    },
-                    data: [{
-                        type: "pie",
-                        showInLegend: true,
-                        legendText: "{label}: {y}",
-                        startAngle: 0,
-                        yValueFormatString: "##0",
-                        indexLabel: "{label} {y}",
-                        dataPoints: borrowReturnData
-                    }]
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Pending Book Returns vs Book Borrowed and Returned'
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                fontSize: 1 // Adjust the font size as needed
+                            },
+                            label: borrowReturnData.map(data => data.label)
+                        },
+                    }
                 });
-                borrowReturnChart.render();
+
             }
         </script>
     <?php 

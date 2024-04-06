@@ -54,7 +54,7 @@
           <div class="box">
             <div class="box-header with-border">
               <!-- <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Borrow</a> -->
-              <button id="downloadButton" class="btn btn-primary btn-sm btn-flat"> Download</button>
+              <!-- <button id="downloadButton" class="btn btn-primary btn-sm btn-flat"> Download</button> -->
               <button class="btn btn-primary btn-sm" id="excel-btn">
                   <i class="fa fa-download"></i> Excel
               </button>

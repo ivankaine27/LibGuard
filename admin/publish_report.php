@@ -55,7 +55,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <!-- <div id="chartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></div> -->
-                                        <canvas id="chartContainer" style="height: 200px; margin-left: auto; margin-right: auto;"></canvas>
+                                        <canvas id="chartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
                                     </div>
                                 </div>
                                 <?php
@@ -113,19 +113,19 @@
                                         echo "<tbody>";
 
                                         // Fetch data for the specific year for pending book returns
-                                        $yearQuery = "SELECT borrow.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
-                                                    FROM borrow
-                                                    LEFT JOIN returns r ON borrow.book_id = r.book_id
-                                                    LEFT JOIN students ON students.id = borrow.student_id
-                                                    LEFT JOIN books ON books.id = borrow.book_id
-                                                    WHERE YEAR(books.publish_date) = $year AND (borrow.status = 0 OR r.date_return IS NULL)";
+                                        $yearQuery = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                                                FROM borrow b
+                                                LEFT JOIN returns r ON b.book_id = r.book_id
+                                                LEFT JOIN students ON students.id = b.student_id
+                                                LEFT JOIN books ON books.id = b.book_id
+                                                WHERE YEAR(books.publish_date) = $year AND (b.status = 0 OR r.date_return IS NULL)";
 
                                         // Add the date range condition
                                         if ($startDate && $endDate) {
-                                            $yearQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                            $yearQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                         }
 
-                                        $yearQuery .= " ORDER BY borrow.date_borrow DESC";
+                                        $yearQuery .= " ORDER BY b.date_borrow DESC";
 
                                         $yearResult = $conn->query($yearQuery);
 
@@ -171,7 +171,7 @@
                                 <div class="box-body">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <canvas id="returnedChartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+                                            <canvas id="returnedChartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
                                         </div>
                                     </div>
                                     <?php
@@ -180,10 +180,9 @@
                                         $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
 
                                         // Fetch data for book borrowed and returned
-                                        $returnedQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
-                                                        FROM borrow
-                                                        INNER JOIN returns ON borrow.book_id = returns.book_id
-                                                        LEFT JOIN books ON borrow.book_id = books.id";
+                                        $returnedQuery = "SELECT DISTINCT b.id, b.*, books.isbn, books.title, books.author, YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
+                                                        FROM borrow b
+                                                        LEFT JOIN books ON books.id = b.book_id";
 
                                         if ($selected_publish !== null) {
                                             $publishYears = explode(',', $selected_publish);
@@ -193,10 +192,11 @@
 
                                         // Add the date range condition
                                         if ($startDate && $endDate) {
-                                            $returnedQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                            $returnedQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                         }
 
-                                        $returnedQuery .= " GROUP BY publish_year";
+                                        $returnedQuery .= " AND b.status = 1";
+                                        $returnedQuery .= " GROUP BY publish_year"; // Corrected grouping
                                         $returnedResult = $conn->query($returnedQuery);
 
                                         // Fetch data for each year and create tables for book borrowed and returned
@@ -229,23 +229,24 @@
                                             echo "<tbody>";
 
                                             // Fetch data for the specific year for book borrowed and returned
-                                            $returnedYearQuery = "SELECT borrow.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
-                                                                FROM borrow
-                                                                INNER JOIN returns r ON borrow.book_id = r.book_id
-                                                                LEFT JOIN students ON students.id = borrow.student_id
-                                                                LEFT JOIN books ON books.id = borrow.book_id
+                                            $returnedYearQuery = "SELECT b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                                                                FROM borrow b
+                                                                INNER JOIN returns r ON b.book_id = r.book_id
+                                                                LEFT JOIN students ON students.id = b.student_id
+                                                                LEFT JOIN books ON books.id = b.book_id
                                                                 WHERE YEAR(books.publish_date) = $year";
 
                                             // Add the date range condition
                                             if ($startDate && $endDate) {
-                                                $returnedYearQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                                $returnedYearQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                             }
 
-                                            $returnedYearQuery .= " ORDER BY borrow.date_borrow DESC";
+                                            $returnedYearQuery .= " GROUP BY book_id";
+                                            $returnedYearQuery .= " ORDER BY b.date_borrow DESC";
 
                                             $returnedYearResult = $conn->query($returnedYearQuery);
 
-                                            if ($returnedYearResult->num_rows > 0) {
+                                            if ($returnedYearResult && $returnedYearResult->num_rows > 0) {
                                                 while ($row = $returnedYearResult->fetch_assoc()) {
                                                     echo "<tr>";
                                                     echo "<td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>";
@@ -296,7 +297,7 @@
                                 <div class="box-body">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <canvas id="borrowReturnChartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
+                                            <canvas id="borrowReturnChartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
                                             <table class='table table-bordered contrast-returned-and-pending-returns-table' style="display: none;">
                                                 <thead>
                                                     <tr>
@@ -333,7 +334,7 @@
                                 <div class="box-body">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <canvas id="bookTransactionsChart" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
+                                            <canvas id="bookTransactionsChart" style="height: 250px; width: 900px; margin-left: auto; margin-right: auto;"></canvas>
                                             <table class='table table-bordered all-transaction-history-table' style="display: none;">
                                                 <thead>
                                                     <tr>
@@ -522,6 +523,9 @@
                             // Initialize Pending DataTable
                             pendingBooksTable = $('.pending-book-table').DataTable({
                                 dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
                                 buttons: [
                                     {
                                         extend: 'excelHtml5',
@@ -608,6 +612,9 @@
                             // Initialize Book Borrowed and Return DataTable
                             bookBorrowedAndReturnTable = $('.book-borrowed-and-return-table').DataTable({
                                 dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
                                 buttons: [
                                     {
                                         extend: 'excelHtml5',
@@ -693,6 +700,9 @@
 
                             contrastBooksReturnedAndPendingReturns = $('.contrast-returned-and-pending-returns-table').DataTable({
                                 dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
                                 buttons: [
                                     {
                                         extend: 'excelHtml5',
@@ -774,6 +784,9 @@
 
                             allTransactionHistory = $('.all-transaction-history-table').DataTable({
                                 dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
                                 buttons: [
                                     {
                                         extend: 'excelHtml5',
@@ -855,6 +868,9 @@
 
                             rankingPerTotalTransaction = $('.ranking-of-book-publish-year-by-total-transaction').DataTable({
                                 dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
                                 buttons: [
                                     {
                                         extend: 'excelHtml5',
@@ -1162,15 +1178,26 @@
                             responsive: true,
                             plugins: {
                                 legend: {
-                                    position: 'bottom',
+                                    position: 'right',
                                     labels: {
-                                        fontSize: 1 // Adjust the font size as needed
+                                        font: {
+                                            size: 20,
+                                            weight: 'bolder'
+                                        }
                                     },
                                     label: pendingBookReturnsPublishYear
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Pending Book Returns by Year Published of Books'
+                                    text: 'Pending Book Returns by Year Published of Books',
+                                    font: {
+                                        size: 20,
+                                        
+                                    },
+                                    padding: {
+                                        top: 10,
+                                        bottom: 30
+                                    }
                                 }
                             }
                         },
@@ -1222,7 +1249,7 @@
                     ?>
 
                     const bookBorrowedAndReturned = <?php echo json_encode($returnedChartData); ?>;
-                    const bookBorrowedAndReturnedPublishYear = bookBorrowedAndReturned.map(element => element.publish_year);
+                    const bookBorrowedAndReturnedPublishYear = bookBorrowedAndReturned.map(element => element.publish_year + ' : ' + element.count);
                     const bookBorrowedAndReturnedCount = bookBorrowedAndReturned.map(element => element.count);
                     const bookBorrowedAndReturnedBackgroundColor = <?php echo json_encode($backgroundColor); ?>;
                     const bookBorrowedAndReturnedContainer = document.getElementById('returnedChartContainer');
@@ -1241,11 +1268,26 @@
                             responsive: true,
                             plugins: {
                                 legend: {
-                                    position: 'top',
+                                    position: 'right',
+                                    labels: {
+                                        font: {
+                                            size: 13,
+                                            weight: 'bolder'
+                                        }
+                                    },
+                                    label: bookBorrowedAndReturnedPublishYear
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Book Borrowed and Returned by Year Published of Books'
+                                    text: 'Book Borrowed and Returned by Year Published of Books',
+                                    font: {
+                                        size: 20,
+                                        
+                                    },
+                                    padding: {
+                                        top: 10,
+                                        bottom: 50
+                                    }
                                 }
                             }
                         },
@@ -1260,35 +1302,7 @@
         if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
     ?>
         <script>
-            //! FIX ME
             window.onload = function () {
-                // Pie chart for borrow and return transactions
-                // var borrowReturnData = [
-                //     { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
-                //     { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
-                // ];
-
-                // var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
-                //     animationEnabled: true,
-                //     title: {
-                //         text: "Pending Book Returns vs Book Borrowed and Returned"
-                //     },
-                //     legend: {
-                //         maxWidth: 350,
-                //         itemWidth: 120
-                //     },
-                //     data: [{
-                //         type: "pie",
-                //         showInLegend: true,
-                //         legendText: "{label}: {y}",
-                //         startAngle: 0,
-                //         yValueFormatString: "##0",
-                //         indexLabel: "{label} {y}",
-                //         dataPoints: borrowReturnData
-                //     }]
-                // });
-                // borrowReturnChart.render();
-
                 var borrowReturnData = [
                     { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
                     { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
@@ -1312,18 +1326,32 @@
                         }]
                     },
                     options: {
-                        title: {
-                            display: true,
-                            text: 'Pending Book Returns vs Book Borrowed and Returned'
-                        },
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                fontSize: 1 // Adjust the font size as needed
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 5,
+                                        weight: 'bolder'
+                                    }
+                                },
+                                label: borrowReturnData.map(data => data.label)
                             },
-                            label: borrowReturnData.map(data => data.label)
-                        },
-                    }
+                            title: {
+                                display: true,
+                                text: 'Pending Book Returns vs Book Borrowed and Returned',
+                                font: {
+                                        size: 20,
+                                        
+                                    },
+                                    padding: {
+                                        top: 10,
+                                        bottom: 30
+                                    }
+                            }
+                        }
+                    },
                 });
 
             }
@@ -1363,6 +1391,16 @@
                                         data: transactions
                                     }]
                                 },
+                                options: {
+                                    legend: {
+                                        position: 'right',
+                                        font: {
+                                            size: 13,
+                                            weight: 'bolder'
+                                        },
+                                        label: years
+                                    }
+                                }
                             });
                         },
                         error: function (data) {

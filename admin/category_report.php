@@ -69,7 +69,7 @@
             <div class="box-body">
               <div class="row pending-book-returns">
                 <div class="col-md-12">
-                  <canvas id="chartContainer" style="height: 200px; margin-left: auto; margin-right: auto;"></canvas>
+                  <canvas id="chartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
                   <div id="legend-container"></div>
                   <table class="table table-bordered" id="book_data">
                     <thead>
@@ -288,7 +288,7 @@
                 <div class="row">
                   <div class="col-md-12">
                     <!-- <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div> -->
-                    <canvas id="returnedChartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+                    <canvas id="returnedChartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
                   </div>
                 </div>
                 <div class="row">
@@ -432,7 +432,7 @@
                       <div class="box-body">
                           <div class="row">
                               <div class="col-md-12">
-                                  <canvas id="borrowReturnChartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
+                                  <canvas id="borrowReturnChartContainer" style="height: 250px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
                                   <table class='table table-bordered contrast-returned-and-pending-returns-table' style="display: none;">
                                         <thead>
                                             <tr>
@@ -472,7 +472,7 @@
                     <div class="box-body">
                     <div class="row">
                       <div class="col-md-12">
-                        <canvas id="bookTransactionsChart" style="height: 300px; margin-left: auto; margin-right: auto;"></canvas>
+                        <canvas id="bookTransactionsChart" style="height: 250px; width: 900px; margin-left: auto; margin-right: auto;"></canvas>
                         <table class='table table-bordered all-transaction-history-table' style="display: none;">
                             <thead>
                                 <tr>
@@ -677,8 +677,6 @@ $(function(){
             printWindow.document.write($('#example1').clone().prop('outerHTML'));
             printWindow.document.write('</body></html>');
             printWindow.document.close();
-
-            // Call the print function on the new window
             printWindow.print();
         });
     });
@@ -735,6 +733,9 @@ $(function(){
 
                     table = $('#book_data').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -820,6 +821,9 @@ $(function(){
 
                     pendingBooksTable = $('.pending-book-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -905,6 +909,9 @@ $(function(){
 
                     bookBorrowedAndReturnTable = $('.book-borrowed-and-return-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -990,6 +997,9 @@ $(function(){
 
                     contrastBooksReturnedAndPendingReturns = $('.contrast-returned-and-pending-returns-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -1071,6 +1081,9 @@ $(function(){
 
                     allTransactionHistory = $('.all-transaction-history-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -1152,6 +1165,9 @@ $(function(){
 
                     rankingPerTotalTransaction = $('.ranking-of-book-publish-year-by-total-transaction').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -1413,16 +1429,27 @@ $(function(){
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            position: 'right',
                             labels: {
-                                fontSize: 1 // Adjust the font size as needed
+                                font: {
+                                    size: 20,
+                                    weight: 'bolder'
+                                }
                             },
                             label: pendingBookReturnsPublishYear
                         },
                         title: {
                             display: true,
-                            text: 'Borrowed Books by Category'
-                        },
+                            text: 'Borrowed Books by Category',
+                            font: {
+                                size: 20,
+                                
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
+                        }
                     }
                 },
             });
@@ -1463,12 +1490,23 @@ $(function(){
                 options: {
                     title: {
                         display: true,
-                        text: 'Pending Book Returns vs Book Borrowed and Returned'
+                        text: 'Pending Book Returns vs Book Borrowed and Returned',
+                        font: {
+                                size: 20,
+                                
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
                     },
                     legend: {
-                        position: 'bottom',
+                        position: 'right',
                         labels: {
-                            fontSize: 1 // Adjust the font size as needed
+                            font: {
+                                size: 5,
+                                weight: 'bolder'
+                            }
                         },
                         label: borrowReturnData.map(data => data.label)
                     },
@@ -1618,11 +1656,26 @@ $(function(){
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'top',
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 13,
+                                weight: 'bolder'
+                            }
+                        },
+                        label: bookBorrowedAndReturnedPublishYear
                     },
                     title: {
                         display: true,
-                        text: 'Book Borrowed and Returned by Category'
+                        text: 'Book Borrowed and Returned by Category',
+                        font: {
+                            size: 20,
+                            
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 50
+                        }
                     }
                 }
             },
@@ -1682,6 +1735,15 @@ $(function(){
                         data: totalTransactionData
                     }]
                 },
+                options: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            fontSize: 13,
+                            fontWeight: 'bolder'
+                        }
+                    }
+                }
             });
 
 

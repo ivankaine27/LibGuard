@@ -68,7 +68,7 @@
             </div>
             
             <div class="box-body">
-              <canvas id="chartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+              <canvas id="chartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
               <table id="borrowed_book_data" class="table table-bordered">
                 <thead>
                   <th class="hidden"></th>
@@ -271,7 +271,7 @@
                         <div class="row">
                           <div class="col-md-12">
                             <!-- <div id="borrowReturnChartContainer" style="height: 300px; width: 100%;"></div> -->
-                            <canvas id="returnedChartContainer" style="height: 120px; margin-left: auto; margin-right: auto;"></canvas>
+                            <canvas id="returnedChartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
                           </div>
                         </div>
                         <div class="row">
@@ -415,7 +415,7 @@
                               <div class="box-body">
                                   <div class="row">
                                       <div class="col-md-12">
-                                          <canvas id="borrowReturnChartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></canvas>
+                                          <canvas id="borrowReturnChartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
                                           <table class='table table-bordered contrast-returned-and-pending-returns-table' style="display: none;">
                                             <thead>
                                                 <tr>
@@ -455,7 +455,7 @@
                             <div class="box-body">
                             <div class="row">
                               <div class="col-md-12">
-                                <canvas id="bookTransactionsChart" style="height: 300px; margin-left: auto; margin-right: auto;"></canvas>
+                                <canvas id="bookTransactionsChart" style="height: 250px; width: 900px; margin-left: auto; margin-right: auto;"></canvas>
                                 <table class='table table-bordered all-transaction-history-table' style="display: none;">
                                     <thead>
                                         <tr>
@@ -647,7 +647,7 @@ $(function(){
     });
 </script> -->
 <!-- Add this script after the existing scripts in your HTML -->
-<script>
+<!-- <script>
   $(document).ready(function() {
     $('#downloadButton').click(function(e) {
         e.preventDefault();
@@ -699,12 +699,9 @@ $(function(){
 
 
         printWindow.document.close();
-
-        // Call the print function on the new window
-        // printWindow.print();
     });
 });
-</script>
+</script> -->
 <script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -759,6 +756,9 @@ $(function(){
 
                     table = $('#borrowed_book_data').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -832,6 +832,9 @@ $(function(){
 
                     pendingBooksTable = $('.pending-book-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -917,6 +920,9 @@ $(function(){
 
                     bookBorrowedAndReturnTable = $('.book-borrowed-and-return-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -1002,6 +1008,9 @@ $(function(){
 
                     contrastBooksReturnedAndPendingReturns = $('.contrast-returned-and-pending-returns-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -1083,6 +1092,9 @@ $(function(){
 
                     allTransactionHistory = $('.all-transaction-history-table').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -1164,6 +1176,9 @@ $(function(){
 
                     rankingPerTotalTransaction = $('.ranking-of-book-publish-year-by-total-transaction').DataTable({
                         dom: 'lBfrtip',
+                        searching: false, 
+                        paging: false, 
+                        info: false,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -1361,115 +1376,6 @@ $(function(){
     });
 </script>
 
-<script type="text/javascript" language="javascript">
-    $(document).ready(function () {
-        // Base64 encoded image data
-        <?php
-        // Path to your image file
-        $imagePath = '../images/libguard-logo.png';
-
-        // Read image data
-        $imageData = file_get_contents($imagePath);
-
-        // Encode image data to base64
-        $imgData = base64_encode($imageData);
-        $type = pathinfo($imagePath, PATHINFO_EXTENSION);
-        $src = 'data:image/' . $type . ';base64,' . $imgData;
-        ?>
-
-        var image = '<?php echo $src; ?>';
-        var table;
-
-        table = $('#borrowed_book_data').DataTable({
-            dom: 'lBfrtip',
-            buttons: [
-                {
-                    extend: 'excelHtml5',
-                    class: 'buttons-excel',
-                    init: function (api, node, config) {
-                        $(node).hide()
-                    },
-                    customize: function (xlsx) {
-                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
-
-                        // Add the title, student name, and student ID to the Excel document
-                        var title = 'Borrowed Books by Course';
-                        
-                        // Add title, student name, and student ID to separate rows
-                        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
-                        
-                        // Add an empty row for better formatting
-                        sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
-                    },
-                    filename: 'Borrowed Books by Course' // Set the filename for download
-                },
-
-                {
-                    extend: 'csvHtml5',
-                    class: 'buttons-csv',
-                    init: function (api, node, config) {
-                        $(node).hide()
-                    },
-                    customize: function (csv) {
-                        // Add the title and student information to the CSV content
-                        var csvContent = 'Borrowed Books by Course\n';
-
-                        // Append the existing CSV content
-                        csvContent += csv;
-
-                        return csvContent;
-                    },
-                    filename: 'Borrowed Books by Course' // Set the filename for download
-                },
-                {
-                    extend: 'pdfHtml5',
-                    class: 'buttons-pdf',
-                    init: function (api, node, config) {
-                        $(node).hide()
-                    },
-                    customize: function (doc) {
-                        // Remove the title
-                        doc.content.splice(0, 1);
-
-                        // Add the image to the PDF document
-                        doc.content.unshift({
-                            margin: [0, 0, 0, 12],
-                            alignment: 'center',
-                            image: image
-                        });
-
-                        // Add the title and student information
-                        doc.content.splice(1, 0, {
-                            text: [
-                                { text: 'Borrowed Books by Course\n', fontSize: 14, bold: true },
-                            ],
-                            alignment: 'left',
-                            margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                        });
-                    },
-                    filename: 'Borrowed Books by Course' // Set the filename for download
-                },
-            ],
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-        });
-
-        // Trigger Excel export
-        $('#excel-btn').click(function() {
-            table.buttons('.buttons-excel').trigger();
-        });
-
-        // Trigger CSV export
-        $('#csv-btn').click(function() {
-            table.buttons('.buttons-csv').trigger();
-        });
-
-        // Trigger PDF export
-        $('#pdf-btn').click(function() {
-            table.buttons('.buttons-pdf').trigger();
-        });
-    });
-</script>
-
 <?php
     if ($_GET['pending_book_returns'] != 0) {
 ?>
@@ -1535,11 +1441,26 @@ $(function(){
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'top',
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 20,
+                                    weight: 'bolder'
+                                }
+                            },
+                            label: pendingBookReturnsPublishYear
                         },
                         title: {
                             display: true,
-                            text: 'Borrowed Books by Category'
+                            text: 'Borrowed Books By Category',
+                            font: {
+                                size: 20,
+                                
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            }
                         }
                     }
                 },
@@ -1554,128 +1475,62 @@ $(function(){
     if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
 ?>
     <script type="text/javascript">
+        window.onload = function () {
+            var borrowReturnData = [
+                { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
+                { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
+            ];
 
-        <?php
-            $totalTransactionData = $totalTransactions;
-            $totalTransactionsReturnedData = $totalTransactionsReturned;
-        ?>
-        
-        const pendingBookReturns = <?php echo json_encode($totalTransactions); ?>;
-        const bookBorrowedAndReturn = <?php echo json_encode($totalTransactionsReturned); ?>
-        
-        const pendingBookReturnsAndBookBorrowedAndReturnedContainer = document.getElementById('borrowReturnChartContainer');
-
-        new Chart(pendingBookReturnsAndBookBorrowedAndReturnedContainer, {
-            type: 'pie',
-            data: {
-                labels: 'Pending Book Returns vs Book Borrowed and Returned',
-                datasets: [{
-                    label: [
-                        'Pending Book Returns',
-                        'Book Borrowed and Returned'
-                    ],
-                    data: [
-                        pendingBookReturns,
-                        bookBorrowedAndReturn
-                    ],
-                    backgroundColor: ['blue', 'red'],
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Pending Book Returns vs Book Borrowed and Returned'
+            var borrowReturnChart = new Chart(document.getElementById('borrowReturnChartContainer'), {
+                type: 'pie',
+                data: {
+                    labels: borrowReturnData.map(data => data.label),
+                    datasets: [{
+                        data: borrowReturnData.map(data => data.y),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 5,
+                                    weight: 'bolder'
+                                }
+                            },
+                            label: borrowReturnData.map(data => data.label)
+                        },
+                        title: {
+                            display: true,
+                            text: 'Pending Book Returns vs Book Borrowed and Returned',
+                            font: {
+                                    size: 20,
+                                    
+                                },
+                                padding: {
+                                    top: 10,
+                                    bottom: 30
+                                }
+                        }
                     }
-                }
-            },
-        });
-
+                },
+            });
+        }
     </script>
 <?php
     }
 ?>
-
-<!-- <script>
-  //! FIX ME
-  window.onload = function () {
-    // Pie chart for borrow and return transactions
-    var borrowReturnData = [
-        { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
-        { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
-    ];
-
-    var borrowReturnChart = new CanvasJS.Chart("borrowReturnChartContainer", {
-        animationEnabled: true,
-        title: {
-            text: "Pending Book Returns vs Book Borrowed and Returned"
-        },
-        legend: {
-            maxWidth: 350,
-            itemWidth: 120
-        },
-        data: [{
-            type: "pie",
-            showInLegend: true,
-            legendText: "{label}: {y}",
-            startAngle: 0,
-            yValueFormatString: "##0",
-            indexLabel: "{label} {y}",
-            dataPoints: borrowReturnData
-        }]
-    });
-    borrowReturnChart.render();
-  }
-
-  $(document).ready(function () {
-      // Fetch data for book transactions by publish year
-      $.ajax({
-          url: 'fetch_book_transactions.php', // Path to your PHP script to fetch data
-          method: 'GET',
-          success: function (data) {
-              var years = [];
-              var transactions = [];
-
-              for (var i in data) {
-                  years.push(data[i].publish_year);
-                  transactions.push(data[i].total_transactions);
-              }
-
-              var ctx = document.getElementById('bookTransactionsChart').getContext('2d');
-              var chart = new Chart(ctx, {
-                  type: 'bar',
-                  data: {
-                      labels: years,
-                      datasets: [{
-                          label: 'Total Transactions',
-                          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                          borderColor: 'rgba(255, 99, 132, 1)',
-                          borderWidth: 1,
-                          data: transactions
-                      }]
-                  },
-                  // options: {
-                  //     scales: {
-                  //         yAxes: [{
-                  //             ticks: {
-                  //                 beginAtZero: true
-                  //             }
-                  //         }]
-                  //     }
-                  // }
-              });
-              
-          },
-          error: function (data) {
-              console.log(data);
-          }
-      });
-  });
-</script> -->
 
 <?php
     if ($_GET['books_borrowed_and_returned'] != 0) {
@@ -1739,11 +1594,26 @@ $(function(){
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'top',
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 13,
+                                weight: 'bolder'
+                            }
+                        },
+                        label: bookBorrowedAndReturnedPublishYear
                     },
                     title: {
                         display: true,
-                        text: 'Book Borrowed and Returned by Category'
+                        text: 'Book Borrowed and Returned by Category',
+                        font: {
+                            size: 20,
+                            
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 50
+                        }
                     }
                 }
             },
@@ -1804,40 +1674,16 @@ $(function(){
                         data: totalTransactionData
                     }]
                 },
+                options: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            fontSize: 13,
+                            fontWeight: 'bolder'
+                        }
+                    }
+                }
             });
-
-
-            // $.ajax({
-            //     url: 'fetch_book_transactions.php', // Path to your PHP script to fetch data
-            //     method: 'GET',
-            //     success: function (data) {
-            //         var years = [];
-            //         var transactions = [];
-
-            //         for (var i in data) {
-            //             years.push(data[i].publish_year);
-            //             transactions.push(data[i].total_transactions);
-            //         }
-
-            //         var ctx = document.getElementById('bookTransactionsChart').getContext('2d');
-            //         var chart = new Chart(ctx, {
-            //             type: 'bar',
-            //             data: {
-            //                 labels: years,
-            //                 datasets: [{
-            //                     label: 'Total Transactions',
-            //                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            //                     borderColor: 'rgba(255, 99, 132, 1)',
-            //                     borderWidth: 1,
-            //                     data: transactions
-            //                 }]
-            //             },
-            //         });
-            //     },
-            //     error: function (data) {
-            //         console.log(data);
-            //     }
-            // });
         });
     </script>
 <?php

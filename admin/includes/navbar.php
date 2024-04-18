@@ -5,7 +5,7 @@
     <span class="logo-mini"><b>LG</b></span>
     <!-- logo for regular state and mobile devices -->
     <span class="logo-lg" style="width: 200px; height: 50px; display: inline-block; overflow: hidden;">
-    <img src="../images/libguard-logo-NAVBAR.png" style="width: auto; height: 100%; margin-left: 10px;">
+    <img src="../images/logos/libguard-logo-NAVBAR.png" style="width: auto; height: 100%; margin-left: 10px;">
 </span>
 
 

@@ -11,13 +11,13 @@
             <div class="modal-body">
                 
                     <?php
-                        $sql = "SELECT title, id from course;";
+                        $sql = "SELECT code, id from course;";
                         $query = $conn->query($sql);
 
                         while($row = $query->fetch_assoc()){
                             echo "
                                 <input type='checkbox' name='selected_courses[]' class='select-checkbox' data-id='".$row['id']."' style='width: 20px; height: 20px;' id='".$row['id']."'>
-                                <label for='".$row['id']."'>".$row['title']."</label>
+                                <label for='".$row['id']."'>".$row['code']."</label>
                                 <br>
                             ";
                         }

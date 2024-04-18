@@ -7,7 +7,8 @@
     }
 ?>
 <?php include 'includes/header.php'; ?>
-<body class="hold-transition skin-maroon-gold layout-top-nav" >
+<body class="hold-transition skin-maroon-gold layout-top-nav" style="background-image: url('images/logos/15.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: rgba(255, 255, 255, 0.5);">
+
 <div class="wrapper">
     <?php include 'includes/navbar.php'; ?>
     <div class="content-wrapper">

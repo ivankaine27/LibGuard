@@ -115,7 +115,7 @@
                                         // Fetch data for the specific year for pending book returns
                                         $yearQuery = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
                                                 FROM borrow b
-                                                LEFT JOIN returns r ON b.book_id = r.book_id
+                                                LEFT JOIN returns r ON b.book_id = r.book_id AND r.student_id = b.student_id
                                                 LEFT JOIN students ON students.id = b.student_id
                                                 LEFT JOIN books ON books.id = b.book_id
                                                 WHERE YEAR(books.publish_date) = $year AND (b.status = 0 OR r.date_return IS NULL)";
@@ -201,7 +201,7 @@
 
                                         // Fetch data for each year and create tables for book borrowed and returned
                                         $totalTransactionsReturned = 0;
-                                        $totalTransactions = 0;
+                                       
                                         while ($returnedRow = $returnedResult->fetch_assoc()) {
                                             $year = $returnedRow['publish_year'];
                                             $count = $returnedRow['count'];
@@ -229,11 +229,11 @@
                                             echo "<tbody>";
 
                                             // Fetch data for the specific year for book borrowed and returned
-                                            $returnedYearQuery = "SELECT b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
-                                                                FROM borrow b
-                                                                INNER JOIN returns r ON b.book_id = r.book_id
-                                                                LEFT JOIN students ON students.id = b.student_id
-                                                                LEFT JOIN books ON books.id = b.book_id
+                                            $returnedYearQuery = "SELECT DISTINCT r.id, r.*, r.date_return AS return_date, b.date_borrow, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                                            FROM returns r
+                                            LEFT JOIN students ON students.id = r.student_id 
+                                            LEFT JOIN books ON books.id = r.book_id 
+                                            LEFT JOIN borrow b ON b.book_id = r.book_id AND b.student_id = r.student_id 
                                                                 WHERE YEAR(books.publish_date) = $year";
 
                                             // Add the date range condition
@@ -241,7 +241,6 @@
                                                 $returnedYearQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                             }
 
-                                            $returnedYearQuery .= " GROUP BY book_id";
                                             $returnedYearQuery .= " ORDER BY b.date_borrow DESC";
 
                                             $returnedYearResult = $conn->query($returnedYearQuery);
@@ -366,7 +365,7 @@
                         <div class="col-xs-12">
                             <div class="box">
                                 <div class="box-header with-border">
-                                    <h3 class="box-title">Rankings of Book Publish Years by Total Transactions</h3>
+                                    <h3 class="box-title">Rankings of Book Publish Years according to the Totral Transactions</h3>
                                 </div>
                                 <div class="row">
                                     <div class="box-body ranking-of-book-publish-year-by-total-transaction-table">
@@ -497,9 +496,9 @@
                     });
                 }
                 
-                var imagePath = '../images/libguard-logo.png';
-                var bannerWidth = 400; 
-                var bannerHeight = 200;
+                var imagePath = '../images/logos/libguard-logo-header2.png';
+                var bannerWidth = 200; 
+                var bannerHeight = 100;
                 var table;
 
                 //Datatable variables
@@ -1185,6 +1184,9 @@
                                             weight: 'bolder'
                                         }
                                     },
+                                    padding: {
+                    top: 40 // Increase the top padding of the legend
+                },
                                     label: pendingBookReturnsPublishYear
                                 },
                                 title: {
@@ -1217,9 +1219,9 @@
                         // Fetch data for book borrowed and returned
                         $returnedChartData = array();
                         $booksBorrowedAndReturnedQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS count
-                                        FROM borrow
-                                        INNER JOIN returns ON borrow.book_id = returns.book_id
-                                        LEFT JOIN books ON borrow.book_id = books.id";
+                                        FROM returns
+                                     
+                                        LEFT JOIN books ON returns.book_id = books.id";
 
                         if ($selected_publish !== null) {
                             $publishYears = explode(',', $selected_publish);
@@ -1229,7 +1231,7 @@
 
                         // Add the date range condition
                         if ($startDate && $endDate) {
-                            $booksBorrowedAndReturnedQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                            $booksBorrowedAndReturnedQuery .= " AND returns.date_return BETWEEN '$startDate' AND '$endDate'";
                         }
 
                         $booksBorrowedAndReturnedQuery .= " GROUP BY publish_year";
@@ -1256,10 +1258,11 @@
 
                     new Chart(bookBorrowedAndReturnedContainer, {
                         type: 'pie',
+                        animationEnabled: true,
                         data: {
                             labels: bookBorrowedAndReturnedPublishYear,
                             datasets: [{
-                                label: 'Book Borrowed and Returned',
+                                label: 'Books Borrowed and Returned',
                                 data: bookBorrowedAndReturnedCount,
                                 backgroundColor: bookBorrowedAndReturnedBackgroundColor,
                             }]
@@ -1268,18 +1271,21 @@
                             responsive: true,
                             plugins: {
                                 legend: {
+                                  
                                     position: 'right',
                                     labels: {
+                                      
                                         font: {
                                             size: 13,
                                             weight: 'bolder'
                                         }
                                     },
+                                 
                                     label: bookBorrowedAndReturnedPublishYear
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Book Borrowed and Returned by Year Published of Books',
+                                    text: 'Books Borrowed and Returned by Year Published of Books',
                                     font: {
                                         size: 20,
                                         
@@ -1304,57 +1310,55 @@
         <script>
             window.onload = function () {
                 var borrowReturnData = [
-                    { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
-                    { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
-                ];
+                { label: "Pending Book Returns", y: <?php echo $totalTransactions; ?> },
+                { label: "Book Borrowed and Returned", y: <?php echo $totalTransactionsReturned; ?> }
+            ];
 
-                var borrowReturnChart = new Chart(document.getElementById('borrowReturnChartContainer'), {
-                    type: 'pie',
-                    data: {
-                        labels: borrowReturnData.map(data => data.label),
-                        datasets: [{
-                            data: borrowReturnData.map(data => data.y),
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.6)',
-                                'rgba(54, 162, 235, 0.6)',
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    font: {
-                                        size: 5,
-                                        weight: 'bolder'
-                                    }
-                                },
-                                label: borrowReturnData.map(data => data.label)
-                            },
-                            title: {
-                                display: true,
-                                text: 'Pending Book Returns vs Book Borrowed and Returned',
-                                font: {
-                                        size: 20,
-                                        
-                                    },
-                                    padding: {
-                                        top: 10,
-                                        bottom: 30
-                                    }
-                            }
-                        }
-                    },
-                });
-
+            var borrowReturnChart = new Chart(document.getElementById('borrowReturnChartContainer'), {
+    type: 'pie',
+    data: {
+        labels: ["Pending Book Returns", "Book Borrowed and Returned"],
+        datasets: [{
+            data: [<?php echo $totalTransactions; ?>, <?php echo $totalTransactionsReturned; ?>],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    font: {
+                        size: 13,
+                        weight: 'bolder'
+                    }
+                }
+            },
+            title: {
+                display: true,
+                text: 'Pending Book Returns vs Book Borrowed and Returned',
+                font: {
+                    size: 20,
+                },
+                padding: {
+                    top: 10,
+                    bottom: 30
+                }
             }
+        }
+    }
+});
+
+        }
         </script>
     <?php 
         }

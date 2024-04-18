@@ -22,7 +22,7 @@
             </div>
             <div class="modal-body">
                 <div class= "iframe-container">
-                    <iframe src="http://192.168.0.112" width="480" height="320" frameborder="0" scrolling="no"></iframe>
+                    <iframe src="http://192.168.0.121" width="480" height="320" frameborder="0" scrolling="no"></iframe>
                 </div>
             </div>
         </div>

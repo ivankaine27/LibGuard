@@ -72,8 +72,8 @@
 
                     $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
                             FROM borrow b
-                            LEFT JOIN returns r ON b.book_id = r.book_id
-                            LEFT JOIN students ON students.id = b.student_id
+                            LEFT JOIN returns r ON b.book_id = r.book_id AND b.student_id = r.student_id 
+                            LEFT JOIN students ON students.id = b.student_id 
                             LEFT JOIN books ON books.id = b.book_id";
                     
                     if ($department !== null) {

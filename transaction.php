@@ -40,10 +40,16 @@
                                     <?php
                                         $query = $conn->query($sql);
                                         while($row = $query->fetch_assoc()){
+                                            $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
+                                            $returnDate = $row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet";
+                                            // Check if the status is 0 (not returned) and adjust the return date accordingly
+                                            if (!$row['status']) {
+                                                $returnDate = "Not Returned Yet";
+                                            }
                                             echo "
                                                 <tr>
                                                     <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
-                                                    <td>".($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet")."</td>
+                                                    <td>".$returnDate."</td>
                                                     <td>".$row['isbn']."</td>
                                                     <td>".$row['title']."</td>
                                                     <td>".$row['author']."</td>

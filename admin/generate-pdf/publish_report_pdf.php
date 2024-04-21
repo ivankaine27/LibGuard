@@ -1,7 +1,7 @@
 <?php
 
 // Include Composer autoloader to load libraries
-require_once 'vendor/autoload.php';
+require_once '../../vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -57,7 +57,7 @@ function exportToPDF($data) {
     $pdf->render();
 
     // Output PDF
-    $pdf->stream('export.pdf');
+    return $pdf->stream('export.pdf', array("Attachment" => true));
 }
 
 // Export to CSV
@@ -117,8 +117,8 @@ function exportToExcel($data) {
 }
 
 // Example usage
-exportToPDF($data);
-exportToCSV($data);
-exportToExcel($data);
+// exportToPDF($data);
+// exportToCSV($data);
+// exportToExcel($data);
 
 ?>

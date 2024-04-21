@@ -473,628 +473,628 @@
         <script type="text/javascript" language="javascript">
             $(document).ready(function () {
                 // // Function to convert image file to base64 data URL
-                // function imageToDataURL(imagePath) {
-                //     return new Promise(function(resolve, reject) {
-                //         var xhr = new XMLHttpRequest();
-                //         xhr.onload = function() {
-                //             if (xhr.status === 200) {
-                //                 var reader = new FileReader();
-                //                 reader.onload = function() {
-                //                     resolve(reader.result);
-                //                 };
-                //                 reader.readAsDataURL(xhr.response);
-                //             } else {
-                //                 reject(new Error('Failed to load image'));
-                //             }
-                //         };
-                //         xhr.onerror = function() {
-                //             reject(new Error('Network error occurred'));
-                //         };
-                //         xhr.open('GET', imagePath);
-                //         xhr.responseType = 'blob';
-                //         xhr.send();
-                //     });
-                // }
+                function imageToDataURL(imagePath) {
+                    return new Promise(function(resolve, reject) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                var reader = new FileReader();
+                                reader.onload = function() {
+                                    resolve(reader.result);
+                                };
+                                reader.readAsDataURL(xhr.response);
+                            } else {
+                                reject(new Error('Failed to load image'));
+                            }
+                        };
+                        xhr.onerror = function() {
+                            reject(new Error('Network error occurred'));
+                        };
+                        xhr.open('GET', imagePath);
+                        xhr.responseType = 'blob';
+                        xhr.send();
+                    });
+                }
                 
-                // var imagePath = '../images/logos/libguard-logo-header2.png';
-                // var bannerWidth = 200; 
-                // var bannerHeight = 100;
-                // var table;
+                var imagePath = '../images/logos/libguard-logo-header2.png';
+                var bannerWidth = 200; 
+                var bannerHeight = 100;
+                var table;
 
-                // //Datatable variables
-                // var pendingBooksTable;
-                // var bookBorrowedAndReturnTable;
-                // var contrastBooksReturnedAndPendingReturns;
-                // var allTransactionHistory
-                // var rankingPerTotalTransaction;
+                //Datatable variables
+                var pendingBooksTable;
+                var bookBorrowedAndReturnTable;
+                var contrastBooksReturnedAndPendingReturns;
+                var allTransactionHistory
+                var rankingPerTotalTransaction;
 
-                // imageToDataURL(imagePath)
-                //     .then(function(dataURL) {
-                //         var image = new Image();
-                //         image.onload = function() {
-                //             var canvas = document.createElement('canvas');
-                //             var ctx = canvas.getContext('2d');
-                //             canvas.width = bannerWidth;
-                //             canvas.height = bannerHeight;
-                //             ctx.drawImage(image, 0, 0, bannerWidth, bannerHeight);
-                //             var resizedImage = canvas.toDataURL('image/png');
+                imageToDataURL(imagePath)
+                    .then(function(dataURL) {
+                        var image = new Image();
+                        image.onload = function() {
+                            var canvas = document.createElement('canvas');
+                            var ctx = canvas.getContext('2d');
+                            canvas.width = bannerWidth;
+                            canvas.height = bannerHeight;
+                            ctx.drawImage(image, 0, 0, bannerWidth, bannerHeight);
+                            var resizedImage = canvas.toDataURL('image/png');
 
-                //             // Initialize Pending DataTable
-                //             pendingBooksTable = $('.pending-book-table').DataTable({
-                //                 dom: 'lBfrtip',
-                //                 searching: false, 
-                //                 paging: false, 
-                //                 info: false,
-                //                 buttons: [
-                //                     {
-                //                         extend: 'excelHtml5',
-                //                         className: 'buttons-excel',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (xlsx) {
-                //                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            // Initialize Pending DataTable
+                            pendingBooksTable = $('.pending-book-table').DataTable({
+                                dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-                //                             // Add the title, student name, and student ID to the Excel document
-                //                             var title = 'Pending Book Return';
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Pending Book Return';
                                             
-                //                             // Add title, student name, and student ID to separate rows
-                //                             sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
                                             
-                //                             // Add an empty row for better formatting
-                //                             sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
-                //                         },
-                //                         filename: 'Pending Book Return' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'csvHtml5',
-                //                         className: 'buttons-csv',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (csv) {
-                //                             // Add the title and student information to the CSV content
-                //                             var csvContent = 'Pending Book Return\n';
+                                            // Add an empty row for better formatting
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
+                                        },
+                                        filename: 'Pending Book Return' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Pending Book Return\n';
 
-                //                             // Append the existing CSV content
-                //                             csvContent += csv;
+                                            // Append the existing CSV content
+                                            csvContent += csv;
 
-                //                             return csvContent;
-                //                         },
-                //                         filename: 'Pending Book Return' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'pdfHtml5',
-                //                         className: 'buttons-pdf',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (doc) {
-                //                             // Remove the title
-                //                             doc.content.splice(0, 1);
+                                            return csvContent;
+                                        },
+                                        filename: 'Pending Book Return' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
 
-                //                             // Convert Chart.js chart to a base64-encoded PNG image
-                //                             var canvas = document.createElement('canvas');
-                //                             canvas.width = 300; // Adjust width as needed
-                //                             canvas.height = 300; // Adjust height as needed
-                //                             var ctx = canvas.getContext('2d');
-                //                             ctx.drawImage(document.getElementById('chartContainer'), 0, 0, canvas.width, canvas.height);
-                //                             var chartImage = canvas.toDataURL('image/png');
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('chartContainer'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
 
-                //                             doc.content.unshift({
-                //                                 margin: [0, 0, 0, 12],
-                //                                 alignment: 'center',
-                //                                 image: chartImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
 
-                //                             doc.content.unshift({
-                //                                 margin: [100, 0, 0, -50],
-                //                                 alignment: 'center',
-                //                                 image: resizedImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
 
-                //                             // Add the title and student information
-                //                             doc.content.splice(1, 0, {
-                //                                 text: [
-                //                                     { text: 'Pending Book Return\n', fontSize: 14, bold: true },
-                //                                 ],
-                //                                 alignment: 'left',
-                //                                 margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                //                             });
-                //                         },
-                //                         filename: 'Pending Book Return' // Set the filename for download
-                //                     }
-                //                 ],
-                //                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-                //             });
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Pending Book Return\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Pending Book Return' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
 
-                //             // Initialize Book Borrowed and Return DataTable
-                //             bookBorrowedAndReturnTable = $('.book-borrowed-and-return-table').DataTable({
-                //                 dom: 'lBfrtip',
-                //                 searching: false, 
-                //                 paging: false, 
-                //                 info: false,
-                //                 buttons: [
-                //                     {
-                //                         extend: 'excelHtml5',
-                //                         className: 'buttons-excel',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (xlsx) {
-                //                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            // Initialize Book Borrowed and Return DataTable
+                            bookBorrowedAndReturnTable = $('.book-borrowed-and-return-table').DataTable({
+                                dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-                //                             // Add the title, student name, and student ID to the Excel document
-                //                             var title = 'Book Borrowed and Returned Data';
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Book Borrowed and Returned Data';
                                             
-                //                             // Add title, student name, and student ID to separate rows
-                //                             sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
                                             
-                //                             // Add an empty row for better formatting
-                //                             sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
-                //                         },
-                //                         filename: 'Book Borrowed and Returned Data' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'csvHtml5',
-                //                         className: 'buttons-csv',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (csv) {
-                //                             // Add the title and student information to the CSV content
-                //                             var csvContent = 'Book Borrowed and Returned Data\n';
+                                            // Add an empty row for better formatting
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr></tr></table>';
+                                        },
+                                        filename: 'Book Borrowed and Returned Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Book Borrowed and Returned Data\n';
 
-                //                             // Append the existing CSV content
-                //                             csvContent += csv;
+                                            // Append the existing CSV content
+                                            csvContent += csv;
 
-                //                             return csvContent;
-                //                         },
-                //                         filename: 'Book Borrowed and Returned Data' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'pdfHtml5',
-                //                         className: 'buttons-pdf',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (doc) {
-                //                             // Remove the title
-                //                             doc.content.splice(0, 1);
+                                            return csvContent;
+                                        },
+                                        filename: 'Book Borrowed and Returned Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
 
-                //                             // Convert Chart.js chart to a base64-encoded PNG image
-                //                             var canvas = document.createElement('canvas');
-                //                             canvas.width = 300; // Adjust width as needed
-                //                             canvas.height = 300; // Adjust height as needed
-                //                             var ctx = canvas.getContext('2d');
-                //                             ctx.drawImage(document.getElementById('returnedChartContainer'), 0, 0, canvas.width, canvas.height);
-                //                             var chartImage = canvas.toDataURL('image/png');
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('returnedChartContainer'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
 
-                //                             doc.content.unshift({
-                //                                 margin: [0, 0, 0, 12],
-                //                                 alignment: 'center',
-                //                                 image: chartImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
 
-                //                             doc.content.unshift({
-                //                                 margin: [100, 0, 0, -50],
-                //                                 alignment: 'center',
-                //                                 image: resizedImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
 
-                //                             // Add the title and student information
-                //                             doc.content.splice(1, 0, {
-                //                                 text: [
-                //                                     { text: 'Book Borrowed and Returned Data\n', fontSize: 14, bold: true },
-                //                                 ],
-                //                                 alignment: 'left',
-                //                                 margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                //                             });
-                //                         },
-                //                         filename: 'Book Borrowed and Returned Data' // Set the filename for download
-                //                     }
-                //                 ],
-                //                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-                //             });
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Book Borrowed and Returned Data\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Book Borrowed and Returned Data' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
 
-                //             contrastBooksReturnedAndPendingReturns = $('.contrast-returned-and-pending-returns-table').DataTable({
-                //                 dom: 'lBfrtip',
-                //                 searching: false, 
-                //                 paging: false, 
-                //                 info: false,
-                //                 buttons: [
-                //                     {
-                //                         extend: 'excelHtml5',
-                //                         className: 'buttons-excel',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (xlsx) {
-                //                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            contrastBooksReturnedAndPendingReturns = $('.contrast-returned-and-pending-returns-table').DataTable({
+                                dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-                //                             // Add the title, student name, and student ID to the Excel document
-                //                             var title = 'Contrast Returned and Pending Returns Data';
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Contrast Returned and Pending Returns Data';
                                             
-                //                             // Add title, student name, and student ID to separate rows
-                //                             sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
-                //                         },
-                //                         filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'csvHtml5',
-                //                         className: 'buttons-csv',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (csv) {
-                //                             // Add the title and student information to the CSV content
-                //                             var csvContent = 'Contrast Returned and Pending Returns Data\n';
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                        },
+                                        filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Contrast Returned and Pending Returns Data\n';
 
-                //                             csvContent += csv;
+                                            csvContent += csv;
 
-                //                             return csvContent;
-                //                         },
-                //                         filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'pdfHtml5',
-                //                         className: 'buttons-pdf',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (doc) {
-                //                             // Remove the title
-                //                             doc.content.splice(0, 1);
+                                            return csvContent;
+                                        },
+                                        filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
 
-                //                             // Convert Chart.js chart to a base64-encoded PNG image
-                //                             var canvas = document.createElement('canvas');
-                //                             canvas.width = 300; // Adjust width as needed
-                //                             canvas.height = 300; // Adjust height as needed
-                //                             var ctx = canvas.getContext('2d');
-                //                             ctx.drawImage(document.getElementById('borrowReturnChartContainer'), 0, 0, canvas.width, canvas.height);
-                //                             var chartImage = canvas.toDataURL('image/png');
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('borrowReturnChartContainer'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
 
-                //                             doc.content.unshift({
-                //                                 margin: [0, 0, 0, 12],
-                //                                 alignment: 'center',
-                //                                 image: chartImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
 
-                //                             doc.content.unshift({
-                //                                 margin: [100, 0, 0, -50],
-                //                                 alignment: 'center',
-                //                                 image: resizedImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
 
-                //                             // Add the title and student information
-                //                             doc.content.splice(1, 0, {
-                //                                 text: [
-                //                                     { text: 'Contrast Returned and Pending Returns Data\n', fontSize: 14, bold: true },
-                //                                 ],
-                //                                 alignment: 'left',
-                //                                 margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                //                             });
-                //                         },
-                //                         filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
-                //                     }
-                //                 ],
-                //                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-                //             });
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Contrast Returned and Pending Returns Data\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Contrast Returned and Pending Returns Data' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
 
-                //             allTransactionHistory = $('.all-transaction-history-table').DataTable({
-                //                 dom: 'lBfrtip',
-                //                 searching: false, 
-                //                 paging: false, 
-                //                 info: false,
-                //                 buttons: [
-                //                     {
-                //                         extend: 'excelHtml5',
-                //                         className: 'buttons-excel',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (xlsx) {
-                //                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            allTransactionHistory = $('.all-transaction-history-table').DataTable({
+                                dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-                //                             // Add the title, student name, and student ID to the Excel document
-                //                             var title = 'All Book Transactions by Publish Year';
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'All Book Transactions by Publish Year';
                                             
-                //                             // Add title, student name, and student ID to separate rows
-                //                             sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
-                //                         },
-                //                         filename: 'All Book Transactions by Publish Year' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'csvHtml5',
-                //                         className: 'buttons-csv',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (csv) {
-                //                             // Add the title and student information to the CSV content
-                //                             var csvContent = 'All Book Transactions by Publish Year\n';
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                        },
+                                        filename: 'All Book Transactions by Publish Year' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'All Book Transactions by Publish Year\n';
 
-                //                             csvContent += csv;
+                                            csvContent += csv;
 
-                //                             return csvContent;
-                //                         },
-                //                         filename: 'All Book Transactions by Publish Year' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'pdfHtml5',
-                //                         className: 'buttons-pdf',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (doc) {
-                //                             // Remove the title
-                //                             doc.content.splice(0, 1);
+                                            return csvContent;
+                                        },
+                                        filename: 'All Book Transactions by Publish Year' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
 
-                //                             // Convert Chart.js chart to a base64-encoded PNG image
-                //                             var canvas = document.createElement('canvas');
-                //                             canvas.width = 300; // Adjust width as needed
-                //                             canvas.height = 300; // Adjust height as needed
-                //                             var ctx = canvas.getContext('2d');
-                //                             ctx.drawImage(document.getElementById('bookTransactionsChart'), 0, 0, canvas.width, canvas.height);
-                //                             var chartImage = canvas.toDataURL('image/png');
+                                            // Convert Chart.js chart to a base64-encoded PNG image
+                                            var canvas = document.createElement('canvas');
+                                            canvas.width = 300; // Adjust width as needed
+                                            canvas.height = 300; // Adjust height as needed
+                                            var ctx = canvas.getContext('2d');
+                                            ctx.drawImage(document.getElementById('bookTransactionsChart'), 0, 0, canvas.width, canvas.height);
+                                            var chartImage = canvas.toDataURL('image/png');
 
-                //                             doc.content.unshift({
-                //                                 margin: [0, 0, 0, 12],
-                //                                 alignment: 'center',
-                //                                 image: chartImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [0, 0, 0, 12],
+                                                alignment: 'center',
+                                                image: chartImage,
+                                            });
 
-                //                             doc.content.unshift({
-                //                                 margin: [100, 0, 0, -50],
-                //                                 alignment: 'center',
-                //                                 image: resizedImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
 
-                //                             // Add the title and student information
-                //                             doc.content.splice(1, 0, {
-                //                                 text: [
-                //                                     { text: 'All Book Transactions by Publish Year\n', fontSize: 14, bold: true },
-                //                                 ],
-                //                                 alignment: 'left',
-                //                                 margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                //                             });
-                //                         },
-                //                         filename: 'All Book Transactions by Publish Year' // Set the filename for download
-                //                     }
-                //                 ],
-                //                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-                //             });
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'All Book Transactions by Publish Year\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'All Book Transactions by Publish Year' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
 
-                //             rankingPerTotalTransaction = $('.ranking-of-book-publish-year-by-total-transaction').DataTable({
-                //                 dom: 'lBfrtip',
-                //                 searching: false, 
-                //                 paging: false, 
-                //                 info: false,
-                //                 buttons: [
-                //                     {
-                //                         extend: 'excelHtml5',
-                //                         className: 'buttons-excel',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (xlsx) {
-                //                             var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            rankingPerTotalTransaction = $('.ranking-of-book-publish-year-by-total-transaction').DataTable({
+                                dom: 'lBfrtip',
+                                searching: false, 
+                                paging: false, 
+                                info: false,
+                                buttons: [
+                                    {
+                                        extend: 'excelHtml5',
+                                        className: 'buttons-excel',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (xlsx) {
+                                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
 
-                //                             // Add the title, student name, and student ID to the Excel document
-                //                             var title = 'Rankings of Book Publish Years by Total Transactions';
+                                            // Add the title, student name, and student ID to the Excel document
+                                            var title = 'Rankings of Book Publish Years by Total Transactions';
                                             
-                //                             // Add title, student name, and student ID to separate rows
-                //                             sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
-                //                         },
-                //                         filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'csvHtml5',
-                //                         className: 'buttons-csv',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (csv) {
-                //                             // Add the title and student information to the CSV content
-                //                             var csvContent = 'Rankings of Book Publish Years by Total Transactions\n';
+                                            // Add title, student name, and student ID to separate rows
+                                            sheet.getElementsByTagName('worksheet')[0].appendChild(document.createElement("table")).outerHTML = '<table><tr><td colspan="5"><b>' + title + '</b></td></tr></table>';
+                                        },
+                                        filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'csvHtml5',
+                                        className: 'buttons-csv',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (csv) {
+                                            // Add the title and student information to the CSV content
+                                            var csvContent = 'Rankings of Book Publish Years by Total Transactions\n';
 
-                //                             csvContent += csv;
+                                            csvContent += csv;
 
-                //                             return csvContent;
-                //                         },
-                //                         filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
-                //                     },
-                //                     {
-                //                         extend: 'pdfHtml5',
-                //                         className: 'buttons-pdf',
-                //                         init: function (api, node, config) {
-                //                             $(node).hide();
-                //                         },
-                //                         customize: function (doc) {
-                //                             // Remove the title
-                //                             doc.content.splice(0, 1);
+                                            return csvContent;
+                                        },
+                                        filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
+                                    },
+                                    {
+                                        extend: 'pdfHtml5',
+                                        className: 'buttons-pdf',
+                                        init: function (api, node, config) {
+                                            $(node).hide();
+                                        },
+                                        customize: function (doc) {
+                                            // Remove the title
+                                            doc.content.splice(0, 1);
 
-                //                             doc.content.unshift({
-                //                                 margin: [100, 0, 0, -50],
-                //                                 alignment: 'center',
-                //                                 image: resizedImage,
-                //                             });
+                                            doc.content.unshift({
+                                                margin: [100, 0, 0, -50],
+                                                alignment: 'center',
+                                                image: resizedImage,
+                                            });
 
-                //                             // Add the title and student information
-                //                             doc.content.splice(1, 0, {
-                //                                 text: [
-                //                                     { text: 'Rankings of Book Publish Years by Total Transactions\n', fontSize: 14, bold: true },
-                //                                 ],
-                //                                 alignment: 'left',
-                //                                 margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
-                //                             });
-                //                         },
-                //                         filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
-                //                     }
-                //                 ],
-                //                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-                //             });
+                                            // Add the title and student information
+                                            doc.content.splice(1, 0, {
+                                                text: [
+                                                    { text: 'Rankings of Book Publish Years by Total Transactions\n', fontSize: 14, bold: true },
+                                                ],
+                                                alignment: 'left',
+                                                margin: [0, 0, 15, 15] // Adjust left margin for alignment and add space before the table
+                                            });
+                                        },
+                                        filename: 'Rankings of Book Publish Years by Total Transactions' // Set the filename for download
+                                    }
+                                ],
+                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                            });
 
                             
 
-                //             // Trigger Excel export
-                //             $('#excel-btn').click(function() {
-                //                 <?php
-                //                     if ($_GET['pending_book_returns'] != 0) {
-                //                 ?>
-                //                     pendingBooksTable.buttons('.buttons-excel').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['books_borrowed_and_returned'] != 0) {
-                //                 ?>
-                //                     bookBorrowedAndReturnTable.buttons('.buttons-excel').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
-                //                 ?>
-                //                     contrastBooksReturnedAndPendingReturns.buttons('.buttons-excel').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['all_transaction_history'] != 0) {
-                //                 ?>
-                //                     allTransactionHistory.buttons('.buttons-excel').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['rankings_per_total_transaction'] != 0) {
-                //                 ?>
-                //                     rankingPerTotalTransaction.buttons('.buttons-excel').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //             });
+                            // Trigger Excel export
+                            $('#excel-btn').click(function() {
+                                <?php
+                                    if ($_GET['pending_book_returns'] != 0) {
+                                ?>
+                                    pendingBooksTable.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['books_borrowed_and_returned'] != 0) {
+                                ?>
+                                    bookBorrowedAndReturnTable.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+                                ?>
+                                    contrastBooksReturnedAndPendingReturns.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['all_transaction_history'] != 0) {
+                                ?>
+                                    allTransactionHistory.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['rankings_per_total_transaction'] != 0) {
+                                ?>
+                                    rankingPerTotalTransaction.buttons('.buttons-excel').trigger();
+                                <?php 
+                                    }
+                                ?>
+                            });
 
-                //             // Trigger CSV export
-                //             $('#csv-btn').click(function() {
-                //                 <?php
-                //                     if ($_GET['pending_book_returns'] != 0) {
-                //                 ?>
-                //                     pendingBooksTable.buttons('.buttons-csv').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
+                            // Trigger CSV export
+                            $('#csv-btn').click(function() {
+                                <?php
+                                    if ($_GET['pending_book_returns'] != 0) {
+                                ?>
+                                    pendingBooksTable.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
 
-                //                 <?php
-                //                     if ($_GET['books_borrowed_and_returned'] != 0) {
-                //                 ?>
-                //                     bookBorrowedAndReturnTable.buttons('.buttons-csv').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
+                                <?php
+                                    if ($_GET['books_borrowed_and_returned'] != 0) {
+                                ?>
+                                    bookBorrowedAndReturnTable.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
 
-                //                 <?php
-                //                     if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
-                //                 ?>
-                //                     contrastBooksReturnedAndPendingReturns.buttons('.buttons-csv').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
+                                <?php
+                                    if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+                                ?>
+                                    contrastBooksReturnedAndPendingReturns.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
 
-                //                 <?php
-                //                     if ($_GET['all_transaction_history'] != 0) {
-                //                 ?>
-                //                     allTransactionHistory.buttons('.buttons-csv').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
+                                <?php
+                                    if ($_GET['all_transaction_history'] != 0) {
+                                ?>
+                                    allTransactionHistory.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
 
-                //                 <?php
-                //                     if ($_GET['rankings_per_total_transaction'] != 0) {
-                //                 ?>
-                //                     rankingPerTotalTransaction.buttons('.buttons-csv').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //             });
+                                <?php
+                                    if ($_GET['rankings_per_total_transaction'] != 0) {
+                                ?>
+                                    rankingPerTotalTransaction.buttons('.buttons-csv').trigger();
+                                <?php 
+                                    }
+                                ?>
+                            });
 
-                //             // Trigger PDF export
-                //             $('#pdf-btn').click(function() {
-                //                 <?php
-                //                     if ($_GET['pending_book_returns'] != 0) {
-                //                 ?>
-                //                     pendingBooksTable.buttons('.buttons-pdf').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['books_borrowed_and_returned'] != 0) {
-                //                 ?>
-                //                     bookBorrowedAndReturnTable.buttons('.buttons-pdf').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
-                //                 ?>
-                //                     contrastBooksReturnedAndPendingReturns.buttons('.buttons-pdf').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['all_transaction_history'] != 0) {
-                //                 ?>
-                //                     allTransactionHistory.buttons('.buttons-pdf').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //                 <?php
-                //                     if ($_GET['rankings_per_total_transaction'] != 0) {
-                //                 ?>
-                //                     rankingPerTotalTransaction.buttons('.buttons-pdf').trigger();
-                //                 <?php 
-                //                     }
-                //                 ?>
-                //             });
-                //         };
-                //         image.src = dataURL;
-                //     })
-                //     .catch(function(error) {
-                //         console.error(error);
-                //     });
-
-                // AJAX call on clicking PDF button
-                $('#pdf-btn').click(function(){
-                    exportData('pdf');
-                });
-
-                // AJAX call on clicking CSV button
-                $('#csv-btn').click(function(){
-                    exportData('csv');
-                });
-
-                // AJAX call on clicking Excel button
-                $('#excel-btn').click(function(){
-                    exportData('excel');
-                });
-
-                // Function to perform AJAX call based on format
-                function exportData(format){
-                    $.ajax({
-                        type: 'POST',
-                        url: 'generate-pdf/publish_report_pdf.php',
-                        data: { format: format },
-                        success: function(response){
-                            // Handle response, e.g., show success message or download file
-                            alert(response);
-                        },
-                        error: function(xhr, status, error){
-                            // Handle error
-                            console.error(xhr.responseText);
-                        }
+                            // Trigger PDF export
+                            $('#pdf-btn').click(function() {
+                                <?php
+                                    if ($_GET['pending_book_returns'] != 0) {
+                                ?>
+                                    pendingBooksTable.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['books_borrowed_and_returned'] != 0) {
+                                ?>
+                                    bookBorrowedAndReturnTable.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['contrast_books_returned_and_pending_returns'] != 0) {
+                                ?>
+                                    contrastBooksReturnedAndPendingReturns.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['all_transaction_history'] != 0) {
+                                ?>
+                                    allTransactionHistory.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                                <?php
+                                    if ($_GET['rankings_per_total_transaction'] != 0) {
+                                ?>
+                                    rankingPerTotalTransaction.buttons('.buttons-pdf').trigger();
+                                <?php 
+                                    }
+                                ?>
+                            });
+                        };
+                        image.src = dataURL;
+                    })
+                    .catch(function(error) {
+                        console.error(error);
                     });
-                }
+
+                // // AJAX call on clicking PDF button
+                // $('#pdf-btn').click(function(){
+                //     exportData('pdf');
+                // });
+
+                // // AJAX call on clicking CSV button
+                // $('#csv-btn').click(function(){
+                //     exportData('csv');
+                // });
+
+                // // AJAX call on clicking Excel button
+                // $('#excel-btn').click(function(){
+                //     exportData('excel');
+                // });
+
+                // // Function to perform AJAX call based on format
+                // function exportData(format){
+                //     $.ajax({
+                //         type: 'POST',
+                //         url: 'generate-pdf/publish_report_pdf.php',
+                //         data: { format: format },
+                //         success: function(response){
+                //             // Handle response, e.g., show success message or download file
+                //             alert(response);
+                //         },
+                //         error: function(xhr, status, error){
+                //             // Handle error
+                //             console.error(xhr.responseText);
+                //         }
+                //     });
+                // }
             });
         </script>
 

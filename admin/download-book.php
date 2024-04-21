@@ -77,7 +77,7 @@
                                                 }
 
                                                 $publishQuery .= " AND borrow.status = 0";
-                                                $publishQuery .= " GROUP BY course_id";
+                                                $publishQuery .= " GROUP BY date_borrow";
                                                 $publishResult = $conn->query($publishQuery);
 
                                                 // Fetch data for each year and create tables for pending book returns
@@ -173,7 +173,7 @@
                             </div>
                         </div>
 
-                        <div class="not-returned-books-container pending-book-returns">
+                        <!-- <div class="not-returned-books-container pending-book-returns">
                             <div class="box printable-table">
                                 <div class="box-body">
                                     <h4>Not Returned Books</h4>
@@ -194,7 +194,7 @@
                                     </table>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     <?php 
                         }
                     ?>
@@ -436,21 +436,21 @@
                                                 $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
 
                                                 // Fetch data for all borrowers grouped by publish year
-                                                $borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers
-                                                                    FROM borrow
-                                                                    LEFT JOIN books ON borrow.book_id = books.id
-                                                                    WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
+                                                $borrowersQuery = "SELECT COUNT(*) AS total_borrowers, b.*
+                                                                    FROM borrow b
+                                                                    LEFT JOIN books ON b.book_id = books.id
+                                                                    WHERE b.status IN (0, 1)"; // Include both returned and not returned
                                                 if ($startDate && $endDate) {
-                                                    $borrowersQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                                                    $borrowersQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                                 }
-                                                $borrowersQuery .= " GROUP BY publish_year";
+                                                $borrowersQuery .= " GROUP BY date_borrow";
                                                 $borrowersResult = $conn->query($borrowersQuery);
 
                                                 // Prepare data for CanvasJS
                                                 $barChartData = array();
                                                 $allYears = array(); // Store all years to check against selected publish years
                                                 while ($borrowersRow = $borrowersResult->fetch_assoc()) {
-                                                    $year = $borrowersRow['publish_year'];
+                                                    $year = $borrowersRow['date_borrow'];
                                                     $totalBorrowers = $borrowersRow['total_borrowers'];
                                                     $barChartData[$year] = $totalBorrowers;
                                                     $allYears[] = $year;
@@ -668,7 +668,7 @@
                 <?php
                     // Fetch data for pie chart
                     $pieChartData = array();
-                    $pieChartQuery = "SELECT category.*, COUNT(*) AS count
+                    $pieChartQuery = "SELECT category.*, COUNT(*) AS count, borrow.*
                                     FROM borrow
                                     LEFT JOIN books ON borrow.book_id = books.id
                                     LEFT JOIN category ON books.category_id = category.id";
@@ -679,12 +679,12 @@
                     }
 
                     // $pieChartQuery .= " AND borrow.status = 0";
-                    $pieChartQuery .= " GROUP BY name";
+                    $pieChartQuery .= " GROUP BY date_borrow";
                     $pieChartResult = $conn->query($pieChartQuery);
 
                     while ($pieChartRow = $pieChartResult->fetch_assoc()) {
                         $pieChartData[] = array(
-                            "name" => $pieChartRow['name'],
+                            "name" => $pieChartRow['date_borrow'],
                             "count" => $pieChartRow['count']
                         );
                     }
@@ -727,7 +727,7 @@
                             },
                             title: {
                                 display: true,
-                                text: 'Pending Book Returns by Year Published of Books',
+                                text: 'Pending Book Returns',
                                 font: {
                                     size: 20,
                                     
@@ -754,28 +754,27 @@
             <?php
                 // Fetch data for book borrowed and returned
                 $returnedChartData = array();
-                $booksBorrowedAndReturnedQuery = "SELECT category.*, COUNT(*) AS count
-                                FROM borrow
-                                INNER JOIN returns ON borrow.book_id = returns.book_id
-                                LEFT JOIN books ON borrow.book_id = books.id
-                                LEFT JOIN category ON books.category_id = category.id";
+                $booksBorrowedAndReturnedQuery = "SELECT COUNT(*) AS count
+                                FROM borrow b
+                                -- INNER JOIN returns ON b.book_id = returns.book_id
+                                LEFT JOIN books ON b.book_id = books.id";
 
                 if ($selected_category !== null) {
                     $publishYears = explode(',', $selected_category);
                     $publishYearsString = implode(',', $publishYears);
-                    $booksBorrowedAndReturnedQuery .= " WHERE category.id IN ($publishYearsString)";
+                    // $booksBorrowedAndReturnedQuery .= " WHERE category.id IN ($publishYearsString)";
                 }
 
                 // Add the date range condition
                 if ($startDate && $endDate) {
-                    $booksBorrowedAndReturnedQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                    $booksBorrowedAndReturnedQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                 }
 
-                // $booksBorrowedAndReturnedQuery .= " GROUP BY name";
+                $booksBorrowedAndReturnedQuery .= " GROUP BY date_borrow";
                 $booksBorrowedAndReturnedResult = $conn->query($booksBorrowedAndReturnedQuery);
 
                 while ($returnedRow = $booksBorrowedAndReturnedResult->fetch_assoc()) {
-                    $year = $returnedRow['name'];
+                    $year = $returnedRow['date_borrow'];
                     $count = $returnedRow['count'];
                     $returnedChartData[] = array('name' => $year, 'count' => $count);
                 }
@@ -848,11 +847,11 @@
                 $data = array();
 
                 // Execute SQL query to fetch book transactions by publish year
-                $query = "SELECT category.*, COUNT(*) AS total_transactions
+                $query = "SELECT category.*, COUNT(*) AS total_transactions, borrow.*
                             FROM borrow
                             LEFT JOIN books ON borrow.book_id = books.id
                             LEFT JOIN category ON books.category_id = category.id
-                            GROUP BY name";
+                            GROUP BY date_borrow";
 
                 $result = $conn->query($query);
 
@@ -869,7 +868,7 @@
                 ?>
 
                 const totalTransaction = <?php echo json_encode($data); ?>;
-                const totalTransactionName = totalTransaction.map(element => element.name);
+                const totalTransactionName = totalTransaction.map(element => element.date_borrow);
                 const totalTransactionData = totalTransaction.map(element => element.total_transactions);
 
                 const totalTransactionContainer = document.getElementById('bookTransactionsChart').getContext('2d');
@@ -948,16 +947,18 @@
         $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
         $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
         // Prepare the SQL query with the date filter
-        $sql_returned = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author
+        $sql_returned = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, books.isbn, books.title, books.author, students.*
         FROM borrow b
         LEFT JOIN returns r ON b.book_id = r.book_id
         LEFT JOIN books ON books.id = b.book_id
-                         WHERE b.status = 1
-                         ORDER BY b.date_borrow DESC";
+        LEFT JOIN students ON b.student_id = students.id
+                         WHERE b.status = 1";
     
         if ($startDate && $endDate) {
             $sql_returned .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
         }
+
+        $sql_returned .= " ORDER BY b.date_borrow DESC";
     
         // Execute the SQL query
         $query_returned = $conn->query($sql_returned);
@@ -968,7 +969,7 @@
                 echo "
                     <tr>
                         <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
-                        <td>" . $row['stud'] . "</td>
+                        <td>" . $row['student_id'] . "</td>
                         <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
                         <td>" . $row['isbn'] . "</td>
                         <td>" . $row['title'] . "</td>

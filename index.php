@@ -64,18 +64,16 @@
                                         <th>Shelf Row</th>
                                         <th>Quantity</th>
                                         <th>Status</th>
-                                        <th>Expected Return Date</th> <!-- Added column -->
                                     </thead>
                                     <tbody>
                                     <?php
-                                        $sql = "SELECT b.*, br.due_Date
-                                                FROM books b
-                                                LEFT JOIN borrow br ON b.id = br.book_id
+                                        $sql = "SELECT * from books
                                                 WHERE 1 $where"; // Retrieve all books
                                         $query = $conn->query($sql);
                                         while($row = $query->fetch_assoc()){
-                                            $status = ($row['status'] == 0) ? '<span class="label label-success">available</span>' : '<span class="label label-danger">not available</span>';
+                                            $status = ($row['quantity'] > 0) ? '<span class="label label-success">available</span>' : '<span class="label label-danger">not available</span>';
                                             $return_date = ($row['status'] == 1 && $row['due_Date'] != null) ? $row['due_Date'] : 'N/A'; // Display due date if not available
+
                                             echo "
                                                 <tr>
                                                     <td>".$row['isbn']."</td>
@@ -87,7 +85,6 @@
                                                     <td>".$row['shelf_row']."</td>
                                                     <td>".$row['quantity']."</td>
                                                     <td>".$status."</td>
-                                                    <td>".$return_date."</td> <!-- Display due date or N/A -->
                                                 </tr>
                                             ";
                                         }

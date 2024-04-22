@@ -91,8 +91,6 @@
                   <th>Shelf Row</th>
                   <th>Quantity</th>
                   <th>Status</th>
-                  <th>Shelf Number</th>
-                  <th>Shelf Row</th>
                   <th>Tools</th>
                 </thead>
                 <tbody>
@@ -119,8 +117,6 @@
                           <td>".$row['shelf_row']."</td>
                           <td>".$row['quantity']."</td>
                           <td>".$status."</td>
-                          <td>".$row['shelf_number']."</td>
-                          <td>".$row['shelf_row']."</td>
                           <td>
                             <button class='btn btn-success btn-sm edit btn-flat' data-id='".$row['bookid']."'><i class='fa fa-edit'></i> Edit</button>
                             <button class='btn btn-danger btn-sm delete btn-flat' data-id='".$row['bookid']."'><i class='fa fa-trash'></i> Delete</button>

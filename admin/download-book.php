@@ -127,7 +127,7 @@
                                                                     LEFT JOIN books ON books.id = b.book_id
                                                                     LEFT JOIN course ON students.course_id = course.id
                                                                 WHERE
-                                                                    students.course_id = {$publishRow['course_id']}
+                                                                    b.date_borrow = {$publishRow['date_borrow']}
                                                                     AND b.status = 0
                                                                     OR r.date_return IS NULL";
 
@@ -754,9 +754,8 @@
             <?php
                 // Fetch data for book borrowed and returned
                 $returnedChartData = array();
-                $booksBorrowedAndReturnedQuery = "SELECT COUNT(*) AS count
+                $booksBorrowedAndReturnedQuery = "SELECT COUNT(*) AS count, b.*
                                 FROM borrow b
-                                -- INNER JOIN returns ON b.book_id = returns.book_id
                                 LEFT JOIN books ON b.book_id = books.id";
 
                 if ($selected_category !== null) {

@@ -77,7 +77,8 @@
                     FROM returns r
                     LEFT JOIN students ON students.id = r.student_id 
                     LEFT JOIN books ON books.id = r.book_id 
-                    LEFT JOIN borrow b ON b.book_id = r.book_id AND b.student_id = r.student_id 
+                    LEFT JOIN borrow b ON b.book_id = r.book_id AND b.student_id = r.student_id
+                    WHERE b.status = 1
                     ORDER BY r.date_return DESC";
             
             

@@ -132,9 +132,10 @@
                                         if ($yearResult->num_rows > 0) {
                                             while ($row = $yearResult->fetch_assoc()) {
                                                 $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
+                                                $returnDate = ($row['status'] == 0) ? "Not Returned Yet" : date('M d, Y', strtotime($row['return_date']));
                                                 echo "<tr>";
                                                 echo "<td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>";
-                                                echo "<td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>";
+                                                echo "<td>" . $returnDate . "</td>";
                                                 echo "<td>" . $row['stud'] . "</td>";
                                                 echo "<td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>";
                                                 echo "<td>" . $row['isbn'] . "</td>";

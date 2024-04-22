@@ -74,7 +74,8 @@
                             FROM borrow b
                             LEFT JOIN returns r ON b.book_id = r.book_id AND b.student_id = r.student_id 
                             LEFT JOIN students ON students.id = b.student_id 
-                            LEFT JOIN books ON books.id = b.book_id";
+                            LEFT JOIN books ON books.id = b.book_id
+                            WHERE b.status = 0";
                     
                     if ($department !== null) {
                         // Include the department filter when it's provided

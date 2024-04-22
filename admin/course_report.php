@@ -148,12 +148,12 @@
                                           LEFT JOIN students ON borrow.student_id = students.id
                                           LEFT JOIN course ON students.course_id = course.id";
                                           
-                      $selected_category = isset($_GET['selected_category']) ? $_GET['selected_category'] : null;
+                      $selected_courses = isset($_GET['selected_courses']) ? $_GET['selected_courses'] : null;
                       $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
                       $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
 
-                      if ($selected_category !== null) {
-                          $publishCategories = explode(',', $selected_category);
+                      if ($selected_courses !== null) {
+                          $publishCategories = explode(',', $selected_courses);
                           $publishCategories = array_map('intval', $publishCategories);
                           $publishCategoriesString = implode(',', $publishCategories);
 
@@ -203,7 +203,6 @@
                           $yearQuery = "SELECT
                                             DISTINCT b.id,
                                             b.*,
-                                            r.date_return AS return_date,
                                             students.student_id AS stud,
                                             students.firstname,
                                             students.lastname,
@@ -212,14 +211,12 @@
                                             books.author
                                         FROM
                                             borrow b
-                                            LEFT JOIN returns r ON b.book_id = r.book_id
                                             LEFT JOIN students ON students.id = b.student_id
                                             LEFT JOIN books ON books.id = b.book_id
                                             LEFT JOIN course ON students.course_id = course.id
                                         WHERE
                                             students.course_id = {$publishRow['course_id']}
-                                            AND b.status = 0
-                                            OR r.date_return IS NULL";
+                                            AND b.status = 0";
 
                           // Add the date range condition
                           if ($startDate && $endDate) {
@@ -233,9 +230,10 @@
                           if ($yearResult->num_rows > 0) {
                               while ($row = $yearResult->fetch_assoc()) {
                                   $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
+                                  $returnDate = ($row['status'] == 0) ? "Not Returned Yet" : date('M d, Y', strtotime($row['return_date']));
                                   echo "<tr>";
                                   echo "<td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>";
-                                  echo "<td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>";
+                                  echo "<td>" . $returnDate . "</td>";
                                   echo "<td>" . $row['stud'] . "</td>";
                                   echo "<td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>";
                                   echo "<td>" . $row['isbn'] . "</td>";
@@ -285,7 +283,7 @@
                                                             LEFT JOIN students ON students.id = b.student_id
                                                             LEFT JOIN course ON students.course_id = course.id";
 
-                              if ($selected_category !== null) {
+                              if ($selected_courses !== null) {
                                   $returnedQuery .= " WHERE students.course_id IN ($publishCategoriesString)";
                               }
 
@@ -328,7 +326,7 @@
                                   // Fetch data for the specific year for book borrowed and returned
                                   $returnedYearQuery = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author, course.*
                                   FROM borrow b
-                                  LEFT JOIN returns r ON b.book_id = r.book_id
+                                  LEFT JOIN returns r ON b.book_id = r.book_id AND r.student_id = b.student_id
                                   LEFT JOIN students ON students.id = b.student_id
                                   LEFT JOIN books ON books.id = b.book_id
                                   LEFT JOIN course ON students.course_id = course.id
@@ -492,7 +490,7 @@
                     <div class="col-xs-12">
                       <div class="box">
                           <div class="box-header with-border">
-                              <h3 class="box-title">Rankings of Book Courses</h3>
+                              <h3 class="box-title">Rankings of Courses</h3>
                           </div>
                           <div class="row">
                             <div class="box-body ranking-of-book-publish-year-by-total-transaction-table">
@@ -1394,8 +1392,8 @@ $(function(){
                                   LEFT JOIN students ON borrow.student_id = students.id
                                   LEFT JOIN course ON students.course_id = course.id";
 
-                if ($selected_category !== null) {
-                    $categoryIds = explode(',', $selected_category);
+                if ($selected_courses !== null) {
+                    $categoryIds = explode(',', $selected_courses);
                     $categoryIds = array_map('intval', $categoryIds);
                     $categoryIdsString = implode(',', $categoryIds);
 
@@ -1407,13 +1405,13 @@ $(function(){
                     $pieChartQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
                 }
 
-                // $pieChartQuery .= " AND borrow.status = 0";
-                $pieChartQuery .= " GROUP BY title";
+                $pieChartQuery .= " AND borrow.status = 0";
+                $pieChartQuery .= " GROUP BY code";
                 $pieChartResult = $conn->query($pieChartQuery);
 
                 while ($pieChartRow = $pieChartResult->fetch_assoc()) {
                     $pieChartData[] = array(
-                        "title" => $pieChartRow['title'],
+                        "code" => $pieChartRow['code'],
                         "count" => $pieChartRow['count']
                     );
                 }
@@ -1426,7 +1424,7 @@ $(function(){
             ?>
 
             const pendingBookReturns = <?php echo json_encode($pieChartData); ?>;
-            const pendingBookReturnsPublishYear = pendingBookReturns.map(element => element.title);
+            const pendingBookReturnsPublishYear = pendingBookReturns.map(element => element.code);
             const pendingBookReturnsCount = pendingBookReturns.map(element => element.count);
             const pendingBookReturnsBackgroundColor = <?php echo json_encode($backgroundColor); ?>;
             const pendingBookReturnsContainer = document.getElementById('chartContainer');
@@ -1557,8 +1555,8 @@ $(function(){
                                             LEFT JOIN students ON students.id = b.student_id
                                             LEFT JOIN course ON students.course_id = course.id";
 
-            if ($selected_category !== null) {
-                $publishYears = explode(',', $selected_category);
+            if ($selected_courses !== null) {
+                $publishYears = explode(',', $selected_courses);
                 $publishYearsString = implode(',', $publishYears);
                 $booksBorrowedAndReturnedQuery .= " WHERE course.id IN ($publishYearsString)";
             }
@@ -1567,14 +1565,14 @@ $(function(){
             if ($startDate && $endDate) {
                 $booksBorrowedAndReturnedQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
             }
-
+            $booksBorrowedAndReturnedQuery .= " AND b.status = 1";
             $booksBorrowedAndReturnedQuery .= " GROUP BY code";
             $booksBorrowedAndReturnedResult = $conn->query($booksBorrowedAndReturnedQuery);
 
             while ($returnedRow = $booksBorrowedAndReturnedResult->fetch_assoc()) {
-                $year = $returnedRow['title'];
+                $year = $returnedRow['code'];
                 $count = $returnedRow['count'];
-                $returnedChartData[] = array('title' => $year, 'count' => $count);
+                $returnedChartData[] = array('code' => $year, 'count' => $count);
             }
 
             // Generate random background colors
@@ -1585,7 +1583,7 @@ $(function(){
         ?>
 
         const bookBorrowedAndReturned = <?php echo json_encode($returnedChartData); ?>;
-        const bookBorrowedAndReturnedPublishYear = bookBorrowedAndReturned.map(element => element.title);
+        const bookBorrowedAndReturnedPublishYear = bookBorrowedAndReturned.map(element => element.code);
         const bookBorrowedAndReturnedCount = bookBorrowedAndReturned.map(element => element.count);
         const bookBorrowedAndReturnedBackgroundColor = <?php echo json_encode($backgroundColor); ?>;
         const bookBorrowedAndReturnedContainer = document.getElementById('returnedChartContainer');
@@ -1595,7 +1593,7 @@ $(function(){
             data: {
                 labels: bookBorrowedAndReturnedPublishYear,
                 datasets: [{
-                    label: 'Book Borrowed and Returned by Category',
+                    label: 'Book Borrowed and Returned by Courses',
                     data: bookBorrowedAndReturnedCount,
                     backgroundColor: bookBorrowedAndReturnedBackgroundColor,
                 }]
@@ -1615,7 +1613,7 @@ $(function(){
                     },
                     title: {
                         display: true,
-                        text: 'Book Borrowed and Returned by Category',
+                        text: 'Book Borrowed and Returned by Courses',
                         font: {
                             size: 20,
                             
@@ -1650,7 +1648,7 @@ $(function(){
                         LEFT JOIN books ON borrow.book_id = books.id
                         LEFT JOIN students ON borrow.student_id = students.id
                         LEFT JOIN course ON students.course_id = course.id
-                        GROUP BY title";
+                        GROUP BY code";
 
               $result = $conn->query($query);
 
@@ -1667,7 +1665,7 @@ $(function(){
             ?>
 
             const totalTransaction = <?php echo json_encode($data); ?>;
-            const totalTransactionName = totalTransaction.map(element => element.title);
+            const totalTransactionName = totalTransaction.map(element => element.code);
             const totalTransactionData = totalTransaction.map(element => element.total_transactions);
 
             const totalTransactionContainer = document.getElementById('bookTransactionsChart').getContext('2d');

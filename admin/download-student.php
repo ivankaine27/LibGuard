@@ -18,7 +18,6 @@
     if ($currentPage > 1) {
         $offset = 0;
     }
-
     // Get the ID of the student for the current page
     $studentIdForPage = isset($selectedStudents[$currentPage - 1]) ? $selectedStudents[$currentPage - 1] : null;
 
@@ -345,7 +344,7 @@ function printAllPages() {
         // Base64 encoded image data
         <?php
         // Path to your image file
-        $imagePath = '../images/libguard-logo-header2.png';
+        $imagePath = '../images/logos/libguard-logo-header2.png';
 
         // Read image data
         $imageData = file_get_contents($imagePath);

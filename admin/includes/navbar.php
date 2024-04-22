@@ -2,9 +2,13 @@
   <!-- Logo -->
   <a href="index.php" class="logo">
     <!-- mini logo for sidebar mini 50x50 pixels -->
-    <span class="logo-mini"><b>L</b>MS</span>
+    <span class="logo-mini"><b>LG</b></span>
     <!-- logo for regular state and mobile devices -->
-    <span class="logo-lg"><b>LibGuard </b>System</span>
+    <span class="logo-lg" style="width: 200px; height: 50px; display: inline-block; overflow: hidden;">
+    <img src="../images/logos/libguard-logo-NAVBAR.png" style="width: auto; height: 100%; margin-left: 10px;">
+</span>
+
+
   </a>
   <!-- Header Navbar: style can be found in header.less -->
   <nav class="navbar navbar-static-top">

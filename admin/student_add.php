@@ -7,13 +7,19 @@
         $lastname = $_POST['lastname'];
         $course = $_POST['course'];
         $filename = $_FILES['photo']['name'];
-        
+
+        $query = "SELECT id FROM course WHERE title = '$course'";
+        $result = mysqli_query($conn, $query);
+        if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            $course_id = $row['id'];
+        }
         if (!empty($filename)) {
             move_uploaded_file($_FILES['photo']['tmp_name'], '../images/' . $filename);
         }
     
         // Insert the provided student ID into the database
-        $sql = "INSERT INTO students (student_id, firstname, lastname, course_id, photo, created_on) VALUES ('$student_id', '$firstname', '$lastname', '$course', '$filename', NOW())";
+        $sql = "INSERT INTO students (student_id, firstname, lastname, course_id, photo, created_on) VALUES ('$student_id', '$firstname', '$lastname', '$course_id', '$filename', NOW())";
         
         if($conn->query($sql)){
             $_SESSION['success'] = 'Student added successfully';

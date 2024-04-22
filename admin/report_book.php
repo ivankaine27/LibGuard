@@ -26,12 +26,6 @@
         <li class="active">Generate Report</li>
       </ol>
           <!-- Button for specifying filters -->
-
-          <div class="box">
-            <div class="box-header with-border">
-              <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Specify filters to generate report</a>
-            </div>
-</div>
     </section>
 
     <!-- Main content -->
@@ -71,7 +65,8 @@
                 echo "<h3>".$query->num_rows."</h3>";
               ?> -->
 
-              <p>Published Year</p>
+              <h4><strong>Published Year</strong></h4>
+              <h4> ...</h4>
             </div>
             <div class="icon">
               <i class="fa fa-book"></i>
@@ -91,10 +86,11 @@
                 echo "<h3>".$query->num_rows."</h3>";
               ?> -->
              
-              <p>Book Category</p>
+              <h4><strong>Book Category</strong></h4>
+              <h4> ...</h4>
             </div>
             <div class="icon">
-              <i class="fa fa-mail-reply"></i>
+              <i class="fa fa-list-alt"></i>
             </div>
             <a href="#" id="openCategoryModal" class="small-box-footer">Click to Download <i class="fa fa-arrow-circle-right"></i></a>
           </div>
@@ -111,10 +107,11 @@
                 echo "<h3>".$query->num_rows."</h3>";
               ?> -->
 
-              <p>Course</p>
+              <h4><strong>Course</strong></h4>
+              <h4> ...</h4>
             </div>
             <div class="icon">
-              <i class="fa fa-mail-forward"></i>
+              <i class="fa fa-download"></i>
             </div>
             <a href="#" id="openCourseModal" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
           </div>
@@ -133,10 +130,11 @@
                   echo "<h3>".$query->num_rows."</h3>";
                 ?>
            -->
-                <p>Book Transactions</p>
+           <h4><strong>Book Transaction</strong></h4>
+           <h4> ...</h4>
               </div>
               <div class="icon">
-                <i class="fa fa-download"></i>
+                <i class="fa fa-bookmark"></i>
               </div>
               <a href="#" id="openCalendarModal" class="small-box-footer">Generate Report <i class="fa fa-arrow-circle-right"></i></a>
             </div>
@@ -353,3 +351,11 @@
 
 </body>
 </html>
+<style>
+  .box {
+    border-radius: 10px; /* Adjust the value as needed */
+}
+  .small-box {
+    border-radius: 10px; /* Adjust the value as needed */
+}
+</style>

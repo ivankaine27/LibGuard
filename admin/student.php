@@ -49,11 +49,10 @@
             <div class="box-header with-border">
       
               <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Add Student</a>
-              <a href="#addnew1" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Add Student using QR Code</a>
-          </div>
+                </div>
 
             <div class="box-body">
-            <table id="example1" class="table table-bordered">
+            <table class="table table-bordered" id="example1">
                 <thead>
                   <th>Firstname</th>
                   <th>Lastname</th>
@@ -100,7 +99,6 @@
     
   <?php include 'includes/footer.php'; ?>
   <?php include 'includes/student_modal.php'; ?>
-  <?php include 'includes/qr_student_modal.php'; ?>
 </div>
 <?php include 'includes/scripts.php'; ?>
 <script>
@@ -129,22 +127,22 @@ $(function(){
 
 
 function getRowAndPendingReturns(id){
-    $.ajax({
-        type: 'POST',
-        url: 'student_row.php',
-        data: {id:id},
-        dataType: 'json',
-        success: function(response){
-            $('.studid').val(response.studid);
-            $('#edit_firstname').val(response.firstname);
-            $('#edit_lastname').val(response.lastname);
-            $('#edit_student_id').val(response.student_id);
-            $('#selcourse').val(response.course_id);
-            $('#selcourse').html(response.code);
-            $('.del_stu').html(response.firstname+' '+response.lastname);
-            getPendingReturns(id);
-        }
-    });
+  $.ajax({
+    type: 'POST',
+    url: 'student_row.php',
+    data: {id:id},
+    dataType: 'json',
+    success: function(response){
+      $('.studid').val(response.studid);
+      $('#firstname').val(response.firstname);
+      $('#lastname').val(response.lastname);
+      $('#student_id').val(response.student_id);
+      $('#selcourse').val(response.course_id);
+      $('#selcourse').html(response.code);
+      $('#del_stu').html(response.firstname+' '+response.lastname);
+      getPendingReturns(id)
+    }
+  });
 }
 
 function getPendingReturns(id) {
@@ -180,7 +178,7 @@ function getRow(id){
       $('#edit_student_id').val(response.student_id);
       $('#selcourse').val(response.course_id);
       $('#selcourse').html(response.code);
-      $('.del_stu').html(response.firstname+' '+response.lastname);
+      $('#del_stu').html(response.firstname+' '+response.lastname);
     }
   });
 }

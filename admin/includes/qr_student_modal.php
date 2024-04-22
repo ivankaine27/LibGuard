@@ -1,5 +1,5 @@
 <!-- Add -->
-<div class="modal fade" id="addnew1">
+<div class="modal fade" id="scanqrstudent">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

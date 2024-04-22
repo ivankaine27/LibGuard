@@ -53,8 +53,7 @@
           <div class="box">
             <div class="box-header with-border">
               <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Borrow</a>
-              <a href="#addnew1" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> Borrow using QR Code</a>
-            </div>
+               </div>
             <div class="box-body">
               <table id="example1" class="table table-bordered">
                 <thead>
@@ -73,33 +72,37 @@
 
                     $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
                             FROM borrow b
-                            LEFT JOIN returns r ON b.book_id = r.book_id
-                            LEFT JOIN students ON students.id = b.student_id
+                            LEFT JOIN returns r ON b.book_id = r.book_id AND b.student_id = r.student_id 
+                            LEFT JOIN students ON students.id = b.student_id 
                             LEFT JOIN books ON books.id = b.book_id";
                     
                     if ($department !== null) {
                         // Include the department filter when it's provided
                         $sql .= " WHERE b.department = '$department'";
                     }
-                    
                     $sql .= " ORDER BY b.date_borrow DESC";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
-                      $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
-                      echo "
-                        <tr>
-                          <td class='hidden'></td>
-                          <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
-                          <td>".($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet")."</td>
-                          <td>".$row['stud']."</td>
-                          <td>".$row['firstname'].' '.$row['lastname']."</td>
-                          <td>".$row['isbn']."</td>
-                          <td>".$row['title']."</td>
-                          <td>".$status."</td>
-                        </tr>
-                      ";
+                        $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
+                        $returnDate = $row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet";
+                        // Check if the status is 0 (not returned) and adjust the return date accordingly
+                        if (!$row['status']) {
+                            $returnDate = "Not Returned Yet";
+                        }
+                        echo "
+                            <tr>
+                                <td class='hidden'></td>
+                                <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
+                                <td>".$returnDate."</td>
+                                <td>".$row['stud']."</td>
+                                <td>".$row['firstname'].' '.$row['lastname']."</td>
+                                <td>".$row['isbn']."</td>
+                                <td>".$row['title']."</td>
+                                <td>".$status."</td>
+                            </tr>
+                        ";
                     }
-                  ?>
+?>                    
                 </tbody>
               </table>
             </div>
@@ -111,7 +114,7 @@
     
   <?php include 'includes/footer.php'; ?>
   <?php include 'includes/borrow_modal.php'; ?>
-  <?php include 'includes/qr_borrow_modal.php'; ?>
+
 </div>
 <?php include 'includes/scripts.php'; ?>
 <script>

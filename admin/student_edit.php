@@ -3,11 +3,12 @@
 
 	if(isset($_POST['edit'])){
 		$id = $_POST['id'];
+		$student_id = $_POST['student_id'];
 		$firstname = $_POST['firstname'];
 		$lastname = $_POST['lastname'];
 		$course = $_POST['course'];
 
-		$sql = "UPDATE students SET firstname = '$firstname', lastname = '$lastname', course_id = '$course' WHERE id = '$id'";
+		$sql = "UPDATE students SET student_id = '$student_id', firstname = '$firstname', lastname = '$lastname', course_id = '$course' WHERE id = '$id'";
 		if($conn->query($sql)){
 			$_SESSION['success'] = 'Student updated successfully';
 		}

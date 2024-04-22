@@ -1322,6 +1322,9 @@ $(function(){
                     $pieChartQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                 }
 
+                $pieChartQuery .= " AND b.status = 0";
+                $pieChartQuery .= " OR returns.date_return IS NULL";
+
                 // $pieChartQuery .= " AND borrow.status = 0";
                 $pieChartQuery .= " GROUP BY category.id";
                 $pieChartResult = $conn->query($pieChartQuery);

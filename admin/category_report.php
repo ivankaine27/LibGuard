@@ -150,15 +150,16 @@
                                     students.lastname,
                                     books.isbn,
                                     books.title,
-                                    books.author
+                                    books.author,
+                                    category.*
                                 FROM
                                     borrow b
                                     LEFT JOIN returns r ON b.book_id = r.book_id
                                     LEFT JOIN students ON students.id = b.student_id
                                     LEFT JOIN books ON books.id = b.book_id
-                                    LEFT JOIN course ON students.course_id = course.id
+                                    LEFT JOIN category ON books.category_id = category.id
                                 WHERE
-                                    students.course_id = {$publishRow['course_id']}
+                                    category.id = {$publishRow['id']}
                                     AND b.status = 0
                                     OR r.date_return IS NULL";
 
@@ -1372,7 +1373,7 @@ $(function(){
                         },
                         title: {
                             display: true,
-                            text: 'Borrowed Books by Category',
+                            text: 'Pending Book Returns by Category',
                             font: {
                                 size: 20,
                                 

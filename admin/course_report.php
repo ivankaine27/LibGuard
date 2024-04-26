@@ -8,18 +8,6 @@
   <?php include 'includes/menubar.php'; ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <!-- <section class="content-header">
-      <h1>
-        Borrow Books
-      </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li>Transaction</li>
-        <li class="active">Borrow</li>
-      </ol>
-    </section> -->
-    <!-- Main content -->
     <section class="content">
     <?php
     if(isset($_SESSION['error']) && is_array($_SESSION['error']) && !empty($_SESSION['error'])){
@@ -66,76 +54,19 @@
                   <i class="fa fa-download"></i> PDF
               </button>
             </div>
-            
-            <div class="box-body">
-              <!-- <canvas id="chartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
-              <table id="borrowed_book_data" class="table table-bordered">
-                <thead>
-                  <th class="hidden"></th>
-                  <th>Date Borrowed</th>
-                  <th>Date Returned</th>
-                  <th>Student ID</th>
-                  <th>Name</th>
-                  <th>ISBN</th>
-                  <th>Title</th>
-                  <th>Course</th>
-                  <th>Status</th>
-                </thead>
-                <tbody>
-                <?php
-                    $selected_courses = isset($_GET['selected_courses']) ? $_GET['selected_courses'] : null;
-                    $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
-                    $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
-                    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, students.course_id, books.isbn, books.title, books.author, course.title as course_title
-                            FROM borrow b
-                            LEFT JOIN returns r ON b.book_id = r.book_id
-                            LEFT JOIN students ON students.id = b.student_id
-                            LEFT JOIN books ON books.id = b.book_id
-                            LEFT JOIN course ON students.course_id = course.id";
-
-                    if ($selected_courses !== null) {
-                        // Include the course filter when it's provided
-                        $courseIds = explode(',', $selected_courses);
-                        $courseIds = array_map('intval', $courseIds);  // Convert string values to integers
-                        $courseIdsString = implode(',', $courseIds);
-
-                        $sql .= " WHERE course.id IN ($courseIdsString)";
-                    }
-                    if ($startDate && $endDate) {
-                      $sql .= " AND date_borrow BETWEEN '$startDate' AND '$endDate'";
-                    }
-
-                    $sql .= " ORDER BY b.date_borrow DESC";
-
-                    $query = $conn->query($sql);
-
-                    while ($row = $query->fetch_assoc()) {
-                        $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
-                        echo "
-                            <tr>
-                                <td class='hidden'></td>
-                                <td>" . date('M d, Y', strtotime($row['date_borrow'])) . "</td>
-                                <td>" . ($row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet") . "</td>
-                                <td>" . $row['stud'] . "</td>
-                                <td>" . $row['firstname'] . ' ' . $row['lastname'] . "</td>
-                                <td>" . $row['isbn'] . "</td>
-                                <td>" . $row['title'] . "</td>
-                                <td>" . $row['course_title'] . "</td>
-                                <td>" . $status . "</td>
-                            </tr>
-                        ";
-                    }
-                    ?>
-                </tbody>
-              </table> -->
-
 
               <?php
                 if ($_GET['pending_book_returns'] != 0) {
               ?>
                 <div class="row pending-book-returns">
-                  <div class="col-md-12">
+                    <div class="col-xs-12">
+                        <div class="box">
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-md-12">
                     <canvas id="chartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
+                    </div>
+                     </div>
                     <?php
                       // Fetch data for pie chart
                       $publishQuery = "SELECT
@@ -255,10 +186,16 @@
                       ?>
                       <div class="box-header with-border">Total Borrow Transactions: <?php echo $totalTransactions; ?></div>
                   </div>
+                  </div>
+                </div>
                 </div>
               <?php 
                 }
               ?>
+        
+                    </div>
+                    </div>
+                    </div>
 
               <?php
                 if ($_GET['books_borrowed_and_returned'] != 0) {
@@ -281,17 +218,17 @@
                                                             FROM borrow b
                                                             LEFT JOIN books ON books.id = b.book_id
                                                             LEFT JOIN students ON students.id = b.student_id
-                                                            LEFT JOIN course ON students.course_id = course.id";
+                                                            LEFT JOIN course ON students.course_id = course.id
+                                                            WHERE b.status = 1";
 
                               if ($selected_courses !== null) {
-                                  $returnedQuery .= " WHERE students.course_id IN ($publishCategoriesString)";
+                                  $returnedQuery .= " AND students.course_id IN ($publishCategoriesString)";
                               }
 
                               // Add the date range condition
                               if ($startDate && $endDate) {
                                   $returnedQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                               }
-                              $returnedQuery .= " AND b.status = 1";
                             //   $returnedQuery .= " GROUP BY course.code";
                               $returnedResult = $conn->query($returnedQuery);
 
@@ -324,13 +261,14 @@
                                   echo "<tbody>";
 
                                   // Fetch data for the specific year for book borrowed and returned
-                                  $returnedYearQuery = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author, course.*
-                                  FROM borrow b
-                                  LEFT JOIN returns r ON b.book_id = r.book_id AND r.student_id = b.student_id
-                                  LEFT JOIN students ON students.id = b.student_id
-                                  LEFT JOIN books ON books.id = b.book_id
+                                  $returnedYearQuery = "SELECT DISTINCT r.id, r.*, r.date_return AS return_date, b.date_borrow, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                                  FROM returns r
+                                  LEFT JOIN students ON students.id = r.student_id 
+                                  LEFT JOIN books ON books.id = r.book_id 
+                                  LEFT JOIN borrow b ON b.book_id = r.book_id AND b.student_id = r.student_id 
                                   LEFT JOIN course ON students.course_id = course.id
-                                  WHERE course.code = '$year'";
+                                  WHERE course.code = '$year'
+                                  AND b.status = 1";
 
                                   // Add the date range condition
                                   if ($startDate && $endDate) {
@@ -397,8 +335,7 @@
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  
               <?php 
                 }
               ?>
@@ -471,8 +408,6 @@
                                     </tbody>
                                 </table>
                               </div>
-                            </div>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -494,6 +429,7 @@
                           </div>
                           <div class="row">
                             <div class="box-body ranking-of-book-publish-year-by-total-transaction-table">
+                            <div class="col-md-12">
                                 <?php
                                     $selected_publish = isset($_GET['selected_publish']) ? $_GET['selected_publish'] : null;
                                     $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
@@ -506,6 +442,18 @@
                                                         LEFT JOIN students ON students.id = b.student_id
                                                         LEFT JOIN course ON students.course_id = course.id
                                                         WHERE b.status IN (0, 1)"; // Include both returned and not returned
+
+                                    
+                            // Check if selected publish years are provided
+                            if ($selected_courses !== null) {
+                                $publishYears = explode(',', $selected_courses);
+                                $publishYearsString = implode(',', $publishYears);
+                               
+                                $borrowersQuery .= " AND students.course_id IN ($publishYearsString)";
+                            }                    
+
+
+
                                     if ($startDate && $endDate) {
                                         $borrowersQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                     }
@@ -577,13 +525,10 @@
                       </div>
                   </div>
                 </div>
+                </div>
               <?php 
                 }
               ?>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>   
   </div>
     
@@ -1446,7 +1391,7 @@ $(function(){
                             position: 'right',
                             labels: {
                                 font: {
-                                    size: 20,
+                                    size: 13,
                                     weight: 'bolder'
                                 }
                             },
@@ -1507,7 +1452,7 @@ $(function(){
                             position: 'right',
                             labels: {
                                 font: {
-                                    size: 5,
+                                    size: 13,
                                     weight: 'bolder'
                                 }
                             },
@@ -1647,8 +1592,22 @@ $(function(){
                         FROM borrow
                         LEFT JOIN books ON borrow.book_id = books.id
                         LEFT JOIN students ON borrow.student_id = students.id
-                        LEFT JOIN course ON students.course_id = course.id
-                        GROUP BY code";
+                        LEFT JOIN course ON students.course_id = course.id";
+
+
+if ($selected_courses !== null) {
+    $publishCategories = explode(',', $selected_courses);
+    $publishCategoriesString = implode(',', $publishCategories);
+
+    $query .= " WHERE students.course_id IN ($publishCategoriesString)";
+}
+
+// Add the date range condition
+if ($startDate && $endDate) {
+    $query .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+}
+
+$query .= " GROUP BY code";
 
               $result = $conn->query($query);
 

@@ -7,18 +7,6 @@
   <?php include 'includes/menubar.php'; ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <!-- <section class="content-header">
-      <h1>
-        Borrow Books
-      </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li>Transaction</li>
-        <li class="active">Borrow</li>
-      </ol>
-    </section> -->
-    <!-- Main content -->
     <section class="content">
     <?php
       if(isset($_SESSION['error']) && is_array($_SESSION['error']) && !empty($_SESSION['error'])){
@@ -65,16 +53,19 @@
                   <i class="fa fa-download"></i> PDF
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-
+            
       <?php
         if ($_GET['pending_book_returns'] != 0) {
       ?>
         <div class="row pending-book-returns">
-          <div class="col-md-12">
+        <div class="col-xs-12">
+                            <div class="box">
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-md-12">
             <canvas id="chartContainer" style="height: 250px; margin-left: auto; margin-right: auto;"></canvas>
+        </div>
+        </div>
             <?php
               // Fetch data for pie chart
               $publishQuery = "SELECT 
@@ -84,7 +75,6 @@
                                   borrow b
                                   LEFT JOIN books ON b.book_id = books.id
                                   LEFT JOIN students ON b.student_id = students.id
-                                  LEFT JOIN course ON students.course_id = course.id
                                   LEFT JOIN category ON books.category_id = category.id";
                                   
               $selected_category = isset($_GET['selected_category']) ? $_GET['selected_category'] : null;
@@ -156,9 +146,8 @@
                                     LEFT JOIN books ON books.id = b.book_id
                                     LEFT JOIN category ON books.category_id = category.id
                                 WHERE
-                                    category.id = {$publishRow['id']}
-                                    AND b.status = 0
-                                    OR r.date_return IS NULL";
+                                    books.category_id = {$publishRow['id']}
+                                    AND b.status = 0";
 
                   // Add the date range condition
                   if ($startDate && $endDate) {
@@ -198,10 +187,14 @@
               <div class="box-header with-border">Total Borrow Transactions: <?php echo $totalTransactions; ?></div>
           </div>
         </div>
+        </div>
+        </div>
       <?php 
         }
       ?>
-
+</div>
+        </div>
+        </div>
       <?php
         if ($_GET['books_borrowed_and_returned'] != 0) {
       ?>
@@ -271,7 +264,8 @@
                           LEFT JOIN books ON books.id = r.book_id 
                           LEFT JOIN borrow b ON b.book_id = r.book_id AND b.student_id = r.student_id 
                           LEFT JOIN category ON books.category_id = category.id
-                          WHERE category.name = '$year'";
+                          WHERE category.name = '$year'
+                          AND b.status = 1";
 
                           // Add the date range condition
                           if ($startDate && $endDate) {
@@ -333,8 +327,7 @@
                         echo "<div class='box-header with-border'>Most Borrowed Book: $mostBorrowedBook (Borrow Count: $mostBorrowedBookCount)</div>";
                         echo "<br>";
                       ?>
-                  </div>
-                </div>
+            
               </div>
             </div>
           </div>
@@ -387,7 +380,7 @@
           <div class="col-md-12">
             <div class="box">
               <div class="box-header with-border">
-                  <h3 class="box-title">All Book Transactions by Courses</h3>
+                  <h3 class="box-title">All Book Transactions by Book Category</h3>
               </div>
               <div class="box-body">
                 <div class="row">
@@ -410,8 +403,6 @@
                                 </tr>
                             </tbody>
                         </table>
-                      </div>
-                    </div>
                     </div>
                   </div>
                 </div>
@@ -434,8 +425,9 @@
                 </div>
                 <div class="row">
                     <div class="box-body ranking-of-book-publish-year-by-total-transaction-table">
+                    <div class="col-md-12">
                         <?php
-                            $selected_publish = isset($_GET['selected_publish']) ? $_GET['selected_publish'] : null;
+                            $selected_category = isset($_GET['selected_category']) ? $_GET['selected_category'] : null;
                             $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
                             $endDate = isset($_GET['endDate']) ? date('Y-m-d', strtotime($_GET['endDate'])) : null;
 
@@ -446,6 +438,14 @@
                                                 LEFT JOIN category ON books.category_id = category.id
 
                                                 WHERE b.status IN (0, 1)"; // Include both returned and not returned
+
+                            // Check if selected publish years are provided
+                            if ($selected_category !== null) {
+                                $publishYears = explode(',', $selected_category);
+                                $publishYearsString = implode(',', $publishYears);
+                               
+                                $borrowersQuery .= " AND category.id IN ($publishYearsString)";
+                            }                    
                             if ($startDate && $endDate) {
                                 $borrowersQuery .= " AND b.date_borrow BETWEEN '$startDate' AND '$endDate'";
                             }
@@ -463,8 +463,8 @@
                             }
 
                             // Add selected publish years with 0 transactions
-                            if (!empty($selected_publish)) {
-                                $selectedYears = explode(',', $selected_publish);
+                            if (!empty($selected_category)) {
+                                $selectedYears = explode(',', $selected_category);
                                 $selectedYears = array_map('intval', $selectedYears);
                                 foreach ($selectedYears as $year) {
                                     if (!in_array($year, $allYears)) {
@@ -512,16 +512,16 @@
                             // Output the table HTML
                             echo $tableHTML;
                         ?>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
       <?php 
         }
       ?>
       
-    </div>
-
     </section>   
   </div>
     
@@ -1362,7 +1362,7 @@ $(function(){
                             position: 'right',
                             labels: {
                                 font: {
-                                    size: 20,
+                                    size: 13,
                                     weight: 'bolder'
                                 }
                             },
@@ -1619,21 +1619,34 @@ $(function(){
 
 <?php
     if ($_GET['all_transaction_history'] != 0) {
+        
 ?>
     <script>
         $(document).ready(function () {
             // Fetch data for book transactions by publish year
             <?php 
+            
               // Initialize the array to store the data
               $data = array();
-
+              
               // Execute SQL query to fetch book transactions by publish year
               $query = "SELECT category.*, COUNT(*) AS total_transactions
                         FROM borrow
                         LEFT JOIN books ON borrow.book_id = books.id
-                        LEFT JOIN category ON books.category_id = category.id
-                        GROUP BY name";
+                        LEFT JOIN category ON books.category_id = category.id";
+               
+               if ($selected_category !== null) {
+                $publishYears = explode(',', $selected_category);
+                $publishYearsString = implode(',', $publishYears);
+                $query .= " WHERE category.id IN ($publishYearsString)";
+            }
 
+            // Add the date range condition
+            if ($startDate && $endDate) {
+                $query .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+            }
+
+            $query .= "GROUP BY category.name";
               $result = $conn->query($query);
 
               // Check if query executed successfully
@@ -1676,39 +1689,6 @@ $(function(){
                     }
                 }
             });
-
-
-            // $.ajax({
-            //     url: 'fetch_book_transactions.php', // Path to your PHP script to fetch data
-            //     method: 'GET',
-            //     success: function (data) {
-            //         var years = [];
-            //         var transactions = [];
-
-            //         for (var i in data) {
-            //             years.push(data[i].publish_year);
-            //             transactions.push(data[i].total_transactions);
-            //         }
-
-            //         var ctx = document.getElementById('bookTransactionsChart').getContext('2d');
-            //         var chart = new Chart(ctx, {
-            //             type: 'bar',
-            //             data: {
-            //                 labels: years,
-            //                 datasets: [{
-            //                     label: 'Total Transactions',
-            //                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            //                     borderColor: 'rgba(255, 99, 132, 1)',
-            //                     borderWidth: 1,
-            //                     data: transactions
-            //                 }]
-            //             },
-            //         });
-            //     },
-            //     error: function (data) {
-            //         console.log(data);
-            //     }
-            // });
         });
     </script>
 <?php

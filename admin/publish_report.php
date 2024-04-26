@@ -32,7 +32,9 @@
                 <?php
                     unset($_SESSION['success']);
                 } ?>
-
+            <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
                 <div class="box-header with-border">
                     <!-- <button id="downloadButton" class="btn btn-primary btn-sm btn-flat"> Download</button> -->
                     <button class="btn btn-primary btn-sm" id="excel-btn">
@@ -52,6 +54,7 @@
                     <div class="row pending-book-returns">
                         <div class="col-xs-12">
                             <div class="box">
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <!-- <div id="chartContainer" style="height: 300px; width: 25%; margin-left: auto; margin-right: auto;"></div> -->
@@ -158,11 +161,14 @@
                                 <div class="box-header with-border">Total Borrow Transactions: <?php echo $totalTransactions; ?></div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 <?php 
                     }
                 ?>
-
+                </div>
+                </div>
+                </div>
                 <?php
                     if ($_GET['books_borrowed_and_returned'] != 0) {
                 ?>
@@ -235,7 +241,8 @@
                                             LEFT JOIN students ON students.id = r.student_id 
                                             LEFT JOIN books ON books.id = r.book_id 
                                             LEFT JOIN borrow b ON b.book_id = r.book_id AND b.student_id = r.student_id 
-                                                                WHERE YEAR(books.publish_date) = $year";
+                                            WHERE YEAR(books.publish_date) = $year
+                                            AND b.status = 1";
 
                                             // Add the date range condition
                                             if ($startDate && $endDate) {
@@ -366,10 +373,11 @@
                         <div class="col-xs-12">
                             <div class="box">
                                 <div class="box-header with-border">
-                                    <h3 class="box-title">Rankings of Book Publish Years according to the Totral Transactions</h3>
+                                    <h3 class="box-title">Rankings of Book Publish Years according to the Total Transactions</h3>
                                 </div>
                                 <div class="row">
                                     <div class="box-body ranking-of-book-publish-year-by-total-transaction-table">
+                                    <div class="col-md-12">
                                         <?php
                                             $selected_publish = isset($_GET['selected_publish']) ? $_GET['selected_publish'] : null;
                                             $startDate = isset($_GET['startDate']) ? date('Y-m-d', strtotime($_GET['startDate'])) : null;
@@ -377,9 +385,17 @@
 
                                             // Fetch data for all borrowers grouped by publish year
                                             $borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers
-                                                                FROM borrow
-                                                                LEFT JOIN books ON borrow.book_id = books.id
-                                                                WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
+                                            FROM borrow
+                                            LEFT JOIN books ON borrow.book_id = books.id
+                                            WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
+                                                                            
+                                            // Check if selected publish years are provided
+                                            if ($selected_publish !== null) {
+                                                $publishYears = explode(',', $selected_publish);
+                                                $publishYearsString = implode(',', $publishYears);
+                                                $borrowersQuery .= " AND YEAR(books.publish_date) IN ($publishYearsString)";
+                                            }
+                                            
                                             if ($startDate && $endDate) {
                                                 $borrowersQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
                                             }
@@ -447,6 +463,7 @@
                                             echo $tableHTML;
                                         ?>
                                     </div>
+                                        </div>
                                 </div>
                             </div>
                         </div>
@@ -1099,53 +1116,6 @@
             });
         </script>
 
-        //! NO EXISTING ID FOR GRAPH, MUST REMOVE
-        <script type="text/javascript">
-            window.onload = function () {
-                <?php
-                // Fetch data for all borrowers grouped by publish year
-                $borrowersQuery = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_borrowers
-                                        FROM borrow
-                                        LEFT JOIN books ON borrow.book_id = books.id
-                                        WHERE borrow.status IN (0, 1)"; // Include both returned and not returned
-                if ($startDate && $endDate) {
-                    $borrowersQuery .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
-                }
-                $borrowersQuery .= " GROUP BY publish_year";
-                $borrowersResult = $conn->query($borrowersQuery);
-
-                // Prepare data for CanvasJS
-                $barChartData = array();
-                while ($borrowersRow = $borrowersResult->fetch_assoc()) {
-                    $year = $borrowersRow['publish_year'];
-                    $totalBorrowers = $borrowersRow['total_borrowers'];
-                    $barChartData[] = array(
-                        "label" => $year,
-                        "y" => $totalBorrowers
-                    );
-                }
-                ?>
-                var barChart = new CanvasJS.Chart("barChartContainer", {
-                    responsive: true,
-                    animationEnabled: true,
-                    title: {
-                        text: "Total Borrowers by Publish Year"
-                    },
-                    axisX: {
-                        title: "Publish Year"
-                    },
-                    axisY: {
-                        title: "Total Borrowers"
-                    },
-                    data: [{
-                        type: "column",
-                        color: "red",
-                        dataPoints: <?php echo json_encode($barChartData, JSON_NUMERIC_CHECK); ?>
-                    }]
-                });
-                barChart.render();
-            }
-        </script>
 
 
         <?php
@@ -1213,7 +1183,7 @@
                                     position: 'right',
                                     labels: {
                                         font: {
-                                            size: 20,
+                                            size: 13,
                                             weight: 'bolder'
                                         }
                                     },
@@ -1402,50 +1372,74 @@
         ?>
             <script>
                 $(document).ready(function () {
-                    // Fetch data for book transactions by publish year
-                    $.ajax({
-                        url: 'fetch_book_transactions.php', // Path to your PHP script to fetch data
-                        method: 'GET',
-                        success: function (data) {
-                            var years = [];
-                            var transactions = [];
 
-                            for (var i in data) {
-                                years.push(data[i].publish_year);
-                                transactions.push(data[i].total_transactions);
-                            }
+                     // Fetch data for book transactions by publish year
+                     <?php
+                       
+                        // Initialize the array to store the data
+                        $data = array();
 
-                            var ctx = document.getElementById('bookTransactionsChart').getContext('2d');
-                            var chart = new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                    labels: years,
-                                    datasets: [{
-                                        label: 'Total Transactions',
-                                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                        borderColor: 'rgba(255, 99, 132, 1)',
-                                        borderWidth: 1,
-                                        data: transactions
-                                    }]
-                                },
-                                options: {
-                                    legend: {
-                                        position: 'right',
-                                        font: {
-                                            size: 13,
-                                            weight: 'bolder'
-                                        },
-                                        label: years
-                                    }
-                                }
-                            });
-                        },
-                        error: function (data) {
-                            console.log(data);
+                        // Execute SQL query to fetch book transactions by publish year
+                        $query = "SELECT YEAR(books.publish_date) AS publish_year, COUNT(*) AS total_transactions
+                                FROM borrow
+                                LEFT JOIN books ON borrow.book_id = books.id";
+
+                        if ($selected_publish !== null) {
+                            $publishYears = explode(',', $selected_publish);
+                            $publishYearsString = implode(',', $publishYears);
+                            $query .= " WHERE YEAR(books.publish_date) IN ($publishYearsString)";
                         }
-                    });
-                });
-            </script>
+
+                        // Add the date range condition
+                        if ($startDate && $endDate) {
+                            $query .= " AND borrow.date_borrow BETWEEN '$startDate' AND '$endDate'";
+                        }
+
+                        $query .= "GROUP BY publish_year";
+                        $result = $conn->query($query);
+
+                        // Check if query executed successfully
+                        if ($result) {
+                            // Fetch associative array
+                            while ($row = $result->fetch_assoc()) {
+                                // Append data to the array
+                                $data[] = $row;
+                            }
+                            // Free result set
+                            $result->free();
+                        }
+                        ?>
+
+          const totalTransaction = <?php echo json_encode($data); ?>;
+          const totalTransactionName = totalTransaction.map(element => element.publish_year);
+          const totalTransactionData = totalTransaction.map(element => element.total_transactions);
+
+          const totalTransactionContainer = document.getElementById('bookTransactionsChart').getContext('2d');
+
+          new Chart(totalTransactionContainer, {
+              type: 'bar',
+              data: {
+                  labels: totalTransactionName,
+                  datasets: [{
+                      label: 'Total Transactions',
+                      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                      borderColor: 'rgba(255, 99, 132, 1)',
+                      borderWidth: 1,
+                      data: totalTransactionData
+                  }]
+              },
+              options: {
+                  legend: {
+                      position: 'right',
+                      labels: {
+                          fontSize: 13,
+                          fontWeight: 'bolder'
+                      }
+                  }
+              }
+          });
+      });
+       </script>
         <?php
             }
         ?>

@@ -29,18 +29,38 @@
             if(isset($_SESSION['student'])){
               $photo = (!empty($student['photo'])) ? 'images/'.$student['photo'] : 'images/profile.jpg';
               echo "
-                <li class='user user-menu'>
-                  <a href='#'>
-                    <img src='".$photo."' class='user-image' alt='User Image'>
-                    <span class='hidden-xs'>".$student['firstname'].' '.$student['lastname']."</span>
+              <li class='dropdown user user-menu'>
+                  <a href='#' class='dropdown-toggle' data-toggle='dropdown'>
+                      <img src='" . (!empty($student['photo']) ? './images/'.$student['photo'] : './images/profile.jpg') . "' class='user-image' alt='User Image'>
+                      <span class='hidden-xs'>" . $student['firstname'] . ' ' . $student['lastname'] . "</span>
                   </a>
-                </li>
-                <li><a href='logout.php'><i class='fa fa-sign-out'></i> LOGOUT</a></li>
-              ";
+                  <ul class='dropdown-menu'>
+                      <!-- User image -->
+                      <li class='user-header'>
+                          <img src='" . (!empty($student['photo']) ? './images/'.$student['photo'] : './images/profile.jpg') . "' class='img-circle' alt='User Image'>
+          
+                          <p>
+                              " . $student['firstname'] . ' ' . $student['lastname'] . "
+                              <small>Member since " . date('M. Y', strtotime($student['created_on'])) . "</small>
+                          </p>
+                      </li>
+                      <li class='user-footer'>
+                          <div class='pull-left'>
+                              <a href='#profile' data-toggle='modal' class='btn btn-default btn-flat' id='admin_profile'>Update</a>
+                          </div>
+                          <div class='pull-right'>
+                              <a href='logout.php' class='btn btn-default btn-flat'>Sign out</a>
+                          </div>
+                      </li>
+                  </ul>
+              </li>
+              <li><a href='logout.php'><i class='fa fa-sign-out'></i> LOGOUT</a></li>
+          ";
+          
             }
             else{
               echo "
-                <li><a href='#login' data-toggle='modal'><i class='fa fa-sign-in'></i> LOGIN</a></li>
+                <li><a href='./student_login.php' data-toggle='modal'><i class='fa fa-sign-in'></i> STUDENT LOGIN</a></li>
                 <li><a href='admin/index.php' data-toggle='modal'><i class='fa fa-key'></i> ADMIN LOGIN</a></li>
               ";
             } 
@@ -52,4 +72,4 @@
     <!-- /.container-fluid -->
   </nav>
 </header>
-<?php include 'includes/login_modal.php'; ?>
+<?php include 'includes/profile_modal.php'; ?>

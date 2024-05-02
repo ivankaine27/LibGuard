@@ -59,18 +59,19 @@
                 <thead>
                   <th class="hidden"></th>
                   <th>Date Borrowed</th>
-                  <th>Date Returned</th>
+                  <th>Due Date</th>
                   <th>Student ID</th>
                   <th>Name</th>
                   <th>ISBN</th>
                   <th>Title</th>
                   <th>Status</th>
+                  <th>Email Button</th>
                 </thead>
                 <tbody>
                   <?php
                     $department = isset($_GET['department']) ? $_GET['department'] : null;
 
-                    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.lastname, books.isbn, books.title, books.author
+                    $sql = "SELECT DISTINCT b.id, b.*, r.date_return AS return_date, students.student_id AS stud, students.firstname, students.email, students.lastname, books.isbn, books.title, books.author
                             FROM borrow b
                             LEFT JOIN returns r ON b.book_id = r.book_id AND b.student_id = r.student_id 
                             LEFT JOIN students ON students.id = b.student_id 
@@ -84,26 +85,33 @@
                     $sql .= " ORDER BY b.date_borrow DESC";
                     $query = $conn->query($sql);
                     while($row = $query->fetch_assoc()){
-                        $status = ($row['status']) ? '<span class="label label-success">returned</span>' : '<span class="label label-danger">not returned</span>';
-                        $returnDate = $row['return_date'] ? date('M d, Y', strtotime($row['return_date'])) : "Not Returned Yet";
-                        // Check if the status is 0 (not returned) and adjust the return date accordingly
-                        if (!$row['status']) {
-                            $returnDate = "Not Returned Yet";
+                        $not_returned = '<span class="label label-danger">not returned</span>';
+                        $overdue = '<span class="label label-danger">OVERDUE!</span>';
+                        $status = ($row['status']) ? '<span class="label label-success">returned</span>' : $not_returned;
+                        $due_date = strtotime($row['due_date']);
+                        $current_date = strtotime(date('d-m-Y'));
+                        if ($due_date < $current_date) {
+                          // If past due date, change status to "not returned"
+                          $status = $overdue;
+                          // Update the status in the database
                         }
                         echo "
                             <tr>
                                 <td class='hidden'></td>
                                 <td>".date('M d, Y', strtotime($row['date_borrow']))."</td>
-                                <td>".$returnDate."</td>
+                                <td>".date('M d, Y', strtotime($row['due_date']))."</td>
                                 <td>".$row['stud']."</td>
                                 <td>".$row['firstname'].' '.$row['lastname']."</td>
                                 <td>".$row['isbn']."</td>
                                 <td>".$row['title']."</td>
                                 <td>".$status."</td>
+                                <td>
+                                <button class='btn btn-info btn-sm send-email-btn' data-email='".$row['email']."' data-firstname='".$row['firstname']."' data-title='".$row['title']."' data-due-date='".date('M d, Y', strtotime($row['due_date']))."' data-status='".$status."' data-penalty='".$row['penalty']."'>Email <i class='fa fa-send'></i></button></td>
                             </tr>
                         ";
+                        
                     }
-?>                    
+                  ?>                    
                 </tbody>
               </table>
             </div>
@@ -126,6 +134,37 @@ $(function(){
       '<div class="form-group"><label for="" class="col-sm-3 control-label">ISBN</label><div class="col-sm-9"><input type="text" class="form-control" name="isbn[]"></div></div>'
     );
   });
+  $(document).on('click', '.send-email-btn', function(e){
+            e.preventDefault();
+            var email = $(this).data('email');
+            var firstName = $(this).data('firstname');
+            var title = $(this).data('title');
+            var dueDate = $(this).data('due-date');
+            var status = $(this).data('status');
+            var penalty = $(this).data('penalty');
+            sendEmail(email, firstName, title, dueDate, status, penalty);
+        });
+  function sendEmail(email, firstname, title, due_date, status, penalty) {
+    $.ajax({
+      url: 'send_email.php',
+      type: 'POST',
+      data: { 
+        email: email,
+        firstname: firstname,
+        title: title,
+        due_date: due_date,
+        status: status,
+        penalty: penalty
+      },
+      success: function(response) {
+        alert('Email sent successfully!');
+      },
+      error: function(xhr, status, error) {
+        alert('Error sending email: ' + error);
+      }
+  });
+}
+
 });
 </script>
 </body>

@@ -321,6 +321,9 @@
                                             </table>
                                         </div>
                                     </div>
+                                    <div class="box-header with-border">Total Pending Book Returns: <?php echo $totalTransactions; ?> <br>
+                                    Total Returned Books: <?php echo $totalTransactionsReturned; ?> <br>
+                                    Total Book Transactions: <?php echo $totalTransactionsReturned + $totalTransactions; ?></div>
                                 </div>
                             </div>
                         </div>
@@ -358,7 +361,8 @@
                                             </table>
                                         </div>
                                     </div>
-                                </div>
+                     
+</div>
                             </div>
                         </div>
                     </div>
@@ -463,6 +467,68 @@
                                             echo $tableHTML;
                                         ?>
                                     </div>
+                                     
+                    <br>
+                        <div class="box-header with-border">
+    <!-- Introduction to the report -->
+    <p>This comprehensive report provides an in-depth analysis of book borrowing and returning transactions categorized by the publish years of books. It offers insights into the borrowing behavior of students, the most popular books, and more.</p>
+    
+    <!-- Calculation of borrow percentage -->
+    <?php 
+        $borrowPercentage = (($totalTransactionsReturned / ($totalTransactions + $totalTransactionsReturned)) * 100);
+        $borrowPercentage = number_format($borrowPercentage, 2);
+    ?>
+    <p>
+        Currently, there are <?php echo $totalTransactions; ?> books borrowed from the library, awaiting return. 
+        Over the selected date range, <?php echo $totalTransactionsReturned; ?> books have been successfully borrowed and returned.
+    </p>
+    <p>
+        This indicates that <?php echo $borrowPercentage; ?>% of borrowed books have been returned, while <?php echo $totalTransactions; ?> books are yet to be returned.
+    </p>
+    
+    <!-- Calculation of average number of books borrowed per student -->
+    <?php 
+        $avgBooksBorrowedPerStudentQuery = "SELECT AVG(num_books) AS avg_books_borrowed_per_student 
+                                            FROM (SELECT COUNT(*) AS num_books FROM borrow GROUP BY student_id) AS subquery";
+        $avgBooksBorrowedPerStudentResult = $conn->query($avgBooksBorrowedPerStudentQuery);
+        $avgBooksBorrowedPerStudentRow = $avgBooksBorrowedPerStudentResult->fetch_assoc();
+        $avgBooksBorrowedPerStudent = $avgBooksBorrowedPerStudentRow['avg_books_borrowed_per_student']; 
+    ?>
+    <p>
+        On average, each student borrows approximately <?php echo $avgBooksBorrowedPerStudent; ?> books during the selected period, reflecting their engagement with the library resources.
+    </p>
+    
+    <!-- Identification of the most and least borrowed books -->
+    <?php 
+        $mostBorrowedBookQuery = "SELECT books.title AS most_borrowed_book, COUNT(*) AS borrow_count 
+                                    FROM borrow 
+                                    LEFT JOIN books ON borrow.book_id = books.id 
+                                    GROUP BY borrow.book_id 
+                                    ORDER BY borrow_count DESC 
+                                    LIMIT 1";
+        $mostBorrowedBookResult = $conn->query($mostBorrowedBookQuery);
+        $mostBorrowedBookRow = $mostBorrowedBookResult->fetch_assoc();
+        $mostBorrowedBook = $mostBorrowedBookRow['most_borrowed_book'];
+        $mostBorrowedBookCount = $mostBorrowedBookRow['borrow_count']; 
+        
+        $leastBorrowedBookQuery = "SELECT books.title AS least_borrowed_book, COUNT(*) AS borrow_count 
+                                    FROM borrow 
+                                    LEFT JOIN books ON borrow.book_id = books.id 
+                                    GROUP BY borrow.book_id 
+                                    ORDER BY borrow_count ASC 
+                                    LIMIT 1";
+        $leastBorrowedBookResult = $conn->query($leastBorrowedBookQuery);
+        $leastBorrowedBookRow = $leastBorrowedBookResult->fetch_assoc();
+        $leastBorrowedBook = $leastBorrowedBookRow['least_borrowed_book'];
+        $leastBorrowedBookCount = $leastBorrowedBookRow['borrow_count']; 
+    ?>
+    <p>
+        The most borrowed book is "<?php echo $mostBorrowedBook; ?>" with a total of <?php echo $mostBorrowedBookCount; ?> borrow transactions, indicating its popularity among library users.
+    </p>
+    <p>
+        The least borrowed book is "<?php echo $leastBorrowedBook; ?>" with only <?php echo $leastBorrowedBookCount; ?> borrow transactions.
+    </p>
+</div>
                                         </div>
                                 </div>
                             </div>
